@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using RecomField.Data;
+using RecomField.Hubs;
 using RecomField.Models;
 
 namespace RecomField
@@ -39,6 +40,8 @@ namespace RecomField
                 options.AccessDeniedPath = "/Identity/Account/Login";
             });
 
+            builder.Services.AddSignalR();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -65,6 +68,7 @@ namespace RecomField
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
+            app.MapHub<MainHub>("/mainHub");
 
             app.Run();
         }

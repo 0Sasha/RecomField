@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en" id="mainHTML" data-bs-theme="dark">
+<script src="~/js/site.js" asp-append-version="true"></script>
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,6 +33,11 @@
                             <a role="button" onclick="changeTheme()" aria-disabled="false">
                                 <img id="themeIcon" src="~/lib/icons/sun.svg" style="max-width:25px; max-height:25px;">
                             </a>
+                            <script>
+                                if (document.documentElement.getAttribute("data-bs-theme") == "light") {
+                                    document.getElementById("themeIcon").setAttribute("src", "/lib/icons/dark sun.svg");
+                                }
+                            </script>
                         </li>
                     </ul>
                 </div>
@@ -50,8 +56,9 @@
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/lib/bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/hub.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
