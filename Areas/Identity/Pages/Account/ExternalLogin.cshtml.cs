@@ -18,6 +18,8 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using RecomField.Models;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace RecomField.Areas.Identity.Pages.Account
 {
@@ -134,7 +136,10 @@ namespace RecomField.Areas.Identity.Pages.Account
                     {
                         Email = info.Principal.FindFirstValue(ClaimTypes.Email)
                     };
+                    return await OnPostConfirmationAsync(returnUrl);
                 }
+                ModelState.AddModelError(string.Empty, "You've successfully authenticated with " + info.ProviderDisplayName +
+                    ". But email address was not received. Check your permissions in " + info.ProviderDisplayName);
                 return Page();
             }
         }

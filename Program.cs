@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using RecomField.Data;
 using RecomField.Models;
 
@@ -7,6 +8,7 @@ namespace RecomField
 {
     public class Program
     {
+        public static string Environment { get; set; } = "Development";
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -23,8 +25,18 @@ namespace RecomField
 
             builder.Services.AddAuthentication().AddGoogle(options =>
             {
-                options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-                options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+                options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ??
+                throw new Exception("Authentication:Google:ClientId is not in configuration");
+                options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ??
+                throw new Exception("Authentication:Google:ClientId is not in configuration");
+                options.AccessDeniedPath = "/Identity/Account/Login";})
+            .AddFacebook(options =>
+            {
+                options.AppId = builder.Configuration["Authentication:Facebook:AppId"] ??
+                throw new Exception("Authentication:Facebook:AppId is not in configuration");
+                options.AppSecret = builder.Configuration["Authentication:Facebook:AppSecret"] ??
+                throw new Exception("Authentication:Facebook:AppSecret is not in configuration");
+                options.AccessDeniedPath = "/Identity/Account/Login";
             });
 
             var app = builder.Build();
@@ -36,6 +48,7 @@ namespace RecomField
             }
             else
             {
+                Environment = app.Environment.EnvironmentName;
                 app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
