@@ -1,15 +1,18 @@
 ﻿@page
+@using RecomField;
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
 @model ExternalLoginModel
 @{
-    ViewData["Title"] = "Sign in";
+    ViewData["Title"] = Localizer["Sign in"];
 }
 
-<h2 id="external-login-title">Failed to sign in with @Model.ProviderDisplayName.</h2>
+<h2 id="external-login-title">@Localizer["Failed to sign in with"] @Model.ProviderDisplayName.</h2>
 <hr />
 
 <p>
     <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-    Back to <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">Sign in</a>
+    <a class="text-decoration-none" asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Back to sign in"]</a>
 </p>
 
 @section Scripts {

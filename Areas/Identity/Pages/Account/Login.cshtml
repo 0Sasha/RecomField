@@ -1,8 +1,11 @@
 ﻿@page
+@using RecomField;
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
 @model LoginModel
 
 @{
-    ViewData["Title"] = "Sign in";
+    ViewData["Title"] = Localizer["Sign in"];
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -15,12 +18,7 @@
                 if ((Model.ExternalLogins?.Count ?? 0) == 0)
                 {
                     <div>
-                        <p>
-                            There are no external authentication services configured. See this <a href="https://go.microsoft.com/fwlink/?LinkID=532715">
-                                article
-                                about setting up this ASP.NET application to support logging in via external services
-                            </a>.
-                        </p>
+                        <p>@Localizer["There are no external authentication services configured"].</p>
                     </div>
                 }
                 else
@@ -29,12 +27,12 @@
                         @foreach (var provider in Model.ExternalLogins!)
                         {
                             <div class="mb-3">
-                                <button type="submit" class="w-100 btn btn-lg btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">Continue with @provider.DisplayName</button>
+                                <button type="submit" class="w-100 btn btn-lg btn-primary" name="provider" value="@provider.Name">@Localizer["Continue with"] @provider.DisplayName</button>
                             </div>
                         }
                         <div>
                             <p>
-                                Not a member? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register</a>
+                                @Localizer["Not a member?"] <a class="text-decoration-none" asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Register"]</a>
                             </p>
                         </div>
                     </form>

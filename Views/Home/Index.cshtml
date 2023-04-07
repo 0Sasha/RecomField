@@ -1,9 +1,11 @@
-﻿@model string
+﻿@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+@model string
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = @Localizer["Home Page"];
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    <h1 class="display-4">@Localizer["Welcome"]</h1>
     <p>@Model</p>
 </div>
