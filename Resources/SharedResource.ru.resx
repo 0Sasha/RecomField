@@ -123,8 +123,14 @@
   <data name="Back to sign in" xml:space="preserve">
     <value>Вернуться</value>
   </data>
+  <data name="Check your permissions in" xml:space="preserve">
+    <value>Проверьте ваши разрешения в</value>
+  </data>
   <data name="Continue with" xml:space="preserve">
     <value>Войти через</value>
+  </data>
+  <data name="en" xml:space="preserve">
+    <value>ru</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Ошибка</value>
@@ -164,5 +170,8 @@
   </data>
   <data name="Welcome" xml:space="preserve">
     <value>Добро пожаловать</value>
+  </data>
+  <data name="You have successfully authenticated, but the email address was not provided by the external service" xml:space="preserve">
+    <value>Вы успешно прошли аутентификацию, но адрес электронной почты не был предоставлен внешней службой</value>
   </data>
 </root>

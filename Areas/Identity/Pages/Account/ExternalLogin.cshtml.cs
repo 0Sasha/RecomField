@@ -20,6 +20,9 @@ using Microsoft.Extensions.Logging;
 using RecomField.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Mvc.Localization;
+using Microsoft.Extensions.Localization;
 
 namespace RecomField.Areas.Identity.Pages.Account
 {
@@ -32,13 +35,15 @@ namespace RecomField.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
+        private readonly IStringLocalizer<SharedResource> _localizer;
 
         public ExternalLoginModel(
             SignInManager<ApplicationUser> signInManager,
             UserManager<ApplicationUser> userManager,
             IUserStore<ApplicationUser> userStore,
             ILogger<ExternalLoginModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IStringLocalizer<SharedResource> localizer)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -46,6 +51,7 @@ namespace RecomField.Areas.Identity.Pages.Account
             _emailStore = GetEmailStore();
             _logger = logger;
             _emailSender = emailSender;
+            _localizer = localizer;
         }
 
         /// <summary>
@@ -119,6 +125,7 @@ namespace RecomField.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
+                await AdjustCookie(info);
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -138,9 +145,26 @@ namespace RecomField.Areas.Identity.Pages.Account
                     };
                     return await OnPostConfirmationAsync(returnUrl);
                 }
-                ModelState.AddModelError(string.Empty, "You've successfully authenticated with " + info.ProviderDisplayName +
-                    ". But email address was not received. Check your permissions in " + info.ProviderDisplayName);
+                ModelState.AddModelError(string.Empty,
+                    _localizer["You have successfully authenticated, but the email address was not provided by the external service"] +
+                    ". " + _localizer["Check your permissions in"] + " " + info.ProviderDisplayName);
                 return Page();
+            }
+        }
+
+        private async Task AdjustCookie(ExternalLoginInfo info)
+        {
+            if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
+            {
+                var u = await _userManager.FindByEmailAsync(info.Principal.FindFirstValue(ClaimTypes.Email));
+                if (u != null)
+                {
+                    var opt = new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) };
+                    var lang = new RequestCulture(u.InterfaceLanguage == Language.Russian ? "ru" : "en-US");
+                    Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
+                        CookieRequestCultureProvider.MakeCookieValue(lang), opt);
+                    Response.Cookies.Append("IsDarkTheme", u.DarkTheme ? "true" : "false", opt);
+                }
             }
         }
 

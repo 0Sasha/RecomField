@@ -45,7 +45,7 @@ namespace RecomField
 
             var app = builder.Build();
 
-            var supportedCultures = new[] { "en", "ru" };
+            var supportedCultures = new[] { "en-US", "ru" };
             var localizationOptions = new RequestLocalizationOptions().SetDefaultCulture(supportedCultures[0])
                 .AddSupportedCultures(supportedCultures).AddSupportedUICultures(supportedCultures);
             app.UseRequestLocalization(localizationOptions);

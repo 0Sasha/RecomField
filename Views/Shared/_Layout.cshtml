@@ -7,6 +7,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="google-site-verification" content="M2Rb1_mdZEEVJid1NUdHn2pE_zlVvtkY0ON1uQbfryc" />
     <title>@ViewData["Title"] - RecomField</title>
     <link rel="stylesheet" href="~/lib/bootstrap/5.2.3/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
@@ -29,17 +30,23 @@
                     </ul>
                     <partial name="_LoginPartial" />
                     <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a role="button" onclick="changeTheme()" aria-disabled="false">
-                                <img id="themeIcon" src="~/lib/icons/sun.svg" style="max-width:25px; max-height:25px;">
+                        <li class="nav-item m-1">
+                            <a role="button" asp-controller="Home" asp-action="ChangeLanguage" asp-route-current="@Localizer["en"].Value" asp-route-returnUrl="@Context.Request.Path" aria-disabled="false">
+                                <img id="globeIcon" src="~/icons/globe.svg" style="max-width:20px; max-height:20px;">
                             </a>
-                            <script>
-                                if (document.documentElement.getAttribute("data-bs-theme") == "light") {
-                                    document.getElementById("themeIcon").setAttribute("src", "/lib/icons/dark sun.svg");
-                                }
-                            </script>
+                        </li>
+                        <li class="nav-item m-1">
+                            <a role="button" onclick="changeTheme()" aria-disabled="false">
+                                <img id="themeIcon" src="~/icons/sun.svg" style="max-width:20px; max-height:20px;">
+                            </a>
                         </li>
                     </ul>
+                    <script>
+                        if (document.documentElement.getAttribute("data-bs-theme") == "light") {
+                            document.getElementById("themeIcon").setAttribute("src", "/icons/dark sun.svg");
+                            document.getElementById("globeIcon").setAttribute("src", "/icons/dark globe.svg");
+                        }
+                    </script>
                 </div>
             </div>
         </nav>

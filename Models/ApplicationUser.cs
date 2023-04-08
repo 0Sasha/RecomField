@@ -3,5 +3,6 @@ namespace RecomField.Models;
 
 public class ApplicationUser : IdentityUser
 {
-    public UserSettings Settings { get; set; } = new();
+    public bool DarkTheme { get; set; } = true;
+    public Language InterfaceLanguage { get; set; } = Language.English;
 }

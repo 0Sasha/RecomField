@@ -15,16 +15,23 @@ function getCookie(name) {
 }
 
 function changeTheme() {
+    let isDark = "true";
     if (document.documentElement.getAttribute("data-bs-theme") == "light") {
         document.documentElement.setAttribute("data-bs-theme", "dark");
-        document.getElementById("themeIcon").setAttribute("src", "/lib/icons/sun.svg");
-        document.cookie = "IsDarkTheme=true; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+        document.getElementById("themeIcon").setAttribute("src", "/icons/sun.svg");
+        document.getElementById("globeIcon").setAttribute("src", "/icons/globe.svg");
     }
     else {
+        isDark = "false";
         document.documentElement.setAttribute("data-bs-theme", "light");
-        document.getElementById("themeIcon").setAttribute("src", "/lib/icons/dark sun.svg");
-        const d = new Date();
-        d.setDate(d.getDate() + 2);
-        document.cookie = "IsDarkTheme=false; expires=" + d.toUTCString() + "; path=/";
+        document.getElementById("themeIcon").setAttribute("src", "/icons/dark sun.svg");
+        document.getElementById("globeIcon").setAttribute("src", "/icons/dark globe.svg");
     }
+    const d = new Date();
+    d.setDate(d.getDate() + 30);
+    document.cookie = "IsDarkTheme=" + isDark + "; expires=" + d.toUTCString() + "; path=/";
+    $.ajax({
+        url: "Home/SaveTheme?isDark=" + isDark,
+        type: "POST",
+    });
 }
