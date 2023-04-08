@@ -26,17 +26,18 @@ namespace RecomField.Controllers
         {
             //foreach(var u in _userManager.Users.ToArray())
             //    await _userManager.DeleteAsync(u);
+            UpdateUserCookies(await _userManager.GetUserAsync(User), Response.Cookies);
             return View((object)Program.Environment);
         }
 
-        public IActionResult ChangeLanguage(string current, string returnUrl)
+        public async Task<IActionResult> ChangeLanguageAsync(string current, string returnUrl)
         {
             if (string.IsNullOrEmpty(current)) throw new ArgumentNullException(nameof(current));
             if (string.IsNullOrEmpty(returnUrl)) throw new ArgumentNullException(nameof(returnUrl));
             var lang = new RequestCulture(current == "en" ? "ru" : "en-US");
             Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
                 CookieRequestCultureProvider.MakeCookieValue(lang), new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) });
-            _ = SaveLanguage(current == "en" ? Language.Russian : Language.English);
+            await SaveLanguage(current == "en" ? Language.Russian : Language.English);
             return Redirect(returnUrl);
         }
 
@@ -47,6 +48,19 @@ namespace RecomField.Controllers
             {
                 u.InterfaceLanguage = language;
                 await _userManager.UpdateAsync(u);
+            }
+        }
+
+        [NonAction]
+        public static void UpdateUserCookies(ApplicationUser? user, IResponseCookies cookies)
+        {
+            if (user != null)
+            {
+                var opt = new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) };
+                var lang = new RequestCulture(user.InterfaceLanguage == Language.Russian ? "ru" : "en-US");
+                cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
+                    CookieRequestCultureProvider.MakeCookieValue(lang), opt);
+                cookies.Append("IsDarkTheme", user.DarkTheme ? "true" : "false", opt);
             }
         }
 

@@ -9,6 +9,7 @@
 }
 
 <h1>@ViewData["Title"]</h1>
+<h5>@Localizer["Not a member? Sign up with the following services"]</h5>
 <hr />
 
 <div class="row">
@@ -30,11 +31,6 @@
                                 <button type="submit" class="w-100 btn btn-lg btn-primary" name="provider" value="@provider.Name">@Localizer["Continue with"] @provider.DisplayName</button>
                             </div>
                         }
-                        <div>
-                            <p>
-                                @Localizer["Not a member?"] <a class="text-decoration-none" asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">@Localizer["Register"]</a>
-                            </p>
-                        </div>
                     </form>
                 }
             }

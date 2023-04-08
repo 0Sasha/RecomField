@@ -127,7 +127,7 @@
     <value>Проверьте ваши разрешения в</value>
   </data>
   <data name="Continue with" xml:space="preserve">
-    <value>Войти через</value>
+    <value>Продолжить через</value>
   </data>
   <data name="en" xml:space="preserve">
     <value>ru</value>
@@ -149,6 +149,9 @@
   </data>
   <data name="Not a member?" xml:space="preserve">
     <value>Нет учётной записи?</value>
+  </data>
+  <data name="Not a member? Sign up with the following services" xml:space="preserve">
+    <value>Нет учётной записи? Регистрируйтесь через следующие сервисы</value>
   </data>
   <data name="Privacy" xml:space="preserve">
     <value>Политика конфиденциальности</value>

@@ -23,6 +23,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.Localization;
+using RecomField.Controllers;
 
 namespace RecomField.Areas.Identity.Pages.Account
 {
@@ -125,7 +126,8 @@ namespace RecomField.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
-                await AdjustCookie(info);
+                HomeController.UpdateUserCookies(
+                    await _userManager.FindByEmailAsync(info.Principal.FindFirstValue(ClaimTypes.Email)), Response.Cookies);
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -149,22 +151,6 @@ namespace RecomField.Areas.Identity.Pages.Account
                     _localizer["You have successfully authenticated, but the email address was not provided by the external service"] +
                     ". " + _localizer["Check your permissions in"] + " " + info.ProviderDisplayName);
                 return Page();
-            }
-        }
-
-        private async Task AdjustCookie(ExternalLoginInfo info)
-        {
-            if (info.Principal.HasClaim(c => c.Type == ClaimTypes.Email))
-            {
-                var u = await _userManager.FindByEmailAsync(info.Principal.FindFirstValue(ClaimTypes.Email));
-                if (u != null)
-                {
-                    var opt = new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) };
-                    var lang = new RequestCulture(u.InterfaceLanguage == Language.Russian ? "ru" : "en-US");
-                    Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
-                        CookieRequestCultureProvider.MakeCookieValue(lang), opt);
-                    Response.Cookies.Append("IsDarkTheme", u.DarkTheme ? "true" : "false", opt);
-                }
             }
         }
 
