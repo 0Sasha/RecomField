@@ -127,7 +127,7 @@
     <value>Проверьте ваши разрешения в</value>
   </data>
   <data name="Continue with" xml:space="preserve">
-    <value>Продолжить через</value>
+    <value>Продолжить с</value>
   </data>
   <data name="en" xml:space="preserve">
     <value>ru</value>
@@ -146,6 +146,9 @@
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Выйти</value>
+  </data>
+  <data name="My page" xml:space="preserve">
+    <value>Моя страница</value>
   </data>
   <data name="Not a member?" xml:space="preserve">
     <value>Нет учётной записи?</value>
@@ -173,6 +176,9 @@
   </data>
   <data name="Welcome" xml:space="preserve">
     <value>Добро пожаловать</value>
+  </data>
+  <data name="Write a review" xml:space="preserve">
+    <value>Написать рецензию</value>
   </data>
   <data name="You have successfully authenticated, but the email address was not provided by the external service" xml:space="preserve">
     <value>Вы успешно прошли аутентификацию, но адрес электронной почты не был предоставлен внешней службой</value>

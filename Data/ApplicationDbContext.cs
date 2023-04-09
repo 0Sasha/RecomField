@@ -10,5 +10,7 @@ namespace RecomField.Data
             : base(options)
         {
         }
+
+        public DbSet<Product> Product { get; set; } = default!;
     }
 }

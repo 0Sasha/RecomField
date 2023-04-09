@@ -12,13 +12,13 @@ namespace RecomField.Controllers
     public class HomeController : Controller
     {
         private readonly ApplicationDbContext context;
-        private readonly ILogger<HomeController> _logger;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILogger<HomeController> logger;
+        private readonly UserManager<ApplicationUser> userManager;
 
         public HomeController(ILogger<HomeController> logger, UserManager<ApplicationUser> userManager, ApplicationDbContext context)
         {
-            _logger = logger;
-            _userManager = userManager;
+            this.logger = logger;
+            this.userManager = userManager;
             this.context = context;
         }
 
@@ -26,7 +26,7 @@ namespace RecomField.Controllers
         {
             //foreach(var u in _userManager.Users.ToArray())
             //    await _userManager.DeleteAsync(u);
-            UpdateUserCookies(await _userManager.GetUserAsync(User), Response.Cookies);
+            UpdateUserCookies(await userManager.GetUserAsync(User), Response.Cookies);
             return View((object)Program.Environment);
         }
 
@@ -43,11 +43,11 @@ namespace RecomField.Controllers
 
         private async Task SaveLanguage(Language language)
         {
-            var u = await _userManager.GetUserAsync(User);
+            var u = await userManager.GetUserAsync(User);
             if (u != null)
             {
                 u.InterfaceLanguage = language;
-                await _userManager.UpdateAsync(u);
+                await userManager.UpdateAsync(u);
             }
         }
 
@@ -67,11 +67,11 @@ namespace RecomField.Controllers
         [HttpPost]
         public async Task SaveTheme(bool isDark)
         {
-            var u = await _userManager.GetUserAsync(User);
+            var u = await userManager.GetUserAsync(User);
             if (u != null)
             {
                 u.DarkTheme = isDark;
-                await _userManager.UpdateAsync(u);
+                await userManager.UpdateAsync(u);
             }
         }
 

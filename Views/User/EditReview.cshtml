@@ -1,0 +1,91 @@
+﻿@model Review
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = @Localizer["Edit review"];
+}
+
+<div class="container-fluid text-center">
+    <form>
+        <div class="row g-2 mb-3">
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" type="button" onclick="updateProductsModal('')" data-bs-toggle="modal" data-bs-target="#productsModal">Select product</button>
+            </div>
+            <div class="col-md">
+                <input class="form-control" placeholder="Product title" id="titleProd" readonly>
+            </div>
+            <div class="col-md-2">
+                <input class="form-control" placeholder="Product type" id="typeProd" readonly>
+            </div>
+            <div class="col-md-2">
+                <input class="form-control" placeholder="Release year" id="releaseProd" readonly>
+            </div>
+        </div>
+        <div class=" row g-2 mb-3">
+            <div class="col-md form-floating">
+                <input asp-for=Title class="form-control" type="text" placeholder="Review title" value="@Model.Title" required />
+                <label asp-for="Title" class="form-label">Review title</label>
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="col-md form-floating">
+                <input asp-for=Tags class="form-control" type="text" placeholder="Tags" value="@Model.Tags" required />
+                <label asp-for="Tags" class="form-label">Tags</label>
+                <span asp-validation-for="Body" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group mb-3">
+            <textarea asp-for=Body class="form-control" rows="12" placeholder="Review" required>@Model.Body</textarea>
+            <span asp-validation-for="Body" class="text-danger"></span>
+        </div>
+        <button class="btn btn-primary float-end" type="submit" style="min-width:100px">Send</button>
+    </form>
+</div>
+
+<div class="modal fade" id="productsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Select product</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <div class="form-floating">
+                        <input id="searchProductsModal" class="form-control" placeholder="Search" onkeyup="updateProductsModal()" />
+                        <label class="form-label">Search</label>
+                    </div>
+                </div>
+                <table class="table table-striped table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th class="col-1" scope="col">Type</th>
+                            <th scope="col">Title</th>
+                            <th class="col-1" scope="col">Release</th>
+                            <th class="col-2" scope="col"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyProductsModal">
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#addProductModal">Add product</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5">Add product</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @Html.Partial("AddProductForm", new Product())
+            </div>
+        </div>
+    </div>
+</div>

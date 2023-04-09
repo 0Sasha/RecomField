@@ -31,7 +31,26 @@ function changeTheme() {
     d.setDate(d.getDate() + 30);
     document.cookie = "IsDarkTheme=" + isDark + "; expires=" + d.toUTCString() + "; path=/";
     $.ajax({
-        url: "Home/SaveTheme?isDark=" + isDark,
+        url: "/Home/SaveTheme?isDark=" + isDark,
         type: "POST",
     });
+}
+
+function updateProductsModal() {
+    let txt = document.getElementById("searchProductsModal").value;
+    if (txt == undefined) txt = "";
+    $.ajax({
+        url: "/User/GetProductsView?partTitle=" + txt,
+        type: "POST",
+        dataType: "html",
+        success: function (res) {
+            $("#tbodyProductsModal").html(res);
+        }
+    });
+}
+
+function selectProduct(type, title, release) {
+    document.getElementById("typeProd").value = type;
+    document.getElementById("titleProd").value = title;
+    document.getElementById("releaseProd").value = release;
 }

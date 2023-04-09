@@ -1,0 +1,14 @@
+﻿@model IEnumerable<Product>
+@using static System.Web.HttpUtility;
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+
+@foreach (var p in Model)
+{
+    <tr>
+        <td>@p.Type</td>
+        <td>@p.Title</td>
+        <td>@p.ReleaseYear</td>
+        <td><button class="btn btn-secondary w-100" data-bs-dismiss="modal" onclick="selectProduct('@p.Type', '@JavaScriptStringEncode(p.Title)', '@p.ReleaseYear')">Select</button></td>
+    </tr>
+}
