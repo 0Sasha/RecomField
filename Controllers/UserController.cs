@@ -40,12 +40,24 @@ public class UserController : Controller
         if (product == null) throw new ArgumentNullException(nameof(product));
         if (await context.Product.AnyAsync(p => p.Title == product.Title && p.Type == product.Type && p.ReleaseYear == product.ReleaseYear))
             throw new ArgumentException("The product already exists in the database", nameof(product));
-        if (product.Description == null) product.Description = "";
+        product.Description ??= "";
         await context.AddAsync(product);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(NewReview));
     }
 
-    public async Task<IActionResult> NewReview() =>
-        View("EditReview", new Review(await userManager.GetUserAsync(User) ?? throw new Exception("User in not found")));
+    public IActionResult NewReview() => View("EditReview", new Review());
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> NewReview([Bind("Title,Body,Image,Score")] Review review)
+    {
+        if (review == null) throw new ArgumentNullException(nameof(review));
+        review.Author = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        int idProd = int.Parse(Request.Form["ProductIdForServer"].Single() ?? throw new Exception("Product id is not filled"));
+        review.Product = await context.Product.FindAsync(idProd) ?? throw new Exception("Product is not found");
+        string tags = Request.Form["TagsForServer"].Single() ?? throw new Exception("Tags is not filled");
+        review.Tags = tags.Split(",");
+        return RedirectToAction(nameof(MyPage));
+    }
 }

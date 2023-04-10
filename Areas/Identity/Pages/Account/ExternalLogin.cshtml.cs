@@ -94,6 +94,8 @@ namespace RecomField.Areas.Identity.Pages.Account
             [Required]
             [EmailAddress]
             public string Email { get; set; }
+
+            public string Name { get; set; }
         }
         
         public IActionResult OnGet() => RedirectToPage("./Login");
@@ -145,6 +147,8 @@ namespace RecomField.Areas.Identity.Pages.Account
                     {
                         Email = info.Principal.FindFirstValue(ClaimTypes.Email)
                     };
+                    Input.Name = info.Principal.HasClaim(c => c.Type == ClaimTypes.Name) ?
+                        info.Principal.FindFirstValue(ClaimTypes.Name) : Input.Email;
                     return await OnPostConfirmationAsync(returnUrl);
                 }
                 ModelState.AddModelError(string.Empty,
@@ -169,7 +173,7 @@ namespace RecomField.Areas.Identity.Pages.Account
             {
                 var user = CreateUser();
 
-                await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+                await _userStore.SetUserNameAsync(user, Input.Name, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
 
                 var result = await _userManager.CreateAsync(user);

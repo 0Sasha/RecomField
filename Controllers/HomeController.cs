@@ -24,8 +24,8 @@ namespace RecomField.Controllers
 
         public async Task<IActionResult> Index()
         {
-            //foreach(var u in _userManager.Users.ToArray())
-            //    await _userManager.DeleteAsync(u);
+            //foreach(var u in userManager.Users.ToArray())
+            //    await userManager.DeleteAsync(u);
             UpdateUserCookies(await userManager.GetUserAsync(User), Response.Cookies);
             return View((object)Program.Environment);
         }

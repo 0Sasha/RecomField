@@ -12,5 +12,13 @@ namespace RecomField.Data
         }
 
         public DbSet<Product> Product { get; set; } = default!;
+        public DbSet<Review> Review { get; set; } = default!;
+
+        protected override void OnModelCreating(ModelBuilder builder)
+        {
+            base.OnModelCreating(builder);
+            builder.Entity<Review>().Property(e => e.Tags).HasConversion(v => string.Join(',', v),
+                v => v.Split(',', StringSplitOptions.RemoveEmptyEntries));
+        }
     }
 }
