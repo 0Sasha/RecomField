@@ -74,7 +74,7 @@ function addTag() {
 }
 
 function addNewTag(tag) {
-    const idTag = String(tag).replace(' ', '') + "Tag";
+    let idTag = String(tag).replace(/\s/g, '').replace(/'/g, '').replace(/"/g, '') + "Tag";
     if (document.getElementById(idTag) != undefined) return;
     $("#tagsLine").html($("#tagsLine").html() + "<span role='button' class='badge text-bg-primary mb-1' id='" + idTag + "' onclick=deleteTag('" + idTag + "')> " + tag + "</span > ");
     let el = document.getElementById('TagsForServer');
@@ -105,16 +105,17 @@ function changeRate(rate) {
         if (i <= rate) {
             el[i - 1].classList.remove('btn-light');
             el[i - 1].classList.add('btn-warning');
-            //$("#rateBtn" + i).toggleClass('btn-warning', true);
-            //$("#rateBtn" + i).toggleClass('btn-light', false);
         }
         else {
             el[i - 1].classList.remove('btn-warning');
             el[i - 1].classList.add('btn-light');
-            //$("#rateBtn" + i).toggleClass('btn-warning', false);
-            //$("#rateBtn" + i).toggleClass('btn-light', true);
         }
     }
     document.getElementById("myRating").textContent = "Rating: " + rate + "/10";
     document.getElementById("RateForServer").value = rate;
+}
+
+function checkReview() {
+    if (tinymce.activeEditor.getContent().length > 10) document.getElementById("bodyIsFull").value = 1;
+    else document.getElementById("bodyIsFull").value = "";
 }

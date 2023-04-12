@@ -1,0 +1,18 @@
+﻿@model IEnumerable<Review>
+@using static System.Web.HttpUtility;
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+
+@foreach (var p in Model)
+{
+    <tr>
+        <td>@p.Product.Type</td>
+        <td>
+            <a class="h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@p.Id">
+                @p.Product.Title
+            </a>
+        </td>
+        <td>@p.Score</td>
+        <td>@p.PublicationDate</td>
+    </tr>
+}

@@ -1,0 +1,28 @@
+﻿@model Product
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = @Model.Title;
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md">
+            <h1>@Model.Title</h1>
+            <h4>@Model.Type | @Model.ReleaseYear</h4>
+        </div>
+        <div class="col-md text-end">
+            <h1>Review score @Model.ReviewerScore/10</h1>
+            <h4>User score @Model.UserScore/5</h4>
+        </div>
+    </div>
+    <hr />
+    <div class="row g-2">
+        <div class="col-md-3">
+            <h3>Cover here</h3>
+        </div>
+        <div class="col-md">
+            <h5>@Model.Description</h5>
+        </div>
+    </div>
+</div>

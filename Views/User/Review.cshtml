@@ -1,0 +1,33 @@
+﻿@model Review
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+@{
+    ViewData["Title"] = @Localizer["Review"];
+}
+
+<div class="container-fluid ">
+    <div class="row">
+        <div class="col-md-9">
+            <h1>@Model.Title</h1>
+            <h2>By <a href="/User/@Model.Author.Id">@Model.Author.UserName</a> on @Model.PublicationDate.ToString("MMM dd, yyyy")</h2>
+            <h4 id="tagsLine">Tags</h4>
+            <h1 class="align-text-bottom">
+                Score <span class="badge bg-success">
+                    @Model.Score/10
+                </span>
+            </h1>
+        </div>
+        <div class="col-md align-content-end align-items-end text-end">
+            <h3>Cover here</h3>
+            <h3>Cover here</h3>
+            <h3>Cover here</h3>
+            <h3>Cover here</h3>
+            <h5>@Model.Product.Title</h5>
+            <h6>@Model.Product.Type | @Model.Product.ReleaseYear</h6>
+            <h4>@Model.Product.ReviewerScore/10 | @Model.Product.UserScore/5</h4>
+        </div>
+    </div>
+    <hr />
+    @Html.Raw(@Model.Body)
+    <hr />
+</div>

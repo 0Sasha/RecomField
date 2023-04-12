@@ -1,3 +1,4 @@
+using CloudinaryDotNet;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -43,6 +44,10 @@ namespace RecomField
                 throw new Exception("Authentication:Facebook:AppSecret is not in configuration");
                 options.AccessDeniedPath = "/Identity/Account/Login";
             });
+
+            var cloudinary = new Cloudinary(new Account("dvsc8smkg",
+                builder.Configuration["Cloudinary:ApiKey"], builder.Configuration["Cloudinary:APISecret"]));
+            builder.Services.AddSingleton(typeof(Cloudinary), cloudinary);
 
             builder.Services.AddSignalR();
 

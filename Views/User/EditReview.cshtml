@@ -37,28 +37,33 @@
                     <input class="form-control" type="text" id="tagForm" placeholder="Write tags separated by commas" maxlength="50" onchange="addTag()" onkeyup="checkTag()" />
                     <label class="form-label">Write tags separated by commas</label>
                 </div>
-                <h5 id="tagsLine"></h5>
             </div>
         </div>
+        <h5 id="tagsLine"></h5>
         <hr />
-        <h5 id="tagsLine">Review</h5>
+        <h5>Content</h5>
         <div class="form-group mb-3">
-            <textarea asp-for=Body id="tiny" class="form-control" rows="12" placeholder="Review"></textarea>
+            <textarea asp-for=Body id="tiny" class="form-control" rows="12" placeholder="Content"></textarea>
             <span asp-validation-for="Body" class="text-danger"></span>
         </div>
         <div hidden>
             <input name="ProductIdForServer" id="ProductIdForServer" required/>
             <input name="TagsForServer" id="TagsForServer" required />
             <input name="RateForServer" id="RateForServer" required />
+            <input id="bodyIsFull" required />
         </div>
         <hr />
         <h5 class="mt-2" id="myRating">Rating: -/10</h5>
-        @for (int i = 1; i <= 10; i++)
-        {
-            <a role="button" class="btn btn-sm btn-light align-self-center mb-1" data-attr='@i' name="rateBtn" onclick="changeRate('@i')">
-                <img class="align-self-center" src="~/icons/star.svg" style="max-width:17px; max-height:17px" aria-hidden="true" />
-            </a>
-        }
+        <div class="row">
+            <div class="col-12">
+                @for (int i = 1; i <= 10; i++)
+                {
+                    <a role="button" class="btn btn-sm btn-light mb-1" style="max-width:28px; max-height:28px" data-attr='@i' name="rateBtn" onclick="changeRate('@i')">
+                        <img src="~/icons/star.svg" style="max-width:21px; max-height:21px" aria-hidden="true" />
+                    </a>
+                }
+            </div>
+        </div>
         <hr />
         <button class="btn btn-primary float-end" type="submit" style="min-width:100px">Send</button>
     </form>
