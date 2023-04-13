@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecomField.Data;
 
 #nullable disable
 
-namespace RecomField.Data.Migrations
+namespace RecomField.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230413122711_init2")]
+    partial class init2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -230,6 +233,58 @@ namespace RecomField.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("RecomField.Models.Comment<RecomField.Models.Review>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("ReviewComment");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Like<RecomField.Models.Review>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("ReviewLike");
+                });
+
             modelBuilder.Entity("RecomField.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -238,6 +293,9 @@ namespace RecomField.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Cover")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -245,18 +303,15 @@ namespace RecomField.Data.Migrations
                     b.Property<int>("ReleaseYear")
                         .HasColumnType("int");
 
-                    b.Property<double>("ReviewerScore")
-                        .HasColumnType("float");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Trailer")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Type")
                         .HasColumnType("int");
-
-                    b.Property<double>("UserScore")
-                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -285,13 +340,6 @@ namespace RecomField.Data.Migrations
                     b.Property<DateTime>("PublicationDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("Score")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -303,6 +351,83 @@ namespace RecomField.Data.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("Review");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Score<RecomField.Models.Product>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("ProductScore");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Score<RecomField.Models.Review>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SenderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Value")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId")
+                        .IsUnique();
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("ReviewScore");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ReviewId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewId");
+
+                    b.ToTable("Tag");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -356,6 +481,44 @@ namespace RecomField.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("RecomField.Models.Comment<RecomField.Models.Review>", b =>
+                {
+                    b.HasOne("RecomField.Models.Review", "Entity")
+                        .WithMany("Comments")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("RecomField.Models.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Like<RecomField.Models.Review>", b =>
+                {
+                    b.HasOne("RecomField.Models.Review", "Entity")
+                        .WithMany("Likes")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("RecomField.Models.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("RecomField.Models.Review", b =>
                 {
                     b.HasOne("RecomField.Models.ApplicationUser", "Author")
@@ -365,14 +528,78 @@ namespace RecomField.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("RecomField.Models.Product", "Product")
-                        .WithMany()
+                        .WithMany("Reviewes")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
 
                     b.Navigation("Author");
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Score<RecomField.Models.Product>", b =>
+                {
+                    b.HasOne("RecomField.Models.Product", "Entity")
+                        .WithMany("UserScores")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("RecomField.Models.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Score<RecomField.Models.Review>", b =>
+                {
+                    b.HasOne("RecomField.Models.Review", "Entity")
+                        .WithOne("Score")
+                        .HasForeignKey("RecomField.Models.Score<RecomField.Models.Review>", "EntityId")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("RecomField.Models.ApplicationUser", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Tag", b =>
+                {
+                    b.HasOne("RecomField.Models.Review", null)
+                        .WithMany("Tags")
+                        .HasForeignKey("ReviewId");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Product", b =>
+                {
+                    b.Navigation("Reviewes");
+
+                    b.Navigation("UserScores");
+                });
+
+            modelBuilder.Entity("RecomField.Models.Review", b =>
+                {
+                    b.Navigation("Comments");
+
+                    b.Navigation("Likes");
+
+                    b.Navigation("Score")
+                        .IsRequired();
+
+                    b.Navigation("Tags");
                 });
 #pragma warning restore 612, 618
         }

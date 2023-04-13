@@ -38,7 +38,7 @@ public class UserController : Controller
 
     public async Task<IActionResult> Review(int id)
     {
-        return View(await context.Review.Include(r => r.Author).Include(r => r.Product).SingleAsync(r => r.Id == id));
+        return View(await context.Review.Include(r => r.Author).Include(r => r.Product).Include(r => r.Score).SingleAsync(r => r.Id == id));
     }
 
     [HttpPost]
@@ -63,23 +63,46 @@ public class UserController : Controller
         return RedirectToAction(nameof(NewReview));
     }
 
-    public IActionResult NewReview() => View("EditReview", new Review());
+    public IActionResult NewReview() => View("AddReview", new Review());
+
+    public async Task<IActionResult> EditReview(int id)
+    {
+        var u = await userManager.GetUserAsync(User);
+        var r = await context.Review.Include(r => r.Tags).Include(r => r.Score).SingleAsync(r => r.Id == id);
+        await context.Product.FindAsync(r.ProductId);
+        return View("EditReview", r);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> NewReview([Bind("Title,Body")] Review review)
     {
         if (review == null) throw new ArgumentNullException(nameof(review));
-        review.PublicationDate = DateTime.UtcNow;
-        review.Author = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        var u = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        int id = int.Parse(Request.Form["IdForServer"].Single() ?? throw new Exception("Id is not found"));
         int idProd = int.Parse(Request.Form["ProductIdForServer"].Single() ?? throw new Exception("Product id is not filled"));
-        review.Product = await context.Product.FindAsync(idProd) ?? throw new Exception("Product is not found");
-        review.Score = int.Parse(Request.Form["RateForServer"].Single() ?? throw new Exception("Score is not defined"));
         string tags = Request.Form["TagsForServer"].Single() ?? throw new Exception("Tags is not filled");
-        review.Tags = tags.Split(",");
+        int score = int.Parse(Request.Form["RateForServer"].Single() ?? throw new Exception("Score is not defined"));
+        return id == 0 ? await CreateReview(u, idProd, tags, score, review) :
+            await EditReview(id, u, idProd, tags, score, review);
+    }
+
+    private async Task<IActionResult> CreateReview(ApplicationUser user, int idProd, string tags, int score, Review review)
+    {
+        review.PublicationDate = DateTime.UtcNow;
+        review.Product = await context.Product.FindAsync(idProd) ?? throw new Exception("Product is not found");
+        review.Score = new(user, review, score);
+        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
         review.Body = CustomizeStringHtml(review.Body);
         await context.AddAsync(review);
         await context.SaveChangesAsync();
+        return RedirectToAction(nameof(MyPage));
+    }
+
+    private async Task<IActionResult> EditReview(int id, ApplicationUser user, int idProd, string tags, int score, Review review)
+    {
+        var r = await context.Review.Include(r => r.Tags).Include(r => r.Score).SingleAsync(r => r.Id == review.Id);
+        await context.Product.FindAsync(r.ProductId);
         return RedirectToAction(nameof(MyPage));
     }
 
