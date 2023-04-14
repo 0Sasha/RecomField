@@ -6,27 +6,30 @@
 }
 
 <div class="container-fluid mb-5">
-    <form asp-action="NewReview">
-        <div class="row g-2 mb-3">
-            <div class="col-md-3">
-                <button class="btn btn-primary w-100" type="button" onclick="updateProductsModal('')" data-bs-toggle="modal" data-bs-target="#productsModal">Select product</button>
+    <form asp-action="EditReview">
+        @if(Model.Id == 0)
+        {
+            <div class="row g-2 mb-3">
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" type="button" onclick="updateProductsModal('')" data-bs-toggle="modal" data-bs-target="#productsModal">Select product</button>
+                </div>
+                <div class="col-md">
+                    <input class="form-control" placeholder="Product title" id="titleProd" readonly>
+                </div>
+                <div class="col-md-2">
+                    <input class="form-control" placeholder="Product type" id="typeProd" readonly>
+                </div>
+                <div class="col-md-2">
+                    <input class="form-control" placeholder="Release year" id="releaseProd" readonly>
+                </div>
             </div>
-            <div class="col-md">
-                <input class="form-control" placeholder="Product title" id="titleProd" readonly>
-            </div>
-            <div class="col-md-2">
-                <input class="form-control" placeholder="Product type" id="typeProd" readonly>
-            </div>
-            <div class="col-md-2">
-                <input class="form-control" placeholder="Release year" id="releaseProd" readonly>
-            </div>
-        </div>
-        <hr />
+            <hr />
+        }
         <div class=" row g-2">
             <div class="col-md">
                 <h5>Title </h5>
                 <div class="form-floating mb-2">
-                    <input asp-for=Title class="form-control" style="font-weight:bolder" type="text" placeholder="Review title" value="@Model.Title" required />
+                    <input asp-for=Title class="form-control" style="font-weight:bolder" type="text" placeholder="Review title" required />
                     <label asp-for="Title" class="form-label">Review title</label>
                     <span asp-validation-for="Title" class="text-danger"></span>
                 </div>
@@ -43,15 +46,8 @@
         <hr />
         <h5>Content</h5>
         <div class="form-group mb-3">
-            <textarea asp-for=Body id="tiny" class="form-control" rows="12" placeholder="Content"></textarea>
+            <textarea asp-for=Body id="tiny" class="form-control" rows="15" placeholder="Content"></textarea>
             <span asp-validation-for="Body" class="text-danger"></span>
-        </div>
-        <div hidden>
-            <input name="IdForServer" id="IdForServer" value="@Model.Id"/>
-            <input name="ProductIdForServer" id="ProductIdForServer" required/>
-            <input name="TagsForServer" id="TagsForServer" required />
-            <input name="RateForServer" id="RateForServer" required />
-            <input id="bodyIsFull" required />
         </div>
         <hr />
         <h5 class="mt-2" id="myRating">Rating: -/10</h5>
@@ -65,8 +61,33 @@
                 }
             </div>
         </div>
+        <div hidden>
+            @if (Model.Id != 0)
+            {
+                <input name="IdForServer" id="IdForServer" value="@Model.Id" />
+            }
+            else
+            {
+                <input name="ProductIdForServer" id="ProductIdForServer" required />
+            }
+            <input name="TagsForServer" id="TagsForServer" required />
+            <input name="RateForServer" id="RateForServer" required />
+            <input id="bodyIsFull" required />
+        </div>
+        @foreach (var t in Model.Tags)
+        {
+            <script>
+                addNewTag('@t.Body');
+            </script>
+        }
+        @if (Model.Score != null)
+        {
+            <script>
+                changeRate('@Model.Score.Value');
+            </script>
+        }
         <hr />
-        <button class="btn btn-primary float-end" type="submit" style="min-width:100px">Send</button>
+        <button class="btn btn-primary float-end" type="submit" style="min-width:100px">Save review</button>
     </form>
 </div>
 
@@ -93,7 +114,6 @@
                         </tr>
                     </thead>
                     <tbody id="tbodyProductsModal">
-
                     </tbody>
                 </table>
             </div>

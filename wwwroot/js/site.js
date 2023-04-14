@@ -81,6 +81,12 @@ function addNewTag(tag) {
     el.value += (el.value == "") ? tag : "," + tag;
 }
 
+function addAllTags(tags) {
+    let code = "";
+    String(tags).split(',').forEach(t => code += "<span class='badge text-bg-primary mb-1'> " + t + "</span > ");
+    $("#tagsLine").html(code);
+}
+
 function deleteTag(id) {
     document.getElementById("tagsLine").removeChild(document.getElementById(id));
     let tag = id.slice(0, id.length - 3);
@@ -118,4 +124,28 @@ function changeRate(rate) {
 function checkReview() {
     if (tinymce.activeEditor.getContent().length > 10) document.getElementById("bodyIsFull").value = 1;
     else document.getElementById("bodyIsFull").value = "";
+}
+
+function changeLike(id) {
+    let el = document.getElementById("likeIcon");
+    if (el.ariaLabel == "Liked") {
+        $.ajax({
+            url: "/User/ChangeLike?id=" + id,
+            type: "POST",
+            success: function () {
+                el.setAttribute("src", "/icons/thumb.svg");
+                el.ariaLabel = "";
+            }
+        });
+    }
+    else {
+        $.ajax({
+            url: "/User/ChangeLike?id=" + id,
+            type: "POST",
+            success: function () {
+                el.setAttribute("src", "/icons/thumb black.svg");
+                el.ariaLabel = "Liked";
+            }
+        });
+    }
 }

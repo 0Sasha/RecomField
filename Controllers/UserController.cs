@@ -38,7 +38,14 @@ public class UserController : Controller
 
     public async Task<IActionResult> Review(int id)
     {
-        return View(await context.Review.Include(r => r.Author).Include(r => r.Product).Include(r => r.Score).SingleAsync(r => r.Id == id));
+        var r = await context.Review.FindAsync(id);
+        await context.Entry(r).Reference(u => u.Author).LoadAsync();
+        await context.Entry(r).Reference(u => u.Product).LoadAsync();
+        await context.Entry(r).Reference(u => u.Score).LoadAsync();
+        await context.Entry(r).Collection(u => u.Tags).LoadAsync();
+        await context.Entry(r).Collection(u => u.Likes).LoadAsync();
+        await context.Entry(r).Collection(u => u.Comments).LoadAsync();
+        return View(r);
     }
 
     [HttpPost]
@@ -60,50 +67,65 @@ public class UserController : Controller
         product.Description ??= "";
         await context.AddAsync(product);
         await context.SaveChangesAsync();
-        return RedirectToAction(nameof(NewReview));
+        return RedirectToAction(nameof(AddReview));
     }
 
-    public IActionResult NewReview() => View("AddReview", new Review());
-
-    public async Task<IActionResult> EditReview(int id)
+    [HttpGet]
+    public async Task<IActionResult> EditReview(int id = 0)
     {
-        var u = await userManager.GetUserAsync(User);
-        var r = await context.Review.Include(r => r.Tags).Include(r => r.Score).SingleAsync(r => r.Id == id);
-        await context.Product.FindAsync(r.ProductId);
-        return View("EditReview", r);
+        if (id == 0) return View(new Review());
+        else
+        {
+            var r = await context.Review.FindAsync(id);
+            var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+            if (user != r.Author) throw new Exception("User is not author of review"); ////////////////TODO ADMIN
+            await context.Entry(r).Reference(u => u.Score).LoadAsync();
+            await context.Entry(r).Collection(u => u.Tags).LoadAsync();
+            return View(r);
+        }
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> NewReview([Bind("Title,Body")] Review review)
+    public async Task<IActionResult> EditReview([Bind("Title,Body")] Review review)
     {
-        if (review == null) throw new ArgumentNullException(nameof(review));
-        var u = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
-        int id = int.Parse(Request.Form["IdForServer"].Single() ?? throw new Exception("Id is not found"));
-        int idProd = int.Parse(Request.Form["ProductIdForServer"].Single() ?? throw new Exception("Product id is not filled"));
+        if (review.Title == null) throw new ArgumentNullException(nameof(review.Title));
+        if (review.Body == null) throw new ArgumentNullException(nameof(review.Body));
+        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
         string tags = Request.Form["TagsForServer"].Single() ?? throw new Exception("Tags is not filled");
         int score = int.Parse(Request.Form["RateForServer"].Single() ?? throw new Exception("Score is not defined"));
-        return id == 0 ? await CreateReview(u, idProd, tags, score, review) :
-            await EditReview(id, u, idProd, tags, score, review);
+        string? id = Request.Form["IdForServer"].SingleOrDefault();
+        return id == null ? await AddReview(user, review, tags, score) :
+            await EditReview(user, int.Parse(id), review.Title, tags, review.Body, score);
     }
 
-    private async Task<IActionResult> CreateReview(ApplicationUser user, int idProd, string tags, int score, Review review)
+    private async Task<IActionResult> AddReview(ApplicationUser user, Review review, string tags, int score)
     {
         review.PublicationDate = DateTime.UtcNow;
+        review.Author = user;
+        int idProd = int.Parse(Request.Form["ProductIdForServer"].Single() ?? throw new Exception("Product id is not filled"));
         review.Product = await context.Product.FindAsync(idProd) ?? throw new Exception("Product is not found");
         review.Score = new(user, review, score);
-        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
         review.Body = CustomizeStringHtml(review.Body);
+        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
         await context.AddAsync(review);
         await context.SaveChangesAsync();
-        return RedirectToAction(nameof(MyPage));
+        return RedirectToAction(nameof(Review), new { id = review.Id });
     }
 
-    private async Task<IActionResult> EditReview(int id, ApplicationUser user, int idProd, string tags, int score, Review review)
+    private async Task<IActionResult> EditReview(ApplicationUser user, int id, string title, string tags, string body, int score)
     {
-        var r = await context.Review.Include(r => r.Tags).Include(r => r.Score).SingleAsync(r => r.Id == review.Id);
-        await context.Product.FindAsync(r.ProductId);
-        return RedirectToAction(nameof(MyPage));
+        var review = await context.Review.FindAsync(id);
+        await context.Product.FindAsync(review.ProductId);
+        await context.Entry(review).Reference(u => u.Score).LoadAsync();
+        await context.Entry(review).Collection(u => u.Tags).LoadAsync();
+        review.Title = title;
+        review.Body = CustomizeStringHtml(body); //TODO//////////////////////////
+        review.Tags = new();
+        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
+        review.Score = new(user, review, score);
+        await context.SaveChangesAsync();
+        return RedirectToAction(nameof(Review), new { id });
     }
 
     private static string CustomizeStringHtml(string body) // TODO/////////////////////////////////////////
@@ -155,5 +177,17 @@ public class UserController : Controller
         var uploadParams = new ImageUploadParams() { File = new FileDescription("file", file.OpenReadStream()) };
         var uploadResult = await cloud.UploadAsync(uploadParams);
         await Response.WriteAsync(new { location = uploadResult.Url }.ToJson());
+    }
+
+    [HttpPost]
+    public async Task ChangeLike(int id)
+    {
+        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
+        await context.Entry(r).Collection(u => u.Likes).LoadAsync();
+        var like = r.Likes.SingleOrDefault(l => l.Sender == user);
+        if (like != null) r.Likes.Remove(like);
+        else r.Likes.Add(new(user, r));
+        await context.SaveChangesAsync();
     }
 }
