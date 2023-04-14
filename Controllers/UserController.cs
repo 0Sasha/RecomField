@@ -4,10 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
 using RecomField.Data;
+using RecomField.Hubs;
 using RecomField.Models;
 using System.IO;
 
@@ -18,16 +20,18 @@ public class UserController : Controller
 {
     private readonly UserManager<ApplicationUser> userManager;
     private readonly ApplicationDbContext context;
+    private readonly IHubContext<MainHub> hubContext;
     private readonly IWebHostEnvironment appEnvironment;
     private readonly Cloudinary cloud;
 
     public UserController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment appEnvironment,
-        Cloudinary cloud)
+        Cloudinary cloud, IHubContext<MainHub> hubContext)
     {
         this.userManager = userManager;
         this.context = context;
         this.appEnvironment = appEnvironment;
         this.cloud = cloud;
+        this.hubContext = hubContext;
     }
 
     public async Task<IActionResult> MyPage()
@@ -45,6 +49,7 @@ public class UserController : Controller
         await context.Entry(r).Collection(u => u.Tags).LoadAsync();
         await context.Entry(r).Collection(u => u.Likes).LoadAsync();
         await context.Entry(r).Collection(u => u.Comments).LoadAsync();
+        await context.Entry(r.Product).Collection(u => u.UserScores).LoadAsync();
         return View(r);
     }
 
@@ -188,6 +193,46 @@ public class UserController : Controller
         var like = r.Likes.SingleOrDefault(l => l.Sender == user);
         if (like != null) r.Likes.Remove(like);
         else r.Likes.Add(new(user, r));
+        await context.SaveChangesAsync();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddComment(int id, string comment, int visibleCount)
+    {
+        if (string.IsNullOrEmpty(comment)) throw new ArgumentNullException(nameof(comment));
+        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
+        await context.Entry(r).Collection(u => u.Comments).LoadAsync();
+        r.Comments.Add(new(user, r, comment));
+        await context.SaveChangesAsync();
+        await hubContext.Clients.All.SendAsync("NewReviewComment", id);
+        return PartialView("ReviewComments", (r.Comments.Take(visibleCount + 1), r.Id, r.Comments.Count));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ShowComments(int id, int count)
+    {
+        var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
+        await context.Entry(r).Collection(u => u.Comments).LoadAsync();
+        return PartialView("ReviewComments", (r.Comments.Take(count), r.Id, r.Comments.Count));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GetTagList(string partTag)
+    {
+        var t = (await context.Tag.Select(t => t.Body).ToListAsync()).Where(b => b.Contains(partTag, StringComparison.OrdinalIgnoreCase));
+        return PartialView("OptionsList", t.Distinct().TakeLast(7));
+    }
+
+    [HttpPost]
+    public async Task ChangeScoreProduct(int id, int score)
+    {
+        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        var p = await context.Product.FindAsync(id) ?? throw new Exception("Product is not found");
+        await context.Entry(p).Collection(p => p.UserScores).LoadAsync();
+        var s = p.UserScores.SingleOrDefault(s => s.Sender == user);
+        if (s != null) s.Value = score;
+        else p.UserScores.Add(new(user, p, score));
         await context.SaveChangesAsync();
     }
 }

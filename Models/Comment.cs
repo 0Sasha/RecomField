@@ -22,6 +22,8 @@ public class Comment<T>
     [Required]
     public string? Body { get; set; }
 
+    public DateTime PublicationDate { get; set; }
+
     public Comment() { }
 
     public Comment(ApplicationUser sender, T entity, string boby)
@@ -29,5 +31,6 @@ public class Comment<T>
         Sender = sender;
         Entity = entity;
         Body = boby;
+        PublicationDate = DateTime.UtcNow;
     }
 }

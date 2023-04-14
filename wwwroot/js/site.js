@@ -65,6 +65,15 @@ function checkTag() {
         el.value = "";
         addNewTag(tag);
     }
+    else if (el.value.length > 0) {
+        $.ajax({
+            url: "/User/GetTagList?partTag=" + el.value,
+            type: "POST",
+            success: function (res) {
+                $("#tagsList").html(res);
+            }
+        });
+    }
 }
 
 function addTag() {
@@ -121,6 +130,40 @@ function changeRate(rate) {
     document.getElementById("RateForServer").value = rate;
 }
 
+function changeRateProd(rate, id) {
+    $.ajax({
+        url: "/User/ChangeScoreProduct?id=" + id + "&score=" + rate,
+        type: "POST",
+        success: function () {
+            var el = document.getElementsByName("rateBtn");
+            for (var i = 1; i <= 5; i++) {
+                if (i <= rate) {
+                    el[i - 1].classList.remove('btn-light');
+                    el[i - 1].classList.add('btn-warning');
+                }
+                else {
+                    el[i - 1].classList.remove('btn-warning');
+                    el[i - 1].classList.add('btn-light');
+                }
+            }
+        }
+    });
+}
+
+function setInitRateProd(rate) {
+    var el = document.getElementsByName("rateBtn");
+    for (var i = 1; i <= 5; i++) {
+        if (i <= rate) {
+            el[i - 1].classList.remove('btn-light');
+            el[i - 1].classList.add('btn-warning');
+        }
+        else {
+            el[i - 1].classList.remove('btn-warning');
+            el[i - 1].classList.add('btn-light');
+        }
+    }
+}
+
 function checkReview() {
     if (tinymce.activeEditor.getContent().length > 10) document.getElementById("bodyIsFull").value = 1;
     else document.getElementById("bodyIsFull").value = "";
@@ -147,5 +190,35 @@ function changeLike(id) {
                 el.ariaLabel = "Liked";
             }
         });
+    }
+}
+
+function addComment(id, visibleCount) {
+    let el = document.getElementById("comment");
+    if (el.value.length == 0) return;
+    let c = el.value;
+    el.value = "";
+    $.ajax({
+        url: "/User/AddComment?id=" + id + "&comment=" + c + "&visibleCount=" + visibleCount,
+        type: "POST",
+        success: function (res) {
+            $("#reviewComments").html(res);
+        }
+    });
+}
+
+function showMoreComments(id, count) {
+    $.ajax({
+        url: "/User/ShowComments?id=" + id + "&count=" + (Number(document.getElementById("visibleCount").value) + count),
+        type: "POST",
+        success: function (res) {
+            $("#reviewComments").html(res);
+        }
+    });
+}
+
+function updateReviewComments(id) {
+    if (window.location.href.endsWith("Review/" + id)) {
+        showMoreComments(id, 1);
     }
 }

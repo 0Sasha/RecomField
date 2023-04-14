@@ -37,9 +37,11 @@
             <div class="col-md">
                 <h5>Tags </h5>
                 <div class="form-floating mb-2">
-                    <input class="form-control" type="text" id="tagForm" placeholder="Write tags separated by commas" maxlength="50" onchange="addTag()" onkeyup="checkTag()" />
+                    <input class="form-control" type="text" id="tagForm" list="tagsList" placeholder="Write tags separated by commas" maxlength="50" onchange="addTag()" onkeyup="checkTag()" autocomplete="on" />
                     <label class="form-label">Write tags separated by commas</label>
                 </div>
+                <datalist id="tagsList">
+                </datalist>
             </div>
         </div>
         <h5 id="tagsLine"></h5>

@@ -2,8 +2,8 @@
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/mainHub").withAutomaticReconnect().build();
 
-connection.on("ReceiveMessage", function (user, message) {
-    //
+connection.on("NewReviewComment", function (id) {
+    updateReviewComments(id);
 });
 
 connection.start().then(function () {
