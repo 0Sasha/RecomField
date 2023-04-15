@@ -94,9 +94,9 @@
         <div class="col-md-9">
             <div class="row">
                 <div class="col-auto">
-                    <h4><a href="/User/@Model.Author.Id" style="text-decoration:none">@Model.Author.UserName</a>
-                        <span class="badge text-bg-light fw-bold">
-                            <img src="~/icons/thumb black.svg" aria-label="Likes" style="max-width:18px; max-height:18px;">@Model.Author.ReviewLikes
+                    <h4><a href="/User/@Model.Author.Id">@Model.Author.UserName</a>
+                        <span class="badge text-bg-secondary fw-bold">
+                            <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:16px; max-height:16px;">@Model.Author.ReviewLikes
                         </span>
                         <small class="text-muted">on @Model.PublicationDate.ToString("MMM dd, yyyy")</small>
                     </h4>
@@ -105,22 +105,22 @@
         </div>
         <div class="col-md align-items-end text-end">
             <h4>
-                <span role="button" id="likeBtn" class="badge text-bg-light fw-bold" style="min-width:70px" onclick="changeLike('@Model.Id')">
+                <span role="button" id="likeBtn" class="badge text-bg-secondary fw-bold" onclick="changeLike('@Model.Id')">
                     @if (Model.Likes.Count > 0)
                     {
                         var id = User.Claims.First().Value;
                         if (Model.Likes.SingleOrDefault(l => l.SenderId == id) == null)
                         {
-                            <img id="likeIcon" src="~/icons/thumb.svg" aria-label="" style="max-width:18px; max-height:18px;">
+                            <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:18px; max-height:18px;">
                         }
                         else
                         {
-                            <img id="likeIcon" src="~/icons/thumb black.svg" aria-label="Liked" style="max-width:18px; max-height:18px;">
+                            <img id="likeIcon" src="~/icons/thumb white full.svg" aria-label="Liked" style="max-width:18px; max-height:18px;">
                         }
                     }
                     else
                     {
-                        <img id="likeIcon" src="~/icons/thumb.svg" aria-label="" style="max-width:18px; max-height:18px;">
+                        <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:18px; max-height:18px;">
                     }
                     @Model.Likes.Count
                 </span>

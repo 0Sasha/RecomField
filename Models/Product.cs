@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using RecomField.Data;
+using System.ComponentModel.DataAnnotations;
 namespace RecomField.Models;
 
 public class Product
@@ -40,6 +42,14 @@ public class Product
         Type = type;
         Title = title;
         ReleaseYear = releaseYear;
+    }
+
+    public async Task LoadAsync(ApplicationDbContext context)
+    {
+        await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
+        await context.Review.Where(r => r.Product == this).Include(r => r.Author).Include(r => r.Score).LoadAsync();
+        AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 1);
+        AverageReviewScore = Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 1);
     }
 
     public enum ProductType

@@ -12,6 +12,10 @@ html {
   box-shadow: none;
 }
 
+a {
+    text-decoration: none;
+}
+
 html {
   position: relative;
   min-height: 100%;

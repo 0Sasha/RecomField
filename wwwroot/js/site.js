@@ -176,7 +176,7 @@ function changeLike(id) {
             url: "/User/ChangeLike?id=" + id,
             type: "POST",
             success: function () {
-                el.setAttribute("src", "/icons/thumb.svg");
+                el.setAttribute("src", "/icons/thumb white.svg");
                 el.ariaLabel = "";
             }
         });
@@ -186,7 +186,7 @@ function changeLike(id) {
             url: "/User/ChangeLike?id=" + id,
             type: "POST",
             success: function () {
-                el.setAttribute("src", "/icons/thumb black.svg");
+                el.setAttribute("src", "/icons/thumb white full.svg");
                 el.ariaLabel = "Liked";
             }
         });

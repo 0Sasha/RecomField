@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using RecomField.Data;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 namespace RecomField.Models;
 
 public class Review
@@ -39,13 +41,18 @@ public class Review
 
     public List<Comment<Review>> Comments { get; set; } = new();
 
-    public void AddLike(ApplicationUser sender)
+    public async Task LoadAsync(ApplicationDbContext context)
     {
-        Likes.Add(new(sender, this));
-    }
-
-    public void RemoveLike(ApplicationUser sender)
-    {
-        Likes.Remove(Likes.Single(l => l.Sender == sender));
+        if (Author == null) await context.Entry(this).Reference(r => r.Author).LoadAsync();
+        if (Author == null) throw new Exception("Author is not found");
+        await Author.LoadAsync(context);
+        if (Product == null) await context.Entry(this).Reference(r => r.Product).LoadAsync();
+        if (Product == null) throw new Exception("Product is not found");
+        await Product.LoadAsync(context);
+        if (Score == null) await context.Entry(this).Reference(u => u.Score).LoadAsync();
+        if (Score == null) throw new Exception("Score is not found");
+        if (Tags.Count == 0) await context.Entry(this).Collection(u => u.Tags).LoadAsync();
+        if (Likes.Count == 0) await context.Entry(this).Collection(u => u.Likes).LoadAsync();
+        await context.ReviewComment.Where(k => k.Entity == this).Include(k => k.Sender).LoadAsync();
     }
 }
