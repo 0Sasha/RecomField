@@ -111,16 +111,16 @@
                         var id = User.Claims.First().Value;
                         if (Model.Likes.SingleOrDefault(l => l.SenderId == id) == null)
                         {
-                            <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:18px; max-height:18px;">
+                            <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:20px; max-height:20px;">
                         }
                         else
                         {
-                            <img id="likeIcon" src="~/icons/thumb white full.svg" aria-label="Liked" style="max-width:18px; max-height:18px;">
+                            <img id="likeIcon" src="~/icons/thumb white full.svg" aria-label="Liked" style="max-width:20px; max-height:20px;">
                         }
                     }
                     else
                     {
-                        <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:18px; max-height:18px;">
+                        <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:20px; max-height:20px;">
                     }
                     @Model.Likes.Count
                 </span>
