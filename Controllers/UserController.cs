@@ -37,19 +37,31 @@ public class UserController : Controller
     public async Task<IActionResult> MyPage()
     {
         var u = await userManager.GetUserAsync(User);
-        return View(context.Review.Where(r => r.Author == u).Include(r => r.Product).AsEnumerable());
+        return View(context.Review.Where(r => r.Author == u).Include(r => r.Product).Include(r => r.Score).AsEnumerable());
+    }
+
+    public async Task<IActionResult> ClearUsers()
+    {
+        foreach (var u in context.Users.ToArray())
+        {
+            var user = await context.Users.FindAsync(u.Id);
+            context.Users.Remove(user);
+        }
+        await context.SaveChangesAsync();
+        return RedirectToAction(nameof(MyPage));
     }
 
     public async Task<IActionResult> Review(int id)
     {
+        await context.ReviewLike.Include(l => l.Entity).LoadAsync();
         var r = await context.Review.FindAsync(id);
         await context.Entry(r).Reference(u => u.Author).LoadAsync();
         await context.Entry(r).Reference(u => u.Product).LoadAsync();
         await context.Entry(r).Reference(u => u.Score).LoadAsync();
         await context.Entry(r).Collection(u => u.Tags).LoadAsync();
         await context.Entry(r).Collection(u => u.Likes).LoadAsync();
-        await context.Entry(r).Collection(u => u.Comments).LoadAsync();
         await context.Entry(r.Product).Collection(u => u.UserScores).LoadAsync();
+        await context.ReviewComment.Where(k => k.Entity == r).Include(k => k.Sender).LoadAsync();
         return View(r);
     }
 
@@ -72,7 +84,7 @@ public class UserController : Controller
         product.Description ??= "";
         await context.AddAsync(product);
         await context.SaveChangesAsync();
-        return RedirectToAction(nameof(AddReview));
+        return RedirectToAction(nameof(EditReview));
     }
 
     [HttpGet]
@@ -115,6 +127,11 @@ public class UserController : Controller
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
         await context.AddAsync(review);
         await context.SaveChangesAsync();
+
+        /// Need to do in another task
+        var prod = await context.Product.FindAsync(review.ProductId) ?? throw new Exception("Product is not found");
+        prod.AverageReviewScore = Math.Round(await context.Review.Where(r => r.Product == prod).Include(r => r.Score).Select(r => r.Score.Value).AverageAsync(), 1);
+        await context.SaveChangesAsync();
         return RedirectToAction(nameof(Review), new { id = review.Id });
     }
 
@@ -130,7 +147,34 @@ public class UserController : Controller
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
         review.Score = new(user, review, score);
         await context.SaveChangesAsync();
+
+        /// Need to do in another task
+        var prod = await context.Product.FindAsync(review.ProductId) ?? throw new Exception("Product is not found");
+        prod.AverageReviewScore = Math.Round(await context.Review.Where(r => r.Product == prod).Include(r => r.Score).Select(r => r.Score.Value).AverageAsync(), 1);
+        await context.SaveChangesAsync();
         return RedirectToAction(nameof(Review), new { id });
+    }
+
+    [HttpPost]
+    public async Task RemoveReview(int id)
+    {
+        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        var r = await context.Review.FindAsync(id);
+        if (r.Author != user) throw new Exception("User is not author");
+        await context.Entry(r).Reference(r => r.Product).LoadAsync();
+        await context.Entry(r).Reference(r => r.Score).LoadAsync();
+        await context.Entry(r).Collection(r => r.Tags).LoadAsync();
+        await context.Entry(r).Collection(r => r.Likes).LoadAsync();
+        await context.Entry(r).Collection(r => r.Comments).LoadAsync();
+        context.Review.Remove(r);
+        var res = await context.SaveChangesAsync();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GetReviewsView()
+    {
+        var u = await userManager.GetUserAsync(User);
+        return PartialView("ReviewsTableBody", context.Review.Where(r => r.Author == u).Include(r => r.Product).Include(r => r.Score).AsEnumerable());
     }
 
     private static string CustomizeStringHtml(string body) // TODO/////////////////////////////////////////
@@ -190,10 +234,16 @@ public class UserController : Controller
         var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
         var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
         await context.Entry(r).Collection(u => u.Likes).LoadAsync();
+        await context.Entry(r).Reference(u => u.Author).LoadAsync();
         var like = r.Likes.SingleOrDefault(l => l.Sender == user);
         if (like != null) r.Likes.Remove(like);
         else r.Likes.Add(new(user, r));
         await context.SaveChangesAsync();
+
+        /*/// Need to do in another task
+        var author = await userManager.FindByIdAsync(r.Author.Id) ?? throw new Exception("Author is not found");
+        author.ReviewLikes = context.ReviewLike.Include(l => l.Entity).Where(l => l.Entity.Author == author).Count(); 
+        await context.SaveChangesAsync();*/
     }
 
     [HttpPost]
@@ -202,7 +252,7 @@ public class UserController : Controller
         if (string.IsNullOrEmpty(comment)) throw new ArgumentNullException(nameof(comment));
         var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
         var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
-        await context.Entry(r).Collection(u => u.Comments).LoadAsync();
+        await context.ReviewComment.Where(k => k.Entity == r).Include(k => k.Sender).LoadAsync();
         r.Comments.Add(new(user, r, comment));
         await context.SaveChangesAsync();
         await hubContext.Clients.All.SendAsync("NewReviewComment", id);
@@ -213,7 +263,7 @@ public class UserController : Controller
     public async Task<IActionResult> ShowComments(int id, int count)
     {
         var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
-        await context.Entry(r).Collection(u => u.Comments).LoadAsync();
+        await context.ReviewComment.Where(k => k.Entity == r).Include(k => k.Sender).LoadAsync();
         return PartialView("ReviewComments", (r.Comments.Take(count), r.Id, r.Comments.Count));
     }
 
@@ -233,6 +283,9 @@ public class UserController : Controller
         var s = p.UserScores.SingleOrDefault(s => s.Sender == user);
         if (s != null) s.Value = score;
         else p.UserScores.Add(new(user, p, score));
+
+        /// Need to do in another task
+        p.AverageUserScore = Math.Round(p.UserScores.Select(s => s.Value).Average(), 1);
         await context.SaveChangesAsync();
     }
 }

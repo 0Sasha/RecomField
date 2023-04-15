@@ -6,13 +6,45 @@
 @foreach (var p in Model)
 {
     <tr>
-        <td>@p.Product.Type</td>
         <td>
             <a class="h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@p.Id">
                 @p.Product.Title
             </a>
         </td>
-        <td>@p.Score</td>
-        <td>@p.PublicationDate</td>
+        <td>
+            <div class="dropdown">
+                <button class="btn w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    @p.Title
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@p.Id">
+                            Open
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item h-100 w-100 text-start btn" asp-action="EditReview" asp-route-id="@p.Id">
+                            Edit
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="removeReview('@p.Id')">
+                            Remove
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </td>
+        <td>
+            @if (p.Score.Value >= 7)
+            {
+                <h4> <span class="badge text-bg-success" style="min-width:45px">@p.Score.Value</span></h4>
+            }
+            else
+            {
+                <h4> <span class="badge text-bg-warning" style="min-width:45px">@p.Score.Value</span></h4>
+            }
+        </td>
+        <td>@p.PublicationDate.ToShortDateString()</td>
     </tr>
 }

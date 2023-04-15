@@ -24,10 +24,14 @@ public class Product
 
     public virtual string? Trailer { get; set; }
 
+    public virtual double AverageUserScore { get; set; }
+
+    public virtual double AverageReviewScore { get; set; }
+
     public virtual List<Score<Product>> UserScores { get; set; } = new();
-                                                                            // public AddReview() + public RemoveReview()
-    public virtual List<Review> Reviewes { get; set; } = new(); // private List<Review> Reviews??
-                                                    // public Score { get => score; } Score changes when review is added or removed
+
+    public virtual List<Review> Reviews { get; set; } = new();
+
     public Product() { }
 
     public Product(ProductType type, string title, int releaseYear)

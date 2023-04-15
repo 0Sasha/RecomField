@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecomField.Data;
 
@@ -11,9 +12,11 @@ using RecomField.Data;
 namespace RecomField.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230415084805_UpdUserReviewLikes")]
+    partial class UpdUserReviewLikes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,6 +210,9 @@ namespace RecomField.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<int>("ReviewLikes")
+                        .HasColumnType("int");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
@@ -292,12 +298,6 @@ namespace RecomField.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<double>("AverageReviewScore")
-                        .HasColumnType("float");
-
-                    b.Property<double>("AverageUserScore")
-                        .HasColumnType("float");
 
                     b.Property<string>("Cover")
                         .HasColumnType("nvarchar(max)");
@@ -528,13 +528,13 @@ namespace RecomField.Migrations
             modelBuilder.Entity("RecomField.Models.Review", b =>
                 {
                     b.HasOne("RecomField.Models.ApplicationUser", "Author")
-                        .WithMany("Reviews")
+                        .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("RecomField.Models.Product", "Product")
-                        .WithMany("Reviews")
+                        .WithMany("Reviewes")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.ClientCascade)
                         .IsRequired();
@@ -589,14 +589,9 @@ namespace RecomField.Migrations
                         .HasForeignKey("ReviewId");
                 });
 
-            modelBuilder.Entity("RecomField.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Reviews");
-                });
-
             modelBuilder.Entity("RecomField.Models.Product", b =>
                 {
-                    b.Navigation("Reviews");
+                    b.Navigation("Reviewes");
 
                     b.Navigation("UserScores");
                 });

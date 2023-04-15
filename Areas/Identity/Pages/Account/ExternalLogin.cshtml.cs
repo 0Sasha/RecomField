@@ -129,7 +129,7 @@ namespace RecomField.Areas.Identity.Pages.Account
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
                 HomeController.UpdateUserCookies(
-                    await _userManager.FindByEmailAsync(info.Principal.FindFirstValue(ClaimTypes.Email)), Response.Cookies);
+                    await _userManager.FindByNameAsync(info.Principal.Identity.Name), Response.Cookies);
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)
@@ -171,6 +171,17 @@ namespace RecomField.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
+                /*if ((await _userManager.FindByEmailAsync(Input.Email)) != null)
+                {
+                    ErrorMessage = "This email address has already been assigned. Try another service.";
+                    return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                }*/
+                if ((await _userManager.FindByNameAsync(Input.Name)) != null)
+                {
+                    ErrorMessage = "This username has already been assigned. Try to change it or use another service.";
+                    return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+                }
+
                 var user = CreateUser();
 
                 await _userStore.SetUserNameAsync(user, Input.Name, CancellationToken.None);

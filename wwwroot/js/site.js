@@ -218,7 +218,27 @@ function showMoreComments(id, count) {
 }
 
 function updateReviewComments(id) {
-    if (window.location.href.endsWith("Review/" + id)) {
+    if (window.location.href.includes("Review/" + id) || window.location.href.includes("Review?id=" + id)) {
         showMoreComments(id, 1);
     }
+}
+
+function removeReview(id) {
+    $.ajax({
+        url: "/User/RemoveReview/" + id,
+        type: "POST",
+        success: function () {
+            updateReviews();
+        }
+    });
+}
+
+function updateReviews() {
+    $.ajax({
+        url: "/User/GetReviewsView",
+        type: "POST",
+        success: function (res) {
+            $("#tbodyReviews").html(res);
+        }
+    });
 }

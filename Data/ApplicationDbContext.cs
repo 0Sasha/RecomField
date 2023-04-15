@@ -30,7 +30,7 @@ namespace RecomField.Data
                 .HasForeignKey(l => l.EntityId).OnDelete(DeleteBehavior.ClientCascade);
             builder.Entity<Score<Product>>().HasOne(l => l.Entity).WithMany(r => r.UserScores)
                 .HasForeignKey(l => l.EntityId).OnDelete(DeleteBehavior.ClientCascade);
-            builder.Entity<Review>().HasOne(l => l.Product).WithMany(r => r.Reviewes)
+            builder.Entity<Review>().HasOne(l => l.Product).WithMany(r => r.Reviews)
                 .HasForeignKey(l => l.ProductId).OnDelete(DeleteBehavior.ClientCascade);
             builder.Entity<Score<Review>>().HasOne(l => l.Entity).WithOne(r => r.Score).OnDelete(DeleteBehavior.ClientCascade);
         }
