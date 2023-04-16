@@ -30,6 +30,19 @@ namespace RecomField.Controllers
             return View((object)Program.Environment);
         }
 
+        [HttpPost]
+        public async Task<string> GetAllTags()
+        {
+            string res = "";
+            var tags = await context.Tag.Select(t => t.Body).ToListAsync();
+            while(tags.Count > 0)
+            {
+                var tag = tags[0];
+                res += tag + "," + tags.RemoveAll(t => t == tag) + ",";
+            }
+            return res;
+        }
+
         public async Task<IActionResult> ChangeLanguageAsync(string current, string returnUrl)
         {
             if (string.IsNullOrEmpty(current)) throw new ArgumentNullException(nameof(current));

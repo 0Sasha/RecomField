@@ -271,36 +271,3 @@ function sortUserReviews(col) {
     }
     table.dirSort = table.dirSort == "asc" ? "desc" : "asc";
 }
-
-function initTagCloud(tags, weights) {
-    tags = tags.split(',');
-    weights = weights.split(',');
-    am4core.useTheme(am4themes_animated);
-    var chart = am4core.create("chartdiv", am4plugins_wordCloud.WordCloud);
-    chart.fontFamily = "Courier New";
-    var series = chart.series.push(new am4plugins_wordCloud.WordCloudSeries());
-    series.randomness = 0.1;
-    series.rotationThreshold = 0.5;
-
-    series.data = [];
-    for (let i = 0; i < tags.length; i++) {
-        series.data.push({
-            "t": tags[i],
-            "w": weights[i]
-        })
-    }
-
-    series.dataFields.word = "t";
-    series.dataFields.value = "w";
-
-    series.heatRules.push({
-        "target": series.labels.template,
-        "property": "fill",
-        "min": am4core.color("#0000CC"),
-        "max": am4core.color("#CC00CC"),
-        "dataField": "value"
-    });
-
-    series.labels.template.url = "/Home/Search/{word}";
-    //series.labels.template.urlTarget = "_blank";
-}
