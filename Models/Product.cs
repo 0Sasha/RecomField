@@ -48,8 +48,8 @@ public class Product
     {
         await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
         await context.Review.Where(r => r.Product == this).Include(r => r.Author).Include(r => r.Score).LoadAsync();
-        AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 1);
-        AverageReviewScore = Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 1);
+        if (UserScores.Count > 0) AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 1);
+        if (Reviews.Count > 0) AverageReviewScore = Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 1);
     }
 
     public enum ProductType

@@ -18,6 +18,6 @@ public class ApplicationUser : IdentityUser
         if (deep) await context.Review.Where(r => r.Author == this)
                 .Include(r => r.Product).Include(r => r.Score).Include(r => r.Likes).LoadAsync();
         else await context.Review.Where(r => r.Author == this).Include(r => r.Likes).LoadAsync();
-        ReviewLikes = Reviews.Select(r => r.Likes.Count).Sum();
+        if (Reviews.Count > 0) ReviewLikes = Reviews.Select(r => r.Likes.Count).Sum();
     }
 }
