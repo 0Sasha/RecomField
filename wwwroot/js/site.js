@@ -40,7 +40,7 @@ function updateProductsModal() {
     let txt = document.getElementById("searchProductsModal").value;
     if (txt == undefined) txt = "";
     $.ajax({
-        url: "/User/GetProductsView?partTitle=" + txt,
+        url: "/User/GetProductsForReview?partTitle=" + txt,
         type: "POST",
         dataType: "html",
         success: function (res) {
@@ -234,11 +234,40 @@ function removeReview(id) {
 }
 
 function updateReviews() {
+    let search = document.getElementById("searchReview").value;
+    search = search.length > 0 ? "?search=" + search : "";
     $.ajax({
-        url: "/User/GetReviewsView",
+        url: "/User/GetReviewsView" + search,
         type: "POST",
         success: function (res) {
             $("#tbodyReviews").html(res);
         }
     });
+}
+
+function sortUserReviews(col) {
+    var table, rows, sorting, i, x, y;
+    table = document.getElementById("userReviews");
+    sorting = true;
+    while (sorting) {
+        sorting = false;
+        rows = table.rows;
+        for (i = 1; i < rows.length - 1; i++) {
+            x = rows[i].getElementsByTagName("TD")[col];
+            y = rows[i + 1].getElementsByTagName("TD")[col];
+            if (table.dirSort == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    sorting = true;
+                    break;
+                }
+            }
+            else if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                sorting = true;
+                break;
+            }
+        }
+    }
+    table.dirSort = table.dirSort == "asc" ? "desc" : "asc";
 }

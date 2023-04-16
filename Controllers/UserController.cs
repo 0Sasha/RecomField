@@ -62,9 +62,13 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> GetProductsView(string partTitle) // TODO/////////////////////////////////////////
+    public async Task<IActionResult> GetProductsForReview(string partTitle) // TODO/////////////////////////////////////////
     {
-        var prods = await context.Product.ToArrayAsync();
+        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        var reviewedProds = context.Review.Where(r => r.Author == user).Include(r => r.Product).Select(r => r.Product);
+
+        var prods = context.Product.AsEnumerable();
+        prods = prods.Except(reviewedProds);
         if (!string.IsNullOrEmpty(partTitle))
             prods = prods.Where(p => p.Title.Contains(partTitle, StringComparison.OrdinalIgnoreCase)).ToArray();
         return PartialView("ProductsTableBody", prods.TakeLast(7).Reverse());
@@ -158,10 +162,12 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> GetReviewsView()
+    public async Task<IActionResult> GetReviewsView(string? search = null)
     {
-        var u = await userManager.GetUserAsync(User);
-        return PartialView("ReviewsTableBody", context.Review.Where(r => r.Author == u).Include(r => r.Product).Include(r => r.Score).AsEnumerable());
+        var u = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        await u.LoadAsync(context, true);
+        var reviews = await context.Review.Where(r => r.Author == u).Include(r => r.Product).Include(r => r.Score).ToListAsync();
+        return PartialView("ReviewsTableBody", search == null ? reviews : reviews.Where(r => r.Title.Contains(search, StringComparison.OrdinalIgnoreCase) || r.Product.Title.Contains(search, StringComparison.OrdinalIgnoreCase)));
     }
 
     private static string CustomizeStringHtml(string body) // TODO/////////////////////////////////////////

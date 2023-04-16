@@ -3,32 +3,32 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IHtmlLocalizer<SharedResource> Localizer
 
-@foreach (var p in Model)
+@foreach (var review in Model)
 {
     <tr>
         <td>
-            <a class="h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@p.Id">
-                @p.Product.Title
+            <a class="h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@review.Id">
+                @review.Product.Title
             </a>
         </td>
         <td>
             <div class="dropdown">
-                <button class="btn w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    @p.Title
+                <button class="btn h-100 w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    @review.Title
                 </button>
                 <ul class="dropdown-menu">
                     <li>
-                        <a class="dropdown-item h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@p.Id">
+                        <a class="dropdown-item h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@review.Id">
                             Open
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item h-100 w-100 text-start btn" asp-action="EditReview" asp-route-id="@p.Id">
+                        <a class="dropdown-item h-100 w-100 text-start btn" asp-action="EditReview" asp-route-id="@review.Id">
                             Edit
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="removeReview('@p.Id')">
+                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="removeReview('@review.Id')">
                             Remove
                         </a>
                     </li>
@@ -36,15 +36,31 @@
             </div>
         </td>
         <td>
-            @if (p.Score.Value >= 7)
+            @if (review.Score.Value >= 7)
             {
-                <h4> <span class="badge text-bg-success" style="min-width:45px">@p.Score.Value</span></h4>
+                <h4>
+                    <span class="badge text-bg-success align-middle" style="min-height:28px;min-width:47px">
+                        @review.Score.Value
+                    </span>
+                </h4>
             }
             else
             {
-                <h4> <span class="badge text-bg-warning" style="min-width:45px">@p.Score.Value</span></h4>
+                <h4>
+                    <span class="badge text-bg-warning align-middle" style="min-height:28px;min-width:47px">
+                        @review.Score.Value
+                    </span>
+                </h4>
             }
         </td>
-        <td>@p.PublicationDate.ToShortDateString()</td>
+        <td>
+            <h4>
+                <span class="badge text-bg-secondary fw-bold align-middle" style="min-height:28px;min-width:47px">
+                    <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:16px; max-height:16px;">
+                    @review.Likes.Count
+                </span>
+            </h4>
+        </td>
+        <td>@review.PublicationDate.ToString("dd/MM/yy")</td>
     </tr>
 }
