@@ -85,25 +85,26 @@ function addTag() {
 function addNewTag(tag) {
     let idTag = String(tag).replace(/\s/g, '').replace(/'/g, '').replace(/"/g, '') + "Tag";
     if (document.getElementById(idTag) != undefined) return;
-    $("#tagsLine").html($("#tagsLine").html() + "<span role='button' class='badge text-bg-primary mb-1' id='" + idTag + "' onclick=deleteTag('" + idTag + "')> " + tag + "</span > ");
+    $("#tagsLine").html($("#tagsLine").html() + "<span role='button' class='badge text-bg-primary mb-1' id='" + idTag + "' onclick=deleteTag('" + idTag + "')>" + tag + "</span > ");
     let el = document.getElementById('TagsForServer');
     el.value += (el.value == "") ? tag : "," + tag;
 }
 
 function addAllTags(tags) {
     let code = "";
-    String(tags).split(',').forEach(t => code += "<span class='badge text-bg-primary mb-1'> " + t + "</span > ");
+    String(tags).split(',').forEach(t => code += "<span class='badge text-bg-primary mb-1'>" + t + "</span > ");
     $("#tagsLine").html(code);
 }
 
-function deleteTag(id) {
-    document.getElementById("tagsLine").removeChild(document.getElementById(id));
-    let tag = id.slice(0, id.length - 3);
+function deleteTag(id) { // Check ////////////////////////////////////////////
+    let e = document.getElementById(id);
+    let fullTag = e.textContent;
+    document.getElementById("tagsLine").removeChild(e);
     let el = document.getElementById('TagsForServer');
     let val = String(el.value);
-    if (val == tag) el.value = "";
-    else if (val.startsWith(tag)) el.value = val.replace(tag + ',', '');
-    else el.value = val.replace(',' + tag, '');
+    if (val == fullTag) el.value = "";
+    else if (val.startsWith(fullTag)) el.value = val.replace(fullTag + ',', '');
+    else el.value = val.replace(',' + fullTag, '');
 }
 
 function clearTags() {

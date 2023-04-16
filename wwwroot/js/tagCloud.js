@@ -23,8 +23,8 @@ function initTagCloud(tags) {
             "w": tags[i + 1]
         })
     }
-    series.minFontSize = 30;
-    series.maxFontSize = 75;
+    series.minFontSize = 15;
+    series.maxFontSize = 50;
 
     series.dataFields.word = "t";
     series.dataFields.value = "w";

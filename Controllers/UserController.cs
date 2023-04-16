@@ -57,7 +57,7 @@ public class UserController : Controller
         var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
         await r.LoadAsync(context);
         var user = await userManager.GetUserAsync(User);
-        if (user != null) await context.ProductScore.SingleAsync(s => s.Entity == r.Product && s.Sender == user);
+        if (user != null) await context.ProductScore.SingleOrDefaultAsync(s => s.Entity == r.Product && s.Sender == user);
         return View(r);
     }
 
@@ -127,14 +127,10 @@ public class UserController : Controller
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
         await context.AddAsync(review);
         await context.SaveChangesAsync();
-
-        /// Need to do in another task
-        var prod = await context.Product.FindAsync(review.ProductId) ?? throw new Exception("Product is not found");
-        prod.AverageReviewScore = Math.Round(await context.Review.Where(r => r.Product == prod).Include(r => r.Score).Select(r => r.Score.Value).AverageAsync(), 1);
-        await context.SaveChangesAsync();
         return RedirectToAction(nameof(Review), new { id = review.Id });
     }
-
+    
+    //TODO////////////////////////////////////////////////////////////////////////////////////////
     private async Task<IActionResult> EditReview(ApplicationUser user, int id, string title, string tags, string body, int score)
     {
         var review = await context.Review.FindAsync(id);
@@ -142,8 +138,9 @@ public class UserController : Controller
         await context.Entry(review).Reference(u => u.Score).LoadAsync();
         await context.Entry(review).Collection(u => u.Tags).LoadAsync();
         review.Title = title;
-        review.Body = CustomizeStringHtml(body); //TODO//////////////////////////
-        review.Tags = new();
+        review.Body = CustomizeStringHtml(body); //TODO////////////////////////////////////////////////////////////////
+        foreach (var tag in review.Tags) context.Tag.Remove(tag);
+        review.Tags.Clear();
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
         review.Score = new(user, review, score);
         await context.SaveChangesAsync();
