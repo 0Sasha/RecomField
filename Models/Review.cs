@@ -35,7 +35,7 @@ public class Review
     [DataType(DataType.Date)]
     public DateTime PublicationDate { get; set; }
 
-    public List<Tag> Tags { get; set; } = new();
+    public List<Tag<Review>> Tags { get; set; } = new();
 
     public List<Like<Review>> Likes { get; set; } = new();
 

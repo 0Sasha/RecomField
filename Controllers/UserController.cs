@@ -124,7 +124,7 @@ public class UserController : Controller
         review.Product = await context.Product.FindAsync(idProd) ?? throw new Exception("Product is not found");
         review.Score = new(user, review, score);
         review.Body = CustomizeStringHtml(review.Body);
-        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
+        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         await context.AddAsync(review);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Review), new { id = review.Id });
@@ -139,9 +139,8 @@ public class UserController : Controller
         await context.Entry(review).Collection(u => u.Tags).LoadAsync();
         review.Title = title;
         review.Body = CustomizeStringHtml(body); //TODO////////////////////////////////////////////////////////////////
-        foreach (var tag in review.Tags) context.Tag.Remove(tag);
         review.Tags.Clear();
-        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag));
+        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         review.Score = new(user, review, score);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Review), new { id });
@@ -255,7 +254,7 @@ public class UserController : Controller
     [HttpPost]
     public async Task<IActionResult> GetTagList(string partTag)
     {
-        var t = (await context.Tag.Select(t => t.Body).ToListAsync()).Where(b => b.Contains(partTag, StringComparison.OrdinalIgnoreCase));
+        var t = (await context.ReviewTag.Select(t => t.Body).ToListAsync()).Where(b => b.Contains(partTag, StringComparison.OrdinalIgnoreCase));
         return PartialView("OptionsList", t.Distinct().TakeLast(7));
     }
 

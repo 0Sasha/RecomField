@@ -34,7 +34,7 @@ namespace RecomField.Controllers
         public async Task<string> GetAllTags()
         {
             string res = "";
-            var tags = await context.Tag.Select(t => t.Body).ToListAsync();
+            var tags = await context.ReviewTag.Select(t => t.Body).ToListAsync();
             while(tags.Count > 0)
             {
                 var tag = tags[0];
