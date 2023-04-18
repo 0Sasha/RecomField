@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 namespace RecomField.Models;
 
+[Index("Id", IsUnique = true)]
 public class Review
 {
     public int Id { get; set; }

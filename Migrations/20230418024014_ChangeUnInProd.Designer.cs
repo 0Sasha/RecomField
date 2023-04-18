@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecomField.Data;
 
@@ -11,9 +12,11 @@ using RecomField.Data;
 namespace RecomField.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230418024014_ChangeUnInProd")]
+    partial class ChangeUnInProd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -255,14 +258,18 @@ namespace RecomField.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("UniqueIndex")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EntityId");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
-
                     b.HasIndex("SenderId");
+
+                    b.HasIndex(new[] { "UniqueIndex" }, "UniqueIndex")
+                        .IsUnique();
 
                     b.ToTable("ReviewComment");
                 });
@@ -359,14 +366,18 @@ namespace RecomField.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("UniqueIndex")
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
-
                     b.HasIndex("ProductId");
+
+                    b.HasIndex(new[] { "UniqueIndex" }, "UniqueIndex")
+                        .IsUnique();
 
                     b.ToTable("Review");
                 });

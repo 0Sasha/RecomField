@@ -6,6 +6,7 @@ using RecomField.Data;
 using RecomField.Models;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 
 namespace RecomField.Controllers
 {
@@ -27,7 +28,28 @@ namespace RecomField.Controllers
             //foreach(var u in userManager.Users.ToArray())
             //    await userManager.DeleteAsync(u);
             UpdateUserCookies(await userManager.GetUserAsync(User), Response.Cookies);
-            return View((object)Program.Environment);
+            return View((await context.Review.Include(r => r.Product).Include(r => r.Score).ToArrayAsync()).TakeLast(10).Reverse());
+        }
+
+        public async Task Clear()
+        {
+            foreach (var r in await context.Product.ToArrayAsync())
+                context.Remove(r);
+            foreach (var r in await context.ProductScore.ToArrayAsync())
+                context.Remove(r);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task<IActionResult> Search(string text)
+        {
+            string request = "\"" + text + "*\" OR \"" + text + "\"";
+            var byTitle = context.Review.Where(x => EF.Functions.Contains(x.Title, request));
+            var byBody = context.Review.Where(x => EF.Functions.Contains(x.Body, request));
+            var byProduct = context.Review.Where(x => EF.Functions.Contains(x.Product.Title, request));
+            var byTags = context.ReviewTag.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
+            var byComments = context.ReviewComment.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
+            var founded = byTitle.Union(byBody).Union(byProduct).Union(byTags).Union(byComments);
+            return PartialView("MainReviewsTableBody", await founded.Include(r => r.Product).Include(r => r.Score).ToArrayAsync());
         }
 
         [HttpPost]
@@ -41,6 +63,14 @@ namespace RecomField.Controllers
                 res += tag + "," + tags.RemoveAll(t => t == tag) + ",";
             }
             return res;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetHighScoresView()
+        {
+            var reviews = await context.Review.Include(r => r.Product).Include(r => r.Score).ToListAsync();
+            var ordered = reviews.OrderBy(r => r.Score?.Value);
+            return PartialView("MainReviewsTableBody", ordered.TakeLast(10).Reverse());
         }
 
         public async Task<IActionResult> ChangeLanguageAsync(string current, string returnUrl)

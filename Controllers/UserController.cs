@@ -38,7 +38,7 @@ public class UserController : Controller
     {
         var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
         await user.LoadAsync(context, true);
-        return View(user.Reviews);
+        return View(user.Reviews.AsEnumerable().Reverse());
     }
 
     public async Task<IActionResult> ClearUsers()

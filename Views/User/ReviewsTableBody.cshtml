@@ -38,28 +38,22 @@
         <td>
             @if (review.Score.Value >= 7)
             {
-                <h4>
-                    <span class="badge text-bg-success align-middle" style="min-height:28px;min-width:44px">
-                        @review.Score.Value
-                    </span>
-                </h4>
+                <span class="badge text-bg-success align-middle" style="min-width:45px; font-size:larger">
+                    @review.Score.Value
+                </span>
             }
             else
             {
-                <h4>
-                    <span class="badge text-bg-warning align-middle" style="min-height:28px;min-width:44px">
-                        @review.Score.Value
-                    </span>
-                </h4>
+                <span class="badge text-bg-warning align-middle" style="min-width:45px; font-size:larger">
+                    @review.Score.Value
+                </span>
             }
         </td>
         <td>
-            <h4>
-                <span class="badge text-bg-secondary fw-bold align-middle" style="min-height:28px;min-width:44px">
-                    <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:16px; max-height:16px;">
-                    @review.Likes.Count
-                </span>
-            </h4>
+            <span class="badge text-bg-secondary align-middle" style="min-width:45px; font-size:larger">
+                <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:14px; max-height:14px;">
+                @review.Likes.Count
+            </span>
         </td>
         <td>@review.PublicationDate.ToString("dd/MM/yy")</td>
     </tr>

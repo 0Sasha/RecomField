@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecomField.Data;
 
@@ -11,9 +12,11 @@ using RecomField.Data;
 namespace RecomField.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230417142556_upd")]
+    partial class upd
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,9 +262,6 @@ namespace RecomField.Migrations
 
                     b.HasIndex("EntityId");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
-
                     b.HasIndex("SenderId");
 
                     b.ToTable("ReviewComment");
@@ -327,9 +327,6 @@ namespace RecomField.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Id")
-                        .IsUnique();
-
                     b.ToTable("Product");
                 });
 
@@ -362,9 +359,6 @@ namespace RecomField.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AuthorId");
-
-                    b.HasIndex("Id")
-                        .IsUnique();
 
                     b.HasIndex("ProductId");
 
@@ -444,9 +438,6 @@ namespace RecomField.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("EntityId");
-
-                    b.HasIndex("Id")
-                        .IsUnique();
 
                     b.ToTable("ReviewTag");
                 });

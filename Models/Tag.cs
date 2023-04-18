@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace RecomField.Models;
 
+[Index("Id", IsUnique = true)]
 public class Tag<T>
 {
     public int Id { get; set; }

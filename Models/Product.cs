@@ -3,6 +3,7 @@ using RecomField.Data;
 using System.ComponentModel.DataAnnotations;
 namespace RecomField.Models;
 
+[Index("Id", IsUnique = true)]
 public class Product
 {
     private int relYear = 2023;

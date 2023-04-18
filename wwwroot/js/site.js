@@ -272,3 +272,36 @@ function sortUserReviews(col) {
     }
     table.dirSort = table.dirSort == "asc" ? "desc" : "asc";
 }
+
+function updateSearchList() {
+    let text = document.getElementById('searchLine').value;
+    if (text.length > 0) {
+        $.ajax({
+            url: "/Home/Search?text=" + text,
+            type: "POST",
+            async: true,
+            success: function (res) {
+                $('#tbodySearch').html(res);
+            }
+        });
+        if ($('#dropdownMenu').is(":hidden")) {
+            $('#searchLine').dropdown('toggle');
+        }
+    }
+    else hideSearchList();
+}
+
+let canHideSearchList = true;
+
+function hideSearchList() {
+    if (canHideSearchList && !$('#dropdownMenu').is(":hidden"))
+        $('#searchLine').dropdown('toggle');
+}
+
+function forbidHidingSearchList() {
+    canHideSearchList = false;
+}
+
+function allowHidingSearchList() {
+    canHideSearchList = true;
+}

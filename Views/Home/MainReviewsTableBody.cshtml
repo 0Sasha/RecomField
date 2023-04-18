@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Review>
+@using static System.Web.HttpUtility;
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+
+@foreach (var review in Model)
+{
+    <tr>
+        <td>
+            <a class="h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@review.Id">
+                @review.Product.Title
+            </a>
+        </td>
+        <td>
+            <a class="h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@review.Id">
+                @review.Title
+            </a>
+        </td>
+        <td>
+            @if (review.Score.Value >= 7)
+            {
+                <h4>
+                    <span class="badge text-bg-success align-middle mt-2" style="min-height:28px;min-width:44px">
+                        @review.Score.Value
+                    </span>
+                </h4>
+            }
+            else
+            {
+                <h4>
+                    <span class="badge text-bg-warning align-middle mt-2" style="min-height:28px;min-width:44px">
+                        @review.Score.Value
+                    </span>
+                </h4>
+            }
+        </td>
+        <td>@review.PublicationDate.ToString("dd/MM/yy")</td>
+    </tr>
+}

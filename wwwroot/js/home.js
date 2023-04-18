@@ -8,6 +8,14 @@ $.ajax({
     }
 });
 
+$.ajax({
+    url: "/Home/GetHighScoresView",
+    type: "POST",
+    success: function (res) {
+        $("#tbodyReviews").html(res);
+    }
+});
+
 function initTagCloud(tags) {
     var chart = am4core.create("tagCloud", am4plugins_wordCloud.WordCloud);
     //chart.fontFamily = "Courier New";
