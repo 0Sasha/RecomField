@@ -273,6 +273,13 @@ function sortUserReviews(col) {
     table.dirSort = table.dirSort == "asc" ? "desc" : "asc";
 }
 
+function search(text) {
+    if (text.length > 0) {
+        document.getElementById('searchLine').value = text;
+        updateSearchList();
+    }
+}
+
 function updateSearchList() {
     let text = document.getElementById('searchLine').value;
     if (text.length > 0) {

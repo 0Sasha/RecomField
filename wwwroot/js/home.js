@@ -45,7 +45,10 @@ function initTagCloud(tags) {
         "dataField": "value"
     });
 
-    series.labels.template.url = "/Home/Search/{word}";
-    series.labels.template.tooltipText = "{word}:\n[bold]{value}[/]";
+    series.labels.template.events.on("hit", function (ev) {
+        search("[" + ev.target.dataItem.properties.word + "]");
+    });
+    //series.labels.template.url = "/Home/Search/{word}";
+    series.labels.template.tooltipText = "{word}:\n{value} reviews[/]";
     //series.labels.template.urlTarget = "_blank";
 }
