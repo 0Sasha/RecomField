@@ -84,9 +84,9 @@ function updateReviews(id) {
     });
 }
 
-function sortUserReviews(col) {
+function sortTable(col, idTable) {
     var table, rows, sorting, i, x, y;
-    table = document.getElementById("userReviews");
+    table = document.getElementById(idTable);
     sorting = true;
     while (sorting) {
         sorting = false;
@@ -109,6 +109,16 @@ function sortUserReviews(col) {
         }
     }
     table.dirSort = table.dirSort == "asc" ? "desc" : "asc";
+}
+
+function filterTable(idbodyTable, idSearchInput, urlMethod) {
+    $.ajax({
+        url: urlMethod + "?text=" + document.getElementById(idSearchInput).value,
+        type: "POST",
+        success: function (res) {
+            $("#" + idbodyTable).html(res);
+        }
+    });
 }
 
 function blockUser(id, days) {

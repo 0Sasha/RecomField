@@ -77,7 +77,8 @@
                     <img src="~/icons/star.svg" style="max-width:20px; max-height:20px" aria-hidden="true" />
                 </a>
             }
-            @{
+            @if (appUser != null)
+            {
                 var s = Model.Product.UserScores.SingleOrDefault(s => s.Sender == appUser);
                 if (s != null)
                 {

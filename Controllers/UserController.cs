@@ -104,6 +104,14 @@ public class UserController : Controller
     }
 
     [HttpPost]
+    public async Task<IActionResult> SearchUsers(string text)
+    {
+        var users = await userManager.Users.Where(u => u.UserName.Contains(text) ||
+        u.Email.Contains(text)).ToListAsync();
+        return PartialView("UsersTableBody", users);
+    }
+
+    [HttpPost]
     public async Task ChangeScoreProduct(int id, int score)
     {
         var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");

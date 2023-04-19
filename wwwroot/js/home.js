@@ -19,7 +19,7 @@ $.ajax({
 function initTagCloud(tags) {
     var chart = am4core.create("tagCloud", am4plugins_wordCloud.WordCloud);
     //chart.fontFamily = "Courier New";
-    chart.fontWeight = "400";
+    chart.fontWeight = "500";
     var series = chart.series.push(new am4plugins_wordCloud.WordCloudSeries());
     series.randomness = 0.1;
     series.rotationThreshold = 0.5;
@@ -40,15 +40,14 @@ function initTagCloud(tags) {
     series.heatRules.push({
         "target": series.labels.template,
         "property": "fill",
-        "min": am4core.color("#9900cc"),
-        "max": am4core.color("#ff66ff"),
+        "min": am4core.color("#664d00"),
+        "max": am4core.color("#ffbf00"),
         "dataField": "value"
     });
 
     series.labels.template.events.on("hit", function (ev) {
         search("[" + ev.target.dataItem.properties.word + "]");
     });
-    //series.labels.template.url = "/Home/Search/{word}";
+    series.labels.template.url = "#";
     series.labels.template.tooltipText = "{word}:\n{value} reviews[/]";
-    //series.labels.template.urlTarget = "_blank";
 }

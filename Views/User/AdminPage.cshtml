@@ -8,13 +8,57 @@
 }
 
 <div class="container-fluid">
-    <table class="table table-striped table-hover align-middle">
+    <div class="row justify-content-between">
+        <div class="col-4">
+            <h4 class="mt-1">Users</h4>
+        </div>
+        <div class="col">
+            <input type="text" class="form-control float-end" id="searchInput" placeholder="Search user" onkeyup="filterTable('tbodyUsers', 'searchInput', '/User/SearchUsers')" style="max-width:250px" />
+        </div>
+    </div>
+    <table id="users" class="table table-striped table-hover align-middle">
         <thead>
             <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Email</th>
-                <th scope="col">Role</th>
-                <th scope="col">Status</th>
+                <th role="button" scope="col" onclick="sortTable(0, 'users')">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-auto">
+                            Name
+                        </div>
+                        <div class="col-auto">
+                            <img src="~/icons/sort gray.svg" style="max-width:22px; max-height:22px" />
+                        </div>
+                    </div>
+                </th>
+                <th role="button" scope="col" onclick="sortTable(1, 'users')">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-auto">
+                            Email
+                        </div>
+                        <div class="col-auto">
+                            <img src="~/icons/sort gray.svg" style="max-width:22px; max-height:22px" />
+                        </div>
+                    </div>
+                </th>
+                <th role="button" scope="col" onclick="sortTable(2, 'users')">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-auto">
+                            Role
+                        </div>
+                        <div class="col-auto">
+                            <img src="~/icons/sort gray.svg" style="max-width:22px; max-height:22px" />
+                        </div>
+                    </div>
+                </th>
+                <th role="button" scope="col" onclick="sortTable(3, 'users')">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-auto">
+                            Status
+                        </div>
+                        <div class="col-auto">
+                            <img src="~/icons/sort gray.svg" style="max-width:22px; max-height:22px" />
+                        </div>
+                    </div>
+                </th>
             </tr>
         </thead>
         <tbody id="tbodyUsers">

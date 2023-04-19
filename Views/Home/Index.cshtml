@@ -8,41 +8,46 @@
 <script src="//cdn.amcharts.com/lib/4/core.js"></script>
 <script src="//cdn.amcharts.com/lib/4/charts.js"></script>
 <script src="//cdn.amcharts.com/lib/4/plugins/wordCloud.js"></script>
-<div id="tagCloud" style="height:600px"></div>
-<hr />
 
-<h3>New reviews</h3>
-<div class="row">
-    <table class="table table-striped table-hover align-middle">
-        <thead>
-            <tr>
-                <th scope="col">Product</th>
-                <th scope="col">Title</th>
-                <th scope="col">Score</th>
-                <th scope="col">Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            @await Html.PartialAsync("MainReviewsTableBody")
-        </tbody>
-    </table>
-</div>
-<hr />
+<div class="container-fluid">
+    <div class="row">
+        <div id="tagCloud" style="height:600px"></div>
+    </div>
+    <hr />
 
-<h3>Reviews with the highest scores</h3>
-<div class="row">
-    <table class="table table-striped table-hover align-middle">
-        <thead>
-            <tr>
-                <th scope="col">Product</th>
-                <th scope="col">Title</th>
-                <th scope="col">Score</th>
-                <th scope="col">Date</th>
-            </tr>
-        </thead>
-        <tbody id="tbodyReviews">
-        </tbody>
-    </table>
+    <h1 class="fw-bolder" style="color:#cc9900">New reviews</h1>
+    <div class="row">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                @await Html.PartialAsync("MainReviewsTableBody")
+            </tbody>
+        </table>
+    </div>
+    <hr />
+
+    <h1 class="fw-bolder" style="color:#cc9900;">Reviews with the highest scores</h1>
+    <div class="row">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th scope="col">Product</th>
+                    <th scope="col">Title</th>
+                    <th scope="col">Score</th>
+                    <th scope="col">Date</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyReviews">
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script src="~/js/home.js" async></script>
