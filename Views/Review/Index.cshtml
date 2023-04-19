@@ -106,7 +106,7 @@
         <div class="col-md align-items-end text-end">
             <h4>
                 <span role="button" id="likeBtn" class="badge text-bg-secondary fw-bold" onclick="changeLike('@Model.Id')">
-                    @if (Model.Likes.Count > 0)
+                    @if (appUser != null && Model.Likes.Count > 0)
                     {
                         var id = User.Claims.First().Value;
                         if (Model.Likes.SingleOrDefault(l => l.SenderId == id) == null)
