@@ -1,33 +1,37 @@
-﻿@model IEnumerable<Review>
+﻿@model ApplicationUser
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Microsoft.AspNetCore.Identity;
 @inject IHtmlLocalizer<SharedResource> Localizer
 @inject UserManager<ApplicationUser> userManager
 @{
-    ViewData["Title"] = @Localizer["My page"];
-    var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+    var u = await userManager.GetUserAsync(User);
+    ViewData["Title"] = u == Model ? Localizer["My page"] : Model.UserName;
+    bool admin = u == Model || await userManager.IsInRoleAsync(u, "Admin");
 }
 
 <div class="container-fluid">
     <div class="row">
-        <h1 class="card-title">@user.UserName</h1>
+        <h1 class="card-title">@Model.UserName</h1>
     </div>
     <div class="row mb-1">
         <div class="col-md mb-1">
             <h5 class="card-subtitle">
                 <span class="badge text-bg-secondary fw-bold align-middle">
                     <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:16px; max-height:16px;">
-                    @user.ReviewLikes
+                    @Model.ReviewLikes
                 </span>
-                for @user.Reviews.Count reviews
+                for @Model.Reviews.Count reviews
             </h5>
         </div>
-        <div class="col-md">
-            <div class="btn-group float-end" role="group">
-                <a type="button" class="btn btn-primary" href="">@Localizer["App product"]</a>
-                <a type="button" class="btn btn-primary" asp-action="EditReview">@Localizer["Write a review"]</a>
+        @if (admin)
+        {
+            <div class="col-md">
+                <div class="btn-group float-end" role="group">
+                    <a type="button" class="btn btn-primary" href="">@Localizer["App product"]</a>
+                    <a type="button" class="btn btn-primary" asp-controller="Review" asp-action="EditReview">@Localizer["Write a review"]</a>
+                </div>
             </div>
-        </div>
+        }
     </div>
     <hr />
     <div class="row justify-content-between">
@@ -35,7 +39,7 @@
             <h4 class="mt-1">Reviews</h4>
         </div>
         <div class="col">
-            <input type="text" class="form-control float-end" id="searchReview" placeholder="Search a review" onkeyup="updateReviews()" style="max-width:250px" />
+            <input type="text" class="form-control float-end" id="searchReview" placeholder="Search a review" onkeyup="updateReviews('@Model.Id')" style="max-width:250px" />
         </div>
     </div>
     <div class="row">
@@ -95,7 +99,7 @@
                 </tr>
             </thead>
             <tbody id="tbodyReviews">
-                @await Html.PartialAsync("ReviewsTableBody")
+                @await Html.PartialAsync("ReviewsTableBody", (Model.Reviews.AsEnumerable().Reverse(), admin))
             </tbody>
         </table>
     </div>

@@ -1,0 +1,69 @@
+﻿@model (IEnumerable<Review>, bool)
+@using static System.Web.HttpUtility;
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+
+@foreach (var review in Model.Item1)
+{
+    <tr>
+        <td>
+            <a class="h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
+                @review.Product.Title
+            </a>
+        </td>
+        <td>
+            @if (Model.Item2)
+            {
+                <div class="dropdown">
+                    <button class="btn h-100 w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        @review.Title
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
+                                Open
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="Review" asp-action="EditReview" asp-route-id="@review.Id">
+                                Edit
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="removeReview('@review.Id')">
+                                Remove
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            }
+            else
+            {
+                <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
+                    @review.Title
+                </a>
+            }
+        </td>
+        <td>
+            @if (review.Score.Value >= 7)
+            {
+                <span class="badge text-bg-success align-middle" style="min-width:45px; font-size:medium">
+                    @review.Score.Value
+                </span>
+            }
+            else
+            {
+                <span class="badge text-bg-warning align-middle" style="min-width:45px; font-size:medium">
+                    @review.Score.Value
+                </span>
+            }
+        </td>
+        <td>
+            <span class="badge text-bg-secondary align-middle" style="min-width:45px; font-size:medium">
+                <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:14px; max-height:14px;">
+                @review.Likes.Count
+            </span>
+        </td>
+        <td>@review.PublicationDate.ToString("dd/MM/yy")</td>
+    </tr>
+}

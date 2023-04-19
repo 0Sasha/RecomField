@@ -7,12 +7,12 @@
 {
     <tr>
         <td>
-            <a class="h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@review.Id">
+            <a class="h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
                 @review.Product.Title
             </a>
         </td>
         <td>
-            <a class="h-100 w-100 text-start btn" asp-action="Review" asp-route-id="@review.Id">
+            <a class="h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
                 @review.Title
             </a>
         </td>

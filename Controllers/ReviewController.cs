@@ -1,18 +1,14 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
 using RecomField.Data;
 using RecomField.Hubs;
 using RecomField.Models;
-using System.IO;
-
 namespace RecomField.Controllers;
 
 public class ReviewController : Controller
@@ -20,15 +16,13 @@ public class ReviewController : Controller
     private readonly UserManager<ApplicationUser> userManager;
     private readonly ApplicationDbContext context;
     private readonly IHubContext<MainHub> hubContext;
-    private readonly IWebHostEnvironment appEnvironment;
     private readonly Cloudinary cloud;
 
-    public ReviewController(UserManager<ApplicationUser> userManager, ApplicationDbContext context, IWebHostEnvironment appEnvironment,
+    public ReviewController(UserManager<ApplicationUser> userManager, ApplicationDbContext context,
         Cloudinary cloud, IHubContext<MainHub> hubContext)
     {
         this.userManager = userManager;
         this.context = context;
-        this.appEnvironment = appEnvironment;
         this.cloud = cloud;
         this.hubContext = hubContext;
     }
@@ -40,6 +34,19 @@ public class ReviewController : Controller
         var user = await userManager.GetUserAsync(User);
         if (user != null) await context.ProductScore.SingleOrDefaultAsync(s => s.Entity == r.Product && s.Sender == user);
         return View(r);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddProduct([Bind("Type,Title,ReleaseYear,Description")] Product product)
+    {
+        if (product == null) throw new ArgumentNullException(nameof(product));
+        if (await context.Product.AnyAsync(p => p.Title == product.Title && p.Type == product.Type && p.ReleaseYear == product.ReleaseYear))
+            throw new ArgumentException("The product already exists in the database", nameof(product));
+        product.Description ??= "";
+        await context.AddAsync(product);
+        await context.SaveChangesAsync();
+        return RedirectToAction(nameof(EditReview));
     }
 
     [Authorize]
@@ -98,7 +105,7 @@ public class ReviewController : Controller
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         await context.AddAsync(review);
         await context.SaveChangesAsync();
-        return RedirectToAction(nameof(Review), new { id = review.Id });
+        return RedirectToAction(nameof(Index), new { id = review.Id });
     }
     
     //TODO////////////////////////////////////////////////////////////////////////////////////////
@@ -114,7 +121,7 @@ public class ReviewController : Controller
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         review.Score = new(user, review, score);
         await context.SaveChangesAsync();
-        return RedirectToAction(nameof(Review), new { id });
+        return RedirectToAction(nameof(Index), new { id });
     }
 
     [Authorize]
@@ -179,6 +186,40 @@ public class ReviewController : Controller
         var uploadParams = new ImageUploadParams() { File = new FileDescription("file", file.OpenReadStream()) };
         var uploadResult = await cloud.UploadAsync(uploadParams);
         await Response.WriteAsync(new { location = uploadResult.Url }.ToJson());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> AddComment(int id, string comment, int visibleCount)
+    {
+        if (string.IsNullOrEmpty(comment)) throw new ArgumentNullException(nameof(comment));
+        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
+        await context.ReviewComment.Where(k => k.Entity == r).Include(k => k.Sender).LoadAsync();
+        r.Comments.Add(new(user, r, comment));
+        await context.SaveChangesAsync();
+        await hubContext.Clients.All.SendAsync("NewReviewComment", id);
+        return PartialView("ReviewComments", (r.Comments.Take(visibleCount + 1), r.Id, r.Comments.Count));
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ShowComments(int id, int count)
+    {
+        var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
+        await context.ReviewComment.Where(k => k.Entity == r).Include(k => k.Sender).LoadAsync();
+        return PartialView("ReviewComments", (r.Comments.Take(count), r.Id, r.Comments.Count));
+    }
+
+    [HttpPost]
+    public async Task ChangeLike(int id)
+    {
+        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
+        var r = await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
+        await context.Entry(r).Collection(u => u.Likes).LoadAsync();
+        await context.Entry(r).Reference(u => u.Author).LoadAsync();
+        var like = r.Likes.SingleOrDefault(l => l.Sender == user);
+        if (like != null) r.Likes.Remove(like);
+        else r.Likes.Add(new(user, r));
+        await context.SaveChangesAsync();
     }
 
     [Authorize]

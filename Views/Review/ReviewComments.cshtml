@@ -42,7 +42,7 @@
     }
     else when = (DateTime.UtcNow.Year - c.PublicationDate.Year) + " years ago";
     <div class="row">
-        <h6><a href="/User/@c.Sender.Id">@c.Sender</a> @when</h6>
+        <h6><a asp-controller="User" asp-action="Index" asp-route-id="@c.Sender.Id">@c.Sender</a> @when</h6>
         <p class="mb-4">@c.Body</p>
     </div>
 }

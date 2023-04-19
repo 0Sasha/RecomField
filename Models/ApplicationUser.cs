@@ -20,4 +20,13 @@ public class ApplicationUser : IdentityUser
         else await context.Review.Where(r => r.Author == this).Include(r => r.Likes).LoadAsync();
         if (Reviews.Count > 0) ReviewLikes = Reviews.Select(r => r.Likes.Count).Sum();
     }
+
+    public async Task LoadAllDependent(ApplicationDbContext context)
+    {
+        await context.Review.Where(r => r.Author == this).Include(r => r.Score).Include(r => r.Tags)
+            .Include(r => r.Likes).Include(r => r.Comments).LoadAsync();
+        await context.ReviewLike.Where(l => l.Sender == this).LoadAsync();
+        await context.ReviewComment.Where(l => l.Sender == this).LoadAsync();
+        await context.ReviewScore.Where(l => l.Sender == this).LoadAsync();
+    }
 }

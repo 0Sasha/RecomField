@@ -25,7 +25,7 @@ namespace RecomField
             {
                 options.SignIn.RequireConfirmedAccount = false;
                 options.User.AllowedUserNameCharacters = null;
-            }).AddEntityFrameworkStores<ApplicationDbContext>();
+            }).AddRoles<IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
             builder.Services.AddControllersWithViews().AddViewLocalization();
 

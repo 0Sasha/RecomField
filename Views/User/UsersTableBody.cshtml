@@ -1,0 +1,87 @@
+﻿@model IEnumerable<ApplicationUser>
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Identity;
+@inject IHtmlLocalizer<SharedResource> Localizer
+@inject UserManager<ApplicationUser> userManager
+
+@foreach (var u in Model)
+{
+    <tr>
+        <td>
+            <div class="dropdown">
+                <button class="btn h-100 w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    @u.UserName
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="User" asp-action="Index" asp-route-id="@u.Id">
+                            Open user page
+                        </a>
+                    </li>
+                    <li>
+                        @if (u.LockoutEnd > DateTime.UtcNow)
+                        {
+                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="unblockUser('@u.Id')">
+                                Unblock
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="blockUser('@u.Id', 7)">
+                                Block for a week
+                            </a>
+                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="blockUser('@u.Id')">
+                                Block forever
+                            </a>
+                        }
+                    </li>
+                    <li>
+                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="removeUser('@u.Id')">
+                            Remove
+                        </a>
+                    </li>
+                    <li>
+                        @if (await userManager.IsInRoleAsync(u, "Admin"))
+                        {
+                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="revokeAdminRole('@u.Id')">
+                                Revoke admin role
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="addAdminRole('@u.Id')">
+                                Add admin role
+                            </a>
+                        }
+                    </li>
+                </ul>
+            </div>
+        </td>
+        <td>
+            @u.Email
+        </td>
+        @if (await userManager.IsInRoleAsync(u, "Admin"))
+        {
+            <td class="fw-bolder">Admin</td>
+        }
+        else
+        {
+            <td>User</td>
+        }
+        @if (u.LockoutEnd > DateTime.UtcNow)
+        {
+            if (u.LockoutEnd == DateTimeOffset.MaxValue)
+            {
+                <td class="fw-bolder">Blocked forever</td>
+            }
+            else
+            {
+                <td class="fw-bolder">Blocked until @u.LockoutEnd.Value.ToString("dd/MM/yy")</td>
+            }
+        }
+        else
+        {
+            <td>Active</td>
+        }
+    </tr>
+}
