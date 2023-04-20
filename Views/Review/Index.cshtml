@@ -14,10 +14,6 @@
             <h1>@Model.Title</h1>
             <h2>
                 By <a asp-controller="User" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> on @Model.PublicationDate.ToString("MMM dd, yyyy")
-                @if (Model.Author == await userManager.GetUserAsync(User))
-                {
-                    <a asp-controller="Review" asp-action="EditReview" asp-route-id="@Model.Id">Edit</a>
-                }
             </h2>
             <h5 id="tagsLine" class="mt-3 mb-3"></h5>
             @if (Model.Tags.Count > 0)
@@ -71,14 +67,14 @@
                 }
             </h4>
             <h4 class="mt-3">Your score</h4>
-            @for (int i = 1; i <= 5; i++)
-            {
-                <a role="button" class="btn btn-sm btn-light mb-1" style="max-width:26px; max-height:26px" name="rateBtn" onclick="changeRateProd('@i', '@Model.Product.Id')">
-                    <img src="~/icons/star.svg" style="max-width:20px; max-height:20px" aria-hidden="true" />
-                </a>
-            }
             @if (appUser != null)
             {
+                for (int i = 1; i <= 5; i++)
+                {
+                    <a role="button" class="btn btn-sm btn-light mb-1" style="max-width:26px; max-height:26px" name="rateBtn" onclick="changeRateProd('@i', '@Model.Product.Id')">
+                        <img src="~/icons/star.svg" style="max-width:20px; max-height:20px" aria-hidden="true" />
+                    </a>
+                }
                 var s = Model.Product.UserScores.SingleOrDefault(s => s.Sender == appUser);
                 if (s != null)
                 {
@@ -87,10 +83,34 @@
                     </script>
                 }
             }
+            else for (int i = 1; i <= 5; i++)
+            {
+                <a class="btn btn-sm btn-light mb-1" style="max-width:26px; max-height:26px" asp-area="Identity" asp-page="/Account/Login">
+                    <img src="~/icons/star.svg" style="max-width:20px; max-height:20px" aria-hidden="true" />
+                </a>
+            }
         </div>
     </div>
     <hr />
-    @Html.Raw(@Model.Body)
+    <div class="row">
+        @Html.Raw(@Model.Body)
+    </div>
+    <div class="row">
+        <div class="col">
+            @if (Model.Author == appUser || User.IsInRole("Admin"))
+            {
+                <div class="float-end" role="group">
+                    <a class="btn btn-sm btn-danger" style="min-width:80px" asp-controller="Review" asp-action="RemoveReview" asp-route-id="@Model.Id">@Localizer["Remove"]</a>
+                    <a class="btn btn-sm btn-primary" style="min-width:80px" asp-controller="Review" asp-action="EditReview" asp-route-id="@Model.Id">@Localizer["Edit"]</a>
+                    <a class="btn btn-sm btn-primary" style="min-width:90px" asp-controller="Review" asp-action="DownloadReview" asp-route-id="@Model.Id">@Localizer["Convert to PDF"]</a>
+                </div>
+            }
+            else
+            {
+                <a class="btn btn-sm btn-primary float-end" style="min-width:90px" asp-controller="Review" asp-action="DownloadReview" asp-route-id="@Model.Id">@Localizer["Convert to PDF"]</a>
+            }
+        </div>
+    </div>
     <hr />
     <div class="row">
         <div class="col-md-9">
@@ -105,25 +125,30 @@
         </div>
         <div class="col-md align-items-end text-end">
             <h4>
-                <span role="button" id="likeBtn" class="badge text-bg-secondary fw-bold" onclick="changeLike('@Model.Id')">
-                    @if (appUser != null && Model.Likes.Count > 0)
-                    {
-                        var id = User.Claims.First().Value;
-                        if (Model.Likes.SingleOrDefault(l => l.SenderId == id) == null)
-                        {
-                            <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:20px; max-height:20px;">
+                @if (appUser != null)
+                {
+                    <span role="button" id="likeBtn" class="badge text-bg-secondary fw-bold" onclick="changeLike('@Model.Id')">
+                        @{
+                            var id = User.Claims.First().Value;
+                            if (Model.Likes.Count > 0 && Model.Likes.SingleOrDefault(l => l.SenderId == id) != null)
+                            {
+                                <img id="likeIcon" src="~/icons/thumb white full.svg" aria-label="Liked" style="max-width:20px; max-height:20px;">
+                            }
+                            else
+                            {
+                                <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:20px; max-height:20px;">
+                            }
                         }
-                        else
-                        {
-                            <img id="likeIcon" src="~/icons/thumb white full.svg" aria-label="Liked" style="max-width:20px; max-height:20px;">
-                        }
-                    }
-                    else
-                    {
-                        <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:20px; max-height:20px;">
-                    }
-                    @Model.Likes.Count
-                </span>
+                        @Model.Likes.Count
+                    </span>
+                }
+                else
+                {
+                    <a asp-area="Identity" asp-page="/Account/Login" class="badge text-bg-secondary fw-bold">
+                        <img src="~/icons/thumb white.svg" aria-label="" style="max-width:20px; max-height:20px;">
+                        @Model.Likes.Count
+                    </a>
+                }
             </h4>
         </div>
     </div>

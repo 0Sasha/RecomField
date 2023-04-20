@@ -4,7 +4,7 @@
 <form asp-action="AddProduct">
     <div class="row g-2 mb-3">
         <div class="col-md-12 form-floating">
-            <input asp-for=Title class="form-control" type="text" placeholder="Title" value="@Model.Title" required />
+            <input asp-for=Title class="form-control" type="text" placeholder="Title" required />
             <label asp-for="Title" class="form-label">Title</label>
             <span asp-validation-for="Title" class="text-danger"></span>
         </div>
@@ -18,7 +18,7 @@
             <label class="form-label">Type</label>
         </div>
         <div class="col-6 form-floating">
-            <input asp-for=ReleaseYear class="form-control" type="number" min="0" placeholder="Release year" value="@Model.ReleaseYear" required />
+            <input asp-for=ReleaseYear class="form-control" type="number" min="0" placeholder="Release year" required />
             <label asp-for="ReleaseYear" class="form-label">Release year</label>
             <span asp-validation-for="ReleaseYear" class="text-danger"></span>
         </div>

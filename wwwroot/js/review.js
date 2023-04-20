@@ -1,17 +1,4 @@
 ﻿
-function updateProductsModal() {
-    let txt = document.getElementById("searchProductsModal").value;
-    if (txt == undefined) txt = "";
-    $.ajax({
-        url: "/Review/GetProductsForReview?partTitle=" + txt,
-        type: "POST",
-        dataType: "html",
-        success: function (res) {
-            $("#tbodyProductsModal").html(res);
-        }
-    });
-}
-
 function selectProduct(id, type, title, release) {
     document.getElementById("ProductIdForServer").value = id;
     document.getElementById("typeProd").value = type;
@@ -30,7 +17,7 @@ function checkTag() {
     }
     else if (el.value.length > 0) {
         $.ajax({
-            url: "/Review/GetTagList?partTag=" + el.value,
+            url: "/Home/GetTagList?partTag=" + el.value,
             type: "POST",
             success: function (res) {
                 $("#tagsList").html(res);

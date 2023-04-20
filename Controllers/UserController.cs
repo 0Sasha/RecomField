@@ -29,10 +29,18 @@ public class UserController : Controller
 
     public async Task<IActionResult> Index(string? id = null)
     {
-        var user = id == null ? await userManager.GetUserAsync(User) :
-            await userManager.FindByIdAsync(id) ?? throw new Exception("User is not found");
+        var user = (id == null ? await userManager.GetUserAsync(User) :
+            await userManager.FindByIdAsync(id)) ?? throw new Exception("User is not found");
         await user.LoadAsync(context, true);
         return View(user);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> SearchUsers(string text)
+    {
+        var users = await userManager.Users.Where(u => u.UserName.Contains(text) ||
+        u.Email.Contains(text)).ToListAsync();
+        return PartialView("UsersTableBody", users);
     }
 
     [HttpPost]
@@ -101,25 +109,5 @@ public class UserController : Controller
         await userManager.RemoveFromRoleAsync(user, "Admin");
         await context.SaveChangesAsync();
         return PartialView("UsersTableBody", await userManager.Users.ToListAsync());
-    }
-
-    [HttpPost]
-    public async Task<IActionResult> SearchUsers(string text)
-    {
-        var users = await userManager.Users.Where(u => u.UserName.Contains(text) ||
-        u.Email.Contains(text)).ToListAsync();
-        return PartialView("UsersTableBody", users);
-    }
-
-    [HttpPost]
-    public async Task ChangeScoreProduct(int id, int score)
-    {
-        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
-        var p = await context.Product.FindAsync(id) ?? throw new Exception("Product is not found");
-        await context.Entry(p).Collection(p => p.UserScores).LoadAsync();
-        var s = p.UserScores.SingleOrDefault(s => s.Sender == user);
-        if (s != null) s.Value = score;
-        else p.UserScores.Add(new(user, p, score));
-        await context.SaveChangesAsync();
     }
 }

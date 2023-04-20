@@ -77,7 +77,9 @@
         });
     </script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/user.js" asp-append-version="true"></script>
     <script src="~/js/review.js" asp-append-version="true"></script>
+    <script src="~/js/product.js" asp-append-version="true"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
 </head>
 <body>
@@ -99,8 +101,8 @@
                         </li>
                         <form class="d-flex dropdown" role="search" style="min-width:75%;" autocomplete="off">
                             <div class="input-group" >
-                                <select class="form-select" type="button" id="typeSearch" style="min-width:150px;max-width:150px;">
-                                    <option selected>Reviews</option>
+                                <select class="form-select" type="button" id="typeSearch" style="min-width:130px;max-width:130px;">
+                                    <option selected >Reviews</option>
                                 </select>
                                 <input class="form-control dropdown-toggle" id="searchLine" aria-expanded="false" placeholder="Search" aria-label="Search review" aria-describedby="typeSearch" onblur="hideSearchList()" onfocus="updateSearchList()" onkeyup="updateSearchList()">
                                 <div class="dropdown-menu" style="width:100%" id="dropdownMenu" onmouseover="forbidHidingSearchList()" onmouseout="allowHidingSearchList()">

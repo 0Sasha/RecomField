@@ -3,15 +3,17 @@
 @inject IHtmlLocalizer<SharedResource> Localizer
 @{
     ViewData["Title"] = @Localizer["Edit review"];
+    if (Model.AuthorId == null) throw new ArgumentNullException(nameof(Model.AuthorId));
 }
 
 <div class="container-fluid mb-5">
     <form asp-action="EditReview">
+        <input asp-for=AuthorId hidden/>
         @if(Model.Id == 0)
         {
             <div class="row g-2 mb-3">
                 <div class="col-md-3">
-                    <button class="btn btn-primary w-100" type="button" onclick="updateProductsModal('')" data-bs-toggle="modal" data-bs-target="#productsModal">Select product</button>
+                    <button class="btn btn-primary w-100" type="button" onclick="updateProductsModal('@Model.AuthorId')" data-bs-toggle="modal" data-bs-target="#productsModal">Select product</button>
                 </div>
                 <div class="col-md">
                     <input class="form-control" placeholder="Product title" id="titleProd" readonly>
@@ -103,7 +105,7 @@
             <div class="modal-body">
                 <div class="input-group mb-3">
                     <div class="form-floating">
-                        <input id="searchProductsModal" class="form-control" placeholder="Search" onkeyup="updateProductsModal()" />
+                        <input id="searchProductsModal" class="form-control" placeholder="Search" onkeyup="updateProductsModal('@Model.AuthorId')" />
                         <label class="form-label">Search</label>
                     </div>
                 </div>
@@ -120,21 +122,7 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#addProductModal">Add new product</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h1 class="modal-title fs-5">Add product</h1>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                @await Html.PartialAsync("AddProductForm", new Product())
+                <a class="btn btn-secondary" asp-controller="Product" asp-action="AddProduct">Add new product</a>
             </div>
         </div>
     </div>

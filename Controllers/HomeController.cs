@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -25,19 +26,8 @@ namespace RecomField.Controllers
 
         public async Task<IActionResult> Index()
         {
-            //foreach(var u in userManager.Users.ToArray())
-            //    await userManager.DeleteAsync(u);
             UpdateUserCookies(await userManager.GetUserAsync(User), Response.Cookies);
             return View((await context.Review.Include(r => r.Product).Include(r => r.Score).ToArrayAsync()).TakeLast(10).Reverse());
-        }
-
-        public async Task Clear()
-        {
-            foreach (var r in await context.Product.ToArrayAsync())
-                context.Remove(r);
-            foreach (var r in await context.ProductScore.ToArrayAsync())
-                context.Remove(r);
-            await context.SaveChangesAsync();
         }
 
         public async Task<IActionResult> Search(string text)
@@ -74,6 +64,13 @@ namespace RecomField.Controllers
                 res += tag + "," + tags.RemoveAll(t => t == tag) + ",";
             }
             return res;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetTagList(string partTag)
+        {
+            var t = (await context.ReviewTag.Select(t => t.Body).ToListAsync()).Where(b => b.Contains(partTag, StringComparison.OrdinalIgnoreCase));
+            return PartialView("OptionsList", t.Distinct().TakeLast(7));
         }
 
         [HttpPost]

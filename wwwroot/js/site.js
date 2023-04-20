@@ -37,40 +37,6 @@ function changeTheme() {
 }
 
 
-function changeRateProd(rate, id) {
-    $.ajax({
-        url: "/User/ChangeScoreProduct?id=" + id + "&score=" + rate,
-        type: "POST",
-        success: function () {
-            var el = document.getElementsByName("rateBtn");
-            for (var i = 1; i <= 5; i++) {
-                if (i <= rate) {
-                    el[i - 1].classList.remove('btn-light');
-                    el[i - 1].classList.add('btn-warning');
-                }
-                else {
-                    el[i - 1].classList.remove('btn-warning');
-                    el[i - 1].classList.add('btn-light');
-                }
-            }
-        }
-    });
-}
-
-function setInitRateProd(rate) {
-    var el = document.getElementsByName("rateBtn");
-    for (var i = 1; i <= 5; i++) {
-        if (i <= rate) {
-            el[i - 1].classList.remove('btn-light');
-            el[i - 1].classList.add('btn-warning');
-        }
-        else {
-            el[i - 1].classList.remove('btn-warning');
-            el[i - 1].classList.add('btn-light');
-        }
-    }
-}
-
 function updateReviews(id) {
     let partURL = id == undefined || id.length == 0 ? "" : "?id=" + id;
     let search = document.getElementById("searchReview").value;
@@ -121,56 +87,6 @@ function filterTable(idbodyTable, idSearchInput, urlMethod) {
     });
 }
 
-function blockUser(id, days) {
-    let partUrl = days == undefined ? "" : "&days=" + days;
-    $.ajax({
-        url: "/User/BlockUser?id=" + id + partUrl,
-        type: "POST",
-        success: function (res) {
-            $("#tbodyUsers").html(res);
-        }
-    });
-}
-
-function unblockUser(id) {
-    $.ajax({
-        url: "/User/UnlockUser?id=" + id,
-        type: "POST",
-        success: function (res) {
-            $("#tbodyUsers").html(res);
-        }
-    });
-}
-
-function removeUser(id) {
-    $.ajax({
-        url: "/User/RemoveUser?id=" + id,
-        type: "POST",
-        success: function (res) {
-            $("#tbodyUsers").html(res);
-        }
-    });
-}
-
-function addAdminRole(id) {
-    $.ajax({
-        url: "/User/AddAdminRole?id=" + id,
-        type: "POST",
-        success: function (res) {
-            $("#tbodyUsers").html(res);
-        }
-    });
-}
-
-function revokeAdminRole(id) {
-    $.ajax({
-        url: "/User/RevokeAdminRole?id=" + id,
-        type: "POST",
-        success: function (res) {
-            $("#tbodyUsers").html(res);
-        }
-    });
-}
 
 function search(text) {
     if (text.length > 0) {
