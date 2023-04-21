@@ -100,14 +100,14 @@
             @if (Model.Author == appUser || User.IsInRole("Admin"))
             {
                 <div class="float-end" role="group">
-                    <a class="btn btn-sm btn-danger" style="min-width:80px" asp-controller="Review" asp-action="RemoveReview" asp-route-id="@Model.Id">@Localizer["Remove"]</a>
-                    <a class="btn btn-sm btn-primary" style="min-width:80px" asp-controller="Review" asp-action="EditReview" asp-route-id="@Model.Id">@Localizer["Edit"]</a>
-                    <a class="btn btn-sm btn-primary" style="min-width:90px" asp-controller="Review" asp-action="DownloadReview" asp-route-id="@Model.Id">@Localizer["Convert to PDF"]</a>
+                    <a class="btn btn-sm btn-danger mb-1" style="min-width:80px" asp-controller="Review" asp-action="RemoveReview" asp-route-id="@Model.Id">@Localizer["Remove"]</a>
+                    <a class="btn btn-sm btn-primary mb-1" style="min-width:80px" asp-controller="Review" asp-action="EditReview" asp-route-id="@Model.Id">@Localizer["Edit"]</a>
+                    <a class="btn btn-sm btn-primary mb-1" style="min-width:90px" asp-controller="Review" asp-action="ConvertToPDF" asp-route-id="@Model.Id">@Localizer["Convert to PDF"]</a>
                 </div>
             }
             else
             {
-                <a class="btn btn-sm btn-primary float-end" style="min-width:90px" asp-controller="Review" asp-action="DownloadReview" asp-route-id="@Model.Id">@Localizer["Convert to PDF"]</a>
+                <a class="btn btn-sm btn-primary float-end" style="min-width:90px" asp-controller="Review" asp-action="ConvertToPDF" asp-route-id="@Model.Id">@Localizer["Convert to PDF"]</a>
             }
         </div>
     </div>
@@ -127,10 +127,10 @@
             <h4>
                 @if (appUser != null)
                 {
-                    <span role="button" id="likeBtn" class="badge text-bg-secondary fw-bold" onclick="changeLike('@Model.Id')">
+                    <span role="button" class="badge text-bg-secondary" onclick="changeLike('@Model.Id')">
                         @{
                             var id = User.Claims.First().Value;
-                            if (Model.Likes.Count > 0 && Model.Likes.SingleOrDefault(l => l.SenderId == id) != null)
+                            if (Model.Likes.Count > 0 && Model.Likes.Any(l => l.SenderId == id))
                             {
                                 <img id="likeIcon" src="~/icons/thumb white full.svg" aria-label="Liked" style="max-width:20px; max-height:20px;">
                             }
@@ -139,20 +139,27 @@
                                 <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:20px; max-height:20px;">
                             }
                         }
-                        @Model.Likes.Count
+                        <small class="fw-bold" id="likeCount">@Model.Likes.Count</small>
                     </span>
                 }
                 else
                 {
                     <a asp-area="Identity" asp-page="/Account/Login" class="badge text-bg-secondary fw-bold">
                         <img src="~/icons/thumb white.svg" aria-label="" style="max-width:20px; max-height:20px;">
-                        @Model.Likes.Count
+                        <small class="fw-bold" id="likeCount">@Model.Likes.Count</small>
                     </a>
                 }
             </h4>
         </div>
     </div>
-    <div id="reviewComments">
-        @await Html.PartialAsync("ReviewComments", (Model.Comments.Take(5), Model.Id, Model.Comments.Count))
+    <div class="row">
+        <div class="col-md-9">
+            <div id="reviewComments">
+                @await Html.PartialAsync("ReviewComments", (Model.Comments.Take(5), Model.Id, Model.Comments.Count))
+            </div>
+        </div>
+        <div class="col-md">
+            Here vill be reviews
+        </div>
     </div>
 </div>

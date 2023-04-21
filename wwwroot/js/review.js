@@ -86,26 +86,36 @@ function checkReview() {
     else document.getElementById("bodyIsFull").value = "";
 }
 
-
 function changeLike(id) {
     let el = document.getElementById("likeIcon");
+    let count = document.getElementById("likeCount");
     if (el.ariaLabel == "Liked") {
+        el.ariaLabel = "";
+        el.setAttribute("src", "/icons/thumb white.svg");
+        count.textContent = Number(count.textContent) - 1;
         $.ajax({
             url: "/Review/ChangeLike?id=" + id,
             type: "POST",
-            success: function () {
-                el.setAttribute("src", "/icons/thumb white.svg");
-                el.ariaLabel = "";
+            error: function (data, textStatus, jqXHR) {
+                //el.ariaLabel = "Liked";
+                //el.setAttribute("src", "/icons/thumb white full.svg");
+                //count.textContent = Number(count.textContent) + 1;
+                console.log(data.status + " | " + data.statusText);
             }
         });
     }
     else {
+        el.ariaLabel = "Liked";
+        el.setAttribute("src", "/icons/thumb white full.svg");
+        count.textContent = Number(count.textContent) + 1;
         $.ajax({
             url: "/Review/ChangeLike?id=" + id,
             type: "POST",
-            success: function () {
-                el.setAttribute("src", "/icons/thumb white full.svg");
-                el.ariaLabel = "Liked";
+            error: function (data, textStatus, jqXHR) {
+                //el.ariaLabel = "";
+                //el.setAttribute("src", "/icons/thumb white.svg");
+                //count.textContent = Number(count.textContent) - 1;
+                console.log(data.status + " | " + data.statusText);
             }
         });
     }

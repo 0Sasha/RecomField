@@ -1,6 +1,7 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
 using iText.Html2pdf;
+using iText.Layout;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Authorization;
@@ -69,6 +70,7 @@ public class ReviewController : Controller
         if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
         await context.Entry(review).Reference(r => r.Score).LoadAsync();
         await context.Entry(review).Collection(r => r.Tags).LoadAsync();
+        review.Body = ReverseCustomizedStringHtml(review.Body);
         return View(review);
     }
 
@@ -130,43 +132,6 @@ public class ReviewController : Controller
         return RedirectToAction("Index", "User", new { id = review.AuthorId });
     }
 
-    private static string CustomizeStringHtml(string body) // TODO/////////////////////////////////////////
-    {
-        if (body.Contains("style=\""))
-        {
-            var b = body.Split("\"");
-            for (int i = 0; i < b.Length; i++)
-            {
-                if (b[i].EndsWith("style=") && i + 1 < b.Length)
-                {
-                    if (b[i + 1].StartsWith("height") || b[i + 1].StartsWith("width")) b[i + 1] = b[i + 1].Insert(0, "max-");
-                    b[i + 1] = b[i + 1].Replace(" width", " max-width");
-                    b[i + 1] = b[i + 1].Replace(" height", " max-height");
-                }
-            }
-            body = string.Join("\"", b);
-        }
-        if (body.Contains("<iframe"))
-        {
-            var i = body.LastIndexOf("<iframe");
-            while (i >= 0)
-            {
-                var j = body.IndexOf("</iframe>", i);
-                var startStyle = body[..j].IndexOf("style=", i);
-                if (startStyle >= 0)
-                {
-                    var endStyle = body.IndexOf("\"", startStyle + 7) + 1;
-                    var style = body[startStyle..endStyle];
-                    body = body.Remove(startStyle, style.Length);
-                    body = body.Insert(i, "<div class=\"ratio ratio-16x9\" " + style + ">");
-                }
-                i = body[..i].LastIndexOf("<iframe");
-            }
-            body = body.Replace("</iframe>", "</iframe></div>");
-        }
-        return body;
-    }
-
     [Authorize]
     [HttpPost]
     public async Task UploadImage(IFormFile file)
@@ -210,73 +175,162 @@ public class ReviewController : Controller
         var review = await FindReview(id);
         await context.Entry(review).Collection(u => u.Likes).LoadAsync();
         await context.Entry(review).Reference(u => u.Author).LoadAsync();
-        var like = review.Likes.SingleOrDefault(l => l.Sender == user);
-        if (like != null) review.Likes.Remove(like);
+        if (review.Likes.Any(l => l.Sender == user)) review.Likes.RemoveAll(l => l.Sender == user);
         else review.Likes.Add(new(user, review));
         await context.SaveChangesAsync();
     }
 
-    public async Task<IActionResult> DownloadReview(int id)
+    public async Task<IActionResult> ConvertToPDF(int id)
     {
         var review = await FindReview(id);
         await review.LoadAsync(context);
-
-        var html = "<h1>" + review.Title + "</h1>\r\n<h2>By " + review.Author?.UserName + " on " +
-            review.PublicationDate.ToString("MMM dd, yyyy") + "</h2>\r\n\r\n" + review.Body;
+        var backColor = review.Score.Value > 6 ? "forestgreen" : "orange";
+        var html = "<h5>Review of " + review.Product.Title + "</h5><style>.badge { background-color: " + backColor + ";color: white; " +
+            "padding: 4px 10px; text-align: center; border-radius: 5px;\r\n}</style> <h1>" +
+            review.Title + "</h1>" + ClearStringHtmlForPDF(review.Body) + "<h1 style=\"text-align:right;\">" +
+            "<span class=\"badge\">" + review.Score.Value + "/10</span></h1>" +
+            "<h4 style=\"text-align:right\">By " + review.Author?.UserName + " on " +
+            review.PublicationDate.ToString("MMM dd, yyyy") + "</h4>";
 
         using MemoryStream pdfDest = new();
-        //ConverterProperties converterProperties = new();
         HtmlConverter.ConvertToPdf(html, pdfDest);
         return File(new MemoryStream(pdfDest.ToArray()), "application/pdf");
-    }
+    } //TODO
 
-    public virtual string RenderViewToString(
-    ControllerContext controllerContext,
-    string viewPath,
-    string masterPath,
-    ViewDataDictionary viewData,
-    TempDataDictionary tempData)
+    private static string ClearStringHtmlForPDF(string body)
     {
-        Stream filter = null;
-        ViewResult v = new();
-        //ViewPage viewPage = new ViewPage();
-        ViewContext viewContext = new ViewContext();
-        //Right, create our view
-        //var v = new ViewContext(
-
-        //Get the response context, flush it and get the response filter.
-        /*var response = viewPage.ViewContext.HttpContext.Response;
-        response.Flush();
-        var oldFilter = response.Filter;
-
-        try
+        var startImg = body.LastIndexOf("<img");
+        while(startImg >= 0)
         {
-            //Put a new filter into the response
-            filter = new MemoryStream();
-            response.Filter = filter;
-
-            //Now render the view into the memorystream and flush the response
-            viewPage.ViewContext.View.Render(viewPage.ViewContext, viewPage.ViewContext.HttpContext.Response.Output);
-            response.Flush();
-
-            //Now read the rendered view.
-            filter.Position = 0;
-            var reader = new StreamReader(filter, response.ContentEncoding);
-            return reader.ReadToEnd();
+            body = RemoveAttrsEl(body, startImg, "width", "height", "style");
+            var endImg = body.IndexOf(">", startImg);
+            body = body.Insert(endImg, " style=\"max-width: 600px; max-height: 840px;\" ");
+            startImg = body[..startImg].LastIndexOf("<img");
         }
-        finally
+        var startVideo = body.LastIndexOf("<div class=\"ratio");
+        while (startVideo >= 0)
         {
-            //Clean up.
-            if (filter != null)
-            {
-                filter.Dispose();
-            }
+            var endVideo = body.IndexOf("</div>", startVideo);
+            body = body.Remove(startVideo, endVideo - startVideo);
+            startVideo = body[..startVideo].LastIndexOf("<div class=\"ratio");
+        }
+        var endGap = body.IndexOf(">&nbsp;</p>");
+        while (endGap >= 0)
+        {
+            var startGap = body[..endGap].LastIndexOf("<");
+            body = body.Remove(startGap, endGap + 11 - startGap);
+            endGap = body.IndexOf(">&nbsp;</p>");
+        }
+        return body;
+    } //TODO
 
-            //Now replace the response filter
-            response.Filter = oldFilter;
-        }*/
-        return "";
+    private static string RemoveAttrsEl(string body, int startEl, params string[] attrs)
+    {
+        foreach(var attr in attrs)
+        {
+            var endEl = body.IndexOf(">", startEl);
+            var startAttr = body.IndexOf(attr + "=\"", startEl, endEl - startEl);
+            if (startAttr >= 0)
+            {
+                var endAttr = body.IndexOf("\"", startAttr + attr.Length + 3) + 1;
+                body = body.Remove(startAttr, endAttr - startAttr);
+            }
+        }
+        return body;
     }
+    
+    private static string CustomizeStringHtml(string body) => CustomizeIframe(CustomizeStyle(body));
+
+    private static string CustomizeStyle(string body)
+    {
+        if (body.Contains("style=\""))
+        {
+            var b = body.Split("\"");
+            for (int i = 0; i < b.Length; i++)
+            {
+                if (b[i].EndsWith("style=") && i + 1 < b.Length)
+                {
+                    if (b[i + 1].StartsWith("height") || b[i + 1].StartsWith("width")) b[i + 1] = b[i + 1].Insert(0, "max-");
+                    b[i + 1] = b[i + 1].Replace(" width", " max-width");
+                    b[i + 1] = b[i + 1].Replace(" height", " max-height");
+                }
+            }
+            body = string.Join("\"", b);
+        }
+        return body;
+    } //TODO
+
+    private static string CustomizeIframe(string body)
+    {
+        var i = body.LastIndexOf("<iframe");
+        while (i >= 0)
+        {
+            var boxEl = body[..i].LastIndexOf("<");
+            if (body[boxEl + 1] != 'p')
+            {
+                //body = SwitchStyle(body, boxEl, i);
+                i = body[..i].LastIndexOf("<iframe");
+                continue;
+            }
+            var j = body.IndexOf("</iframe>", i);
+            body = body.Insert(j + 9, "</div>");
+            var startStyle = body[..j].IndexOf("style=", i);
+            if (startStyle >= 0)
+            {
+                var endStyle = body.IndexOf("\"", startStyle + 7) + 1;
+                var style = body[startStyle..endStyle];
+                body = body.Remove(startStyle, style.Length);
+                body = body.Insert(i, "<div class=\"ratio ratio-16x9\" " + style + ">");
+            }
+            else body = body.Insert(i, " <div class=\"ratio ratio-16x9\"> ");
+            i = body[..i].LastIndexOf("<iframe");
+        }
+        return body;
+    } //TODO
+
+    private static string ReverseCustomizedStringHtml(string body)
+    {
+        var i = body.LastIndexOf("<iframe");
+        while (i >= 0)
+        {
+            var startBoxEl = body[..i].LastIndexOf("<div");
+            var startStyleBox = body.IndexOf("style=", startBoxEl, i - startBoxEl);
+            if (startStyleBox >= 0)
+            {
+                var endStyleBox = body.IndexOf("\"", startStyleBox + 7) + 1;
+                var styleBox = body[startStyleBox..endStyleBox];
+                body = body.Insert(i + 7, " " + styleBox + " ");
+            }
+            body = body.Remove(startBoxEl, body.IndexOf(">", startBoxEl) - startBoxEl + 1);
+            body = body.Insert(startBoxEl, "<p>");
+            var endBoxEl = body.IndexOf("</div>", startBoxEl);
+            body = body.Remove(endBoxEl, 6);
+            body = body.Insert(endBoxEl, "</p>");
+            i = body.LastIndexOf("<iframe", startBoxEl);
+        }
+        return body;
+    } //TODO
+
+    private static string SwitchStyle(string body, int startBox, int startIframe)
+    {
+        var endIframe = body.IndexOf("</iframe>", startIframe);
+        var startStyle = body[..endIframe].IndexOf("style=", startIframe);
+        if (startStyle >= 0)
+        {
+            var endStyle = body.IndexOf("\"", startStyle + 7) + 1;
+            var style = body[startStyle..endStyle];
+            body = body.Remove(startStyle, style.Length);
+            var startBoxStyle = body[..startIframe].IndexOf("style=", startBox);
+            if (startBoxStyle >= 0)
+            {
+                var endBoxStyle = body.IndexOf("\"", startBoxStyle + 7) + 1;
+                body = body.Remove(startBoxStyle, endBoxStyle - startBoxStyle);
+                body = body.Insert(startBoxStyle, style);
+            }
+            else body = body.Insert(startBox + 5, " " + style + " ");
+        }
+        return body;
+    } //Remove
 
     private async Task<ApplicationUser> GetUser() =>
         await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");

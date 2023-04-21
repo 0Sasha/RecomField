@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using iText.Layout.Element;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -50,9 +51,9 @@ public class ProductController : Controller
         var reviewed = context.Review.Where(r => r.Author == user).Include(r => r.Product).Select(r => r.Product);
         if (string.IsNullOrEmpty(partTitle))
             return PartialView("ProductsTableBody", await context.Product.Except(reviewed).Take(7).ToArrayAsync());
-        var request = "%" + partTitle + "%";
+        var request = "\"" + partTitle + "*\" OR \"" + partTitle + "\"";
         return PartialView("ProductsTableBody", await
-            context.Product.Where(p => EF.Functions.Like(p.Title, request)).Except(reviewed).Take(7).ToArrayAsync());
+            context.Product.Where(p => EF.Functions.Contains(p.Title, request)).Except(reviewed).Take(7).ToArrayAsync());
     }
 
     [HttpPost]
