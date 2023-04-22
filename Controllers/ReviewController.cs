@@ -43,7 +43,7 @@ public class ReviewController : Controller
         await review.LoadAsync(context);
         var user = await userManager.GetUserAsync(User);
         if (user != null)
-            await context.ProductScore.SingleOrDefaultAsync(s => s.Entity == review.Product && s.Sender == user);
+            await context.ProductScores.SingleOrDefaultAsync(s => s.Entity == review.Product && s.Sender == user);
         return View(review);
     }
 
@@ -95,7 +95,7 @@ public class ReviewController : Controller
         review.PublicationDate = DateTime.UtcNow;
         review.Author = author;
         int idProd = int.Parse(Request.Form["ProductIdForServer"].Single() ?? throw new Exception("Product id is not filled"));
-        review.Product = await context.Product.FindAsync(idProd) ?? throw new Exception("Product is not found");
+        review.Product = await context.Products.FindAsync(idProd) ?? throw new Exception("Product is not found");
         review.Score = new(author, review, score);
         review.Body = CustomizeStringHtml(review.Body);
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
@@ -108,7 +108,7 @@ public class ReviewController : Controller
     private async Task<IActionResult> EditReview(ApplicationUser author, int id, string title, string tags, string body, int score)
     {
         var review = await FindReview(id);
-        await context.Product.FindAsync(review.ProductId);
+        await context.Products.FindAsync(review.ProductId);
         await context.Entry(review).Reference(u => u.Score).LoadAsync();
         await context.Entry(review).Collection(u => u.Tags).LoadAsync();
         review.Title = title;
@@ -127,7 +127,7 @@ public class ReviewController : Controller
         var review = await FindReview(id);
         if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
         await review.LoadAsync(context);
-        context.Review.Remove(review);
+        context.Reviews.Remove(review);
         await context.SaveChangesAsync();
         return RedirectToAction("Index", "User", new { id = review.AuthorId });
     }
@@ -153,7 +153,7 @@ public class ReviewController : Controller
         if (string.IsNullOrEmpty(comment)) throw new ArgumentNullException(nameof(comment));
         var user = await GetUser();
         var review = await FindReview(id);
-        await context.ReviewComment.Where(k => k.Entity == review).Include(k => k.Sender).LoadAsync();
+        await context.ReviewComments.Where(k => k.Entity == review).Include(k => k.Sender).LoadAsync();
         review.Comments.Add(new(user, review, comment));
         await context.SaveChangesAsync();
         await hubContext.Clients.All.SendAsync("NewReviewComment", id);
@@ -164,7 +164,7 @@ public class ReviewController : Controller
     public async Task<IActionResult> ShowComments(int id, int count)
     {
         var review = await FindReview(id);
-        await context.ReviewComment.Where(k => k.Entity == review).Include(k => k.Sender).LoadAsync();
+        await context.ReviewComments.Where(k => k.Entity == review).Include(k => k.Sender).LoadAsync();
         return PartialView("ReviewComments", (review.Comments.Take(count), review.Id, review.Comments.Count));
     }
 
@@ -336,5 +336,5 @@ public class ReviewController : Controller
         await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
 
     private async Task<Review> FindReview(int id) =>
-        await context.Review.FindAsync(id) ?? throw new Exception("Review is not found");
+        await context.Reviews.FindAsync(id) ?? throw new Exception("Review is not found");
 }

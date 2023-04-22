@@ -27,7 +27,7 @@ namespace RecomField.Controllers
         public async Task<IActionResult> Index()
         {
             UpdateUserCookies(await userManager.GetUserAsync(User), Response.Cookies);
-            return View((await context.Review.Include(r => r.Product).Include(r => r.Score).ToArrayAsync()).TakeLast(10).Reverse());
+            return View((await context.Reviews.Include(r => r.Product).Include(r => r.Score).ToArrayAsync()).TakeLast(10).Reverse());
         }
 
         public async Task<IActionResult> Search(string text)
@@ -37,17 +37,17 @@ namespace RecomField.Controllers
             {
                 text = text[1..(text.Length - 1)];
                 request = "\"" + text + "*\" OR \"" + text + "\"";
-                var res = context.ReviewTag.Where(x => EF.Functions.Contains(x.Body, request)).Include(r => r.Entity.Product).Include(r => r.Entity.Score);
+                var res = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Include(r => r.Entity.Product).Include(r => r.Entity.Score);
                 return PartialView("MainReviewsTableBody", await res.Select(t => t.Entity).ToArrayAsync());
             }
             else
             {
                 request = "\"" + text + "*\" OR \"" + text + "\"";
-                var byTitle = context.Review.Where(x => EF.Functions.Contains(x.Title, request));
-                var byBody = context.Review.Where(x => EF.Functions.Contains(x.Body, request));
-                var byProduct = context.Review.Where(x => EF.Functions.Contains(x.Product.Title, request));
-                var byTags = context.ReviewTag.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
-                var byComments = context.ReviewComment.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
+                var byTitle = context.Reviews.Where(x => EF.Functions.Contains(x.Title, request));
+                var byBody = context.Reviews.Where(x => EF.Functions.Contains(x.Body, request));
+                var byProduct = context.Reviews.Where(x => EF.Functions.Contains(x.Product.Title, request));
+                var byTags = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
+                var byComments = context.ReviewComments.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
                 var founded = byTitle.Union(byBody).Union(byProduct).Union(byTags).Union(byComments);
                 return PartialView("MainReviewsTableBody", await founded.Include(r => r.Product).Include(r => r.Score).ToArrayAsync());
             }
@@ -57,7 +57,7 @@ namespace RecomField.Controllers
         public async Task<string> GetAllTags()
         {
             string res = "";
-            var tags = await context.ReviewTag.Select(t => t.Body).ToListAsync();
+            var tags = await context.ReviewTags.Select(t => t.Body).ToListAsync();
             while(tags.Count > 0)
             {
                 var tag = tags[0];
@@ -69,14 +69,14 @@ namespace RecomField.Controllers
         [HttpPost]
         public async Task<IActionResult> GetTagList(string partTag)
         {
-            var t = (await context.ReviewTag.Select(t => t.Body).ToListAsync()).Where(b => b.Contains(partTag, StringComparison.OrdinalIgnoreCase));
+            var t = (await context.ReviewTags.Select(t => t.Body).ToListAsync()).Where(b => b.Contains(partTag, StringComparison.OrdinalIgnoreCase));
             return PartialView("OptionsList", t.Distinct().TakeLast(7));
         }
 
         [HttpPost]
         public async Task<IActionResult> GetHighScoresView()
         {
-            var reviews = await context.Review.Include(r => r.Product).Include(r => r.Score).ToListAsync();
+            var reviews = await context.Reviews.Include(r => r.Product).Include(r => r.Score).ToListAsync();
             var ordered = reviews.OrderBy(r => r.Score?.Value);
             return PartialView("MainReviewsTableBody", ordered.TakeLast(10).Reverse());
         }

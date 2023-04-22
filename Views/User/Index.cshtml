@@ -26,8 +26,16 @@
         @if (authorOrAdmin)
         {
             <div class="col-md">
-                <div class="btn-group float-end" role="group">
-                    <a type="button" class="btn btn-primary" href="">@Localizer["App product"]</a>
+                <div class="float-end" role="group">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        @Localizer["Add product"]
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" asp-action="AddMovie" asp-controller="Product">@Localizer["Movie"]</a></li>
+                        <li><a class="dropdown-item" asp-action="AddSeries" asp-controller="Product">@Localizer["Series"]</a></li>
+                        <li><a class="dropdown-item" asp-action="AddBook" asp-controller="Product">@Localizer["Book"]</a></li>
+                        <li><a class="dropdown-item" asp-action="AddGame" asp-controller="Product">@Localizer["Game"]</a></li>
+                    </ul>
                     <a type="button" class="btn btn-primary" asp-controller="Review" asp-action="AddReview" asp-route-authorId="@Model.Id">@Localizer["Write a review"]</a>
                 </div>
             </div>

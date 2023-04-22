@@ -122,7 +122,15 @@
                 </table>
             </div>
             <div class="modal-footer">
-                <a class="btn btn-secondary" asp-controller="Product" asp-action="AddProduct">Add new product</a>
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    @Localizer["Add product"]
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" asp-action="AddMovie" asp-controller="Product">@Localizer["Movie"]</a></li>
+                    <li><a class="dropdown-item" asp-action="AddSeries" asp-controller="Product">@Localizer["Series"]</a></li>
+                    <li><a class="dropdown-item" asp-action="AddBook" asp-controller="Product">@Localizer["Book"]</a></li>
+                    <li><a class="dropdown-item" asp-action="AddGame" asp-controller="Product">@Localizer["Game"]</a></li>
+                </ul>
             </div>
         </div>
     </div>

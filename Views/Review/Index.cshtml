@@ -43,7 +43,7 @@
             <h3>Cover here</h3>
             <h3>Cover here</h3>
             <h5><a asp-action="Index" asp-controller="Product" asp-route-id="@Model.ProductId">@Model.Product.Title</a></h5>
-            <h6>@Model.Product.Type | @Model.Product.ReleaseYear</h6>
+            <h6>@Model.Product.GetType() | @Model.Product.ReleaseYear</h6>
             <h4>
                 @{
                     var rev = @Model.Product.AverageReviewScore > 0.1 ? @Model.Product.AverageReviewScore.ToString() + "/10" : "n/10";

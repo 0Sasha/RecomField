@@ -11,14 +11,18 @@ namespace RecomField.Data
         {
         }
 
-        public DbSet<Product> Product { get; set; } = default!;
-        public DbSet<Score<Product>> ProductScore { get; set; } = default!;
+        public DbSet<Product> Products { get; set; } = default!;
+        public DbSet<Score<Product>> ProductScores { get; set; } = default!;
+        public DbSet<Book> Books { get; set; } = default!;
+        public DbSet<Movie> Movies { get; set; } = default!;
+        public DbSet<Series> Series { get; set; } = default!;
+        public DbSet<Game> Games { get; set; } = default!;
 
-        public DbSet<Review> Review { get; set; } = default!;
-        public DbSet<Tag<Review>> ReviewTag { get; set; } = default!;
-        public DbSet<Score<Review>> ReviewScore { get; set; } = default!;
-        public DbSet<Like<Review>> ReviewLike { get; set; } = default!;
-        public DbSet<Comment<Review>> ReviewComment { get; set; } = default!;
+        public DbSet<Review> Reviews { get; set; } = default!;
+        public DbSet<Tag<Review>> ReviewTags { get; set; } = default!;
+        public DbSet<Score<Review>> ReviewScores { get; set; } = default!;
+        public DbSet<Like<Review>> ReviewLikes { get; set; } = default!;
+        public DbSet<Comment<Review>> ReviewComments { get; set; } = default!;
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

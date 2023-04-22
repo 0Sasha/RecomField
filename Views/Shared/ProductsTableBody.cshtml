@@ -5,10 +5,11 @@
 
 @foreach (var p in Model)
 {
+    var type = p.GetType().Name;
     <tr>
-        <td>@p.Type</td>
+        <td>@type</td>
         <td>
-            <button class="btn w-100 h-100 text-start" data-bs-dismiss="modal" onclick="selectProduct('@p.Id', '@p.Type', '@JavaScriptStringEncode(p.Title)', '@p.ReleaseYear')">@p.Title</button>
+            <button class="btn w-100 h-100 text-start" data-bs-dismiss="modal" onclick="selectProduct('@p.Id', '@type', '@JavaScriptStringEncode(p.Title)', '@p.ReleaseYear')">@p.Title</button>
         </td>
         <td>@p.ReleaseYear</td>
     </tr>

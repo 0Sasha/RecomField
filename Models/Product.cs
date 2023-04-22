@@ -4,15 +4,14 @@ using System.ComponentModel.DataAnnotations;
 namespace RecomField.Models;
 
 [Index("Id", IsUnique = true)]
-public class Product
+public abstract class Product
 {
     private int relYear = 2023;
 
     public int Id { get; set; }
 
-    public virtual ProductType Type { get; set; }
-
     [Required]
+    [MinLength(1)]
     public virtual string? Title { get; set; }
 
     public virtual int ReleaseYear
@@ -25,8 +24,6 @@ public class Product
 
     public virtual string? Cover { get; set; }
 
-    public virtual string? Trailer { get; set; }
-
     public virtual double AverageUserScore { get; set; }
 
     public virtual double AverageReviewScore { get; set; }
@@ -37,27 +34,12 @@ public class Product
 
     public Product() { }
 
-    public Product(ProductType type, string title, int releaseYear)
-    {
-        if (string.IsNullOrEmpty(title)) throw new ArgumentNullException(nameof(title));
-        Type = type;
-        Title = title;
-        ReleaseYear = releaseYear;
-    }
-
-    public async Task LoadAsync(ApplicationDbContext context)
+    public virtual async Task LoadAsync(ApplicationDbContext context)
     {
         await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
-        await context.Review.Where(r => r.Product == this).Include(r => r.Author).Include(r => r.Score).LoadAsync();
+        await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).LoadAsync();
         if (UserScores.Count > 0) AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 1);
-        if (Reviews.Count > 0) AverageReviewScore = Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 1);
-    }
-
-    public enum ProductType
-    {
-        Movie,
-        Series,
-        Game,
-        Book
+        if (Reviews.Count > 0) AverageReviewScore =
+                Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 1);
     }
 }

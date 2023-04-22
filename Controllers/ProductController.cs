@@ -28,15 +28,46 @@ public class ProductController : Controller
     }
 
     [HttpGet]
-    public IActionResult AddProduct() => View();
+    public IActionResult AddProduct() => View("AddMovie");
+
+    [HttpGet]
+    public IActionResult AddMovie() => View();
+
+    [HttpGet]
+    public IActionResult AddSeries() => View();
+
+    [HttpGet]
+    public IActionResult AddBook() => View();
+
+    [HttpGet]
+    public IActionResult AddGame() => View();
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddProduct([Bind("Type,Title,ReleaseYear,Description")] Product product)
+    public async Task<IActionResult> AddMovie([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Movie product) =>
+        await AddProduct(product);
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddSeries([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Series product) =>
+        await AddProduct(product);
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddGame([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Game product) =>
+        await AddProduct(product);
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AddBook([Bind("Title,ReleaseYear,Description,Cover,Author")] Book product) =>
+        await AddProduct(product);
+
+    private async Task<IActionResult> AddProduct(Product product)
     {
-        if (product == null) throw new ArgumentNullException(nameof(product));
-        if (await context.Product.AnyAsync(p => p.Title == product.Title && p.Type == product.Type && p.ReleaseYear == product.ReleaseYear))
-            throw new ArgumentException("The product already exists in the database", nameof(product));
+        var prods = await context.Products.Where(p => p.Title == product.Title &&
+        p.ReleaseYear == product.ReleaseYear).ToArrayAsync();
+        if (prods.Any(p => p.GetType() == product.GetType()))
+            throw new ArgumentException("This product already exists in the database", nameof(product));
         product.Description ??= "";
         await context.AddAsync(product);
         await context.SaveChangesAsync();
@@ -48,12 +79,12 @@ public class ProductController : Controller
     public async Task<IActionResult> GetProductsForReview(string authorId, string? partTitle = null)
     {
         var user = await GetUser(authorId);
-        var reviewed = context.Review.Where(r => r.Author == user).Include(r => r.Product).Select(r => r.Product);
+        var reviewed = context.Reviews.Where(r => r.Author == user).Include(r => r.Product).Select(r => r.Product);
         if (string.IsNullOrEmpty(partTitle))
-            return PartialView("ProductsTableBody", await context.Product.Except(reviewed).Take(7).ToArrayAsync());
+            return PartialView("ProductsTableBody", await context.Products.Except(reviewed).Take(7).ToArrayAsync());
         var request = "\"" + partTitle + "*\" OR \"" + partTitle + "\"";
         return PartialView("ProductsTableBody", await
-            context.Product.Where(p => EF.Functions.Contains(p.Title, request)).Except(reviewed).Take(7).ToArrayAsync());
+            context.Products.Where(p => EF.Functions.Contains(p.Title, request)).Except(reviewed).Take(7).ToArrayAsync());
     }
 
     [HttpPost]
@@ -69,7 +100,7 @@ public class ProductController : Controller
     }
 
     private async Task<Product> FindProduct(int id) =>
-        await context.Product.FindAsync(id) ?? throw new Exception("Product is not found");
+        await context.Products.FindAsync(id) ?? throw new Exception("Product is not found");
 
     private async Task<ApplicationUser> GetUser() =>
         await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");

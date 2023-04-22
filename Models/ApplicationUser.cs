@@ -15,18 +15,18 @@ public class ApplicationUser : IdentityUser
 
     public async Task LoadAsync(ApplicationDbContext context, bool deep = false)
     {
-        if (deep) await context.Review.Where(r => r.Author == this)
+        if (deep) await context.Reviews.Where(r => r.Author == this)
                 .Include(r => r.Product).Include(r => r.Score).Include(r => r.Likes).LoadAsync();
-        else await context.Review.Where(r => r.Author == this).Include(r => r.Likes).LoadAsync();
+        else await context.Reviews.Where(r => r.Author == this).Include(r => r.Likes).LoadAsync();
         if (Reviews.Count > 0) ReviewLikes = Reviews.Select(r => r.Likes.Count).Sum();
     }
 
     public async Task LoadAllDependent(ApplicationDbContext context)
     {
-        await context.Review.Where(r => r.Author == this).Include(r => r.Score).Include(r => r.Tags)
+        await context.Reviews.Where(r => r.Author == this).Include(r => r.Score).Include(r => r.Tags)
             .Include(r => r.Likes).Include(r => r.Comments).LoadAsync();
-        await context.ReviewLike.Where(l => l.Sender == this).LoadAsync();
-        await context.ReviewComment.Where(l => l.Sender == this).LoadAsync();
-        await context.ReviewScore.Where(l => l.Sender == this).LoadAsync();
+        await context.ReviewLikes.Where(l => l.Sender == this).LoadAsync();
+        await context.ReviewComments.Where(l => l.Sender == this).LoadAsync();
+        await context.ReviewScores.Where(l => l.Sender == this).LoadAsync();
     }
 }

@@ -54,6 +54,6 @@ public class Review
         if (Score == null) throw new Exception("Score is not found");
         if (Tags.Count == 0) await context.Entry(this).Collection(u => u.Tags).LoadAsync();
         if (Likes.Count == 0) await context.Entry(this).Collection(u => u.Likes).LoadAsync();
-        await context.ReviewComment.Where(k => k.Entity == this).Include(k => k.Sender).LoadAsync();
+        await context.ReviewComments.Where(k => k.Entity == this).Include(k => k.Sender).LoadAsync();
     }
 }
