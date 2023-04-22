@@ -1,21 +1,19 @@
 ﻿
 function changeRateProd(rate, id) {
+    var el = document.getElementsByName("rateBtn");
+    for (var i = 1; i <= 5; i++) {
+        if (i <= rate) {
+            el[i - 1].classList.remove('btn-light');
+            el[i - 1].classList.add('btn-warning');
+        }
+        else {
+            el[i - 1].classList.remove('btn-warning');
+            el[i - 1].classList.add('btn-light');
+        }
+    }
     $.ajax({
         url: "/Product/ChangeScoreProduct?id=" + id + "&score=" + rate,
-        type: "POST",
-        success: function () {
-            var el = document.getElementsByName("rateBtn");
-            for (var i = 1; i <= 5; i++) {
-                if (i <= rate) {
-                    el[i - 1].classList.remove('btn-light');
-                    el[i - 1].classList.add('btn-warning');
-                }
-                else {
-                    el[i - 1].classList.remove('btn-warning');
-                    el[i - 1].classList.add('btn-light');
-                }
-            }
-        }
+        type: "POST"
     });
 }
 
