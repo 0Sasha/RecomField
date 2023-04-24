@@ -1,13 +1,13 @@
-﻿@model Movie
+﻿@model Book
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IHtmlLocalizer<SharedResource> Localizer
 @{
-    ViewData["Title"] = Localizer["Add movie"];
+    ViewData["Title"] = Localizer["Add book"];
 }
 
 <div class="container-fluid">
-    <h2>Movie</h2>
-    <form asp-action="AddMovie" class="mb-5">
+    <h2>Book</h2>
+    <form asp-action="AddBook" class="mb-5">
         <div class="row g-2 mb-2">
             <div class="col-md-6 form-floating">
                 <input asp-for=Title class="form-control" type="text" placeholder="Title" required />
@@ -20,13 +20,13 @@
                 <span asp-validation-for="ReleaseYear" class="text-danger"></span>
             </div>
             <div class="col-md form-floating">
-                <input id="linkToTrailer" asp-for=Trailer class="form-control" type="text" placeholder="Link to YouTube trailer" onchange="showTrailer()"/>
-                <label asp-for="Trailer" class="form-label">Link to YouTube trailer</label>
-                <span asp-validation-for="Trailer" class="text-danger"></span>
+                <input asp-for=Author class="form-control" type="text" placeholder="Author" required />
+                <label asp-for="Author" class="form-label">Author</label>
+                <span asp-validation-for="Author" class="text-danger"></span>
             </div>
         </div>
         <div class="row g-2 mb-2">
-            <input asp-for="Cover" id="coverAspInput" hidden required />
+            <input asp-for="Cover" id="coverAspInput" hidden required/>
             <div class="col-md-3">
                 <input id="coverInput" class="file-input" type="file" accept=".jpg, .jpeg, .png" onchange="setCover()" hidden>
                 <div class="file-drop-area mb-2" style="width:100%; height:100%" onclick="clickCoverInput()" ondrop="dropCoverInput(event);" ondragover="dragOverHandler(event);">
@@ -42,12 +42,9 @@
                                 <span class="visually-hidden">Loading...</span>
                             </div>
                         </div>
-                        <img id="coverImg" style="width:100%;" hidden />
+                        <img id="coverImg" style="width:100%; height:100%" hidden />
                     </div>
                 </div>
-            </div>
-            <div class="col-md-9" id="divTrailer" hidden>
-                <div class="ratio ratio-16x9"> <iframe id="iframeTrailer" src="" allowfullscreen="allowfullscreen"></iframe></div>
             </div>
             <div class="col-md">
                 <div class="form-group">
@@ -56,6 +53,6 @@
                 </div>
             </div>
         </div>
-        <button class="btn btn-primary float-end" type="submit" style="min-width:100px">Add movie</button>
+        <button class="btn btn-primary float-end" type="submit" style="min-width:100px">Add book</button>
     </form>
 </div>

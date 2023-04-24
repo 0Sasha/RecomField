@@ -84,6 +84,9 @@ async function setCover() {
 async function uploadCover(file) {
     let formData = new FormData();
     formData.append("file", file);
+    document.getElementById("uplIcon").hidden = true;
+    document.getElementById("uplText").hidden = true;
+    document.getElementById("spinner").hidden = false;
     let response = await fetch('/Review/UploadImage', { method: "POST", body: formData });
     if (response.ok) {
         const jsonValue = await response.json();
@@ -94,11 +97,8 @@ async function uploadCover(file) {
 function showCover(url) {
     let img = document.getElementById("coverImg");
     img.src = url;
-    if (img.hidden) {
-        img.hidden = false;
-        document.getElementById("uplIcon").remove();
-        document.getElementById("uplText").remove();
-    }
+    document.getElementById("spinner").hidden = true;
+    img.hidden = false;
 }
 
 function showTrailer() {

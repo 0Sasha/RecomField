@@ -20,6 +20,8 @@ public abstract class Product
         set => relYear = value > 0 ? value : throw new ArgumentOutOfRangeException(nameof(ReleaseYear));
     }
 
+    [Required]
+    [MinLength(10)]
     public virtual string Description { get; set; } = "";
 
     public virtual string? Cover { get; set; }

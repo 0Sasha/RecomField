@@ -36,11 +36,11 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> SearchUsers(string text)
+    public async Task<IActionResult> SearchUsers(string text) // Very slow search - add fulltext///////////////
     {
-        var users = await userManager.Users.Where(u => u.UserName.Contains(text) ||
-        u.Email.Contains(text)).ToListAsync();
-        return PartialView("UsersTableBody", users);
+        var users = string.IsNullOrEmpty(text) ? userManager.Users :
+            userManager.Users.Where(u => u.UserName.Contains(text) || u.Email.Contains(text));
+        return PartialView("UsersTableBody", await users.Take(10).ToListAsync());
     }
 
     [HttpPost]
@@ -55,7 +55,7 @@ public class UserController : Controller
     }
 
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AdminPage() => View(await userManager.Users.ToListAsync());
+    public async Task<IActionResult> AdminPage() => View(await userManager.Users.Take(10).ToArrayAsync());
 
     [Authorize(Roles = "Admin")]
     [HttpPost]

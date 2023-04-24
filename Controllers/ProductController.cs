@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.Elfie.Model.Strings;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
@@ -69,6 +70,9 @@ public class ProductController : Controller
         if (prods.Any(p => p.GetType() == product.GetType()))
             throw new ArgumentException("This product already exists in the database", nameof(product));
         product.Description ??= "";
+        if (product is Movie m && m.Trailer != null) m.Trailer = CustomizeLinkToTrailer(m.Trailer);
+        else if (product is Series s && s.Trailer != null) s.Trailer = CustomizeLinkToTrailer(s.Trailer);
+        else if (product is Game g && g.Trailer != null) g.Trailer = CustomizeLinkToTrailer(g.Trailer);
         await context.AddAsync(product);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id = product.Id });
@@ -107,4 +111,11 @@ public class ProductController : Controller
 
     private async Task<ApplicationUser> GetUser(string id) =>
         await userManager.FindByIdAsync(id) ?? throw new Exception("User is not found");
+
+    private static string CustomizeLinkToTrailer(string link)
+    {
+        var startId = link.IndexOf("v=") + 2;
+        var endId = link.IndexOf("&", startId);
+        return "https://www.youtube.com/embed/" + (endId >= 0 ? link[startId..endId] : link[startId..]);
+    }
 }
