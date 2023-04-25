@@ -24,7 +24,7 @@ public class ProductController : Controller
     public async Task<IActionResult> Index(int id)
     {
         var prod = await FindProduct(id);
-        await prod.LoadAsync(context);
+        await prod.LoadAsync(context, true);
         return View(prod);
     }
 

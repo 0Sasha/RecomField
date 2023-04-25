@@ -28,7 +28,7 @@
         </div>
         <div class="col-md text-end">
             <h1>
-                @if (Model.AverageReviewScore > 6)
+                @if (Model.AverageReviewScore > 7)
                 {
                     <span class="badge bg-success">
                         @Model.AverageReviewScore/10
@@ -44,7 +44,7 @@
                 {
                     <span class="badge bg-secondary">n/10</span>
                 }
-                @if (Model.AverageUserScore > 3)
+                @if (Model.AverageUserScore > 3.5)
                 {
                     <span class="badge bg-success">
                         @Model.AverageUserScore/5
@@ -122,7 +122,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var r in Model.Reviews.OrderByDescending(r => r.Likes))
+                    @foreach (var r in Model.Reviews.OrderByDescending(r => r.Likes.Count))
                     {
                         <tr>
                             <td>

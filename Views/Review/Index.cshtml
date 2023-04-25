@@ -15,14 +15,14 @@
             <h2>
                 By <a asp-controller="User" asp-route-id="@Model.Author.Id">@Model.Author.UserName</a> on @Model.PublicationDate.ToString("MMM dd, yyyy")
             </h2>
-            <h5 id="tagsLine" class="mt-3 mb-3">
+            <h5 id="tagsLine" class="mt-3 mb-2">
                 @foreach (var t in Model.Tags)
                 {
                     var s = "[" + t.Body + "]";
                     <span role="button" class='badge text-bg-primary mb-1' onclick="search('@s')">@t.Body</span>
                 }
             </h5>
-            <h1>
+            <h1 class="mb-3">
                 @if (Model.Score.Value > 6)
                 {
                     <span class="badge bg-success">
@@ -42,8 +42,11 @@
             {
                 <img src="@Model.Product.Cover" style="width:100%;"/>
             }
-            <h4><a asp-action="Index" asp-controller="Product" asp-route-id="@Model.ProductId">@Model.Product.Title</a></h4>
-            <h3>
+            @{
+                var title = Model.Product.Title.Length > 25 ? Model.Product.Title[..25] + "..." : Model.Product.Title;
+            }
+            <h5><a asp-action="Index" asp-controller="Product" asp-route-id="@Model.ProductId">@title</a></h5>
+            <h4>
                 @{
                     var rev = @Model.Product.AverageReviewScore > 0.1 ? @Model.Product.AverageReviewScore.ToString() + "/10" : "n/10";
                     var us = @Model.Product.AverageUserScore > 0.1 ? @Model.Product.AverageUserScore.ToString() + "/5" : "n/5";
@@ -56,7 +59,7 @@
                 {
                     <span class="badge text-bg-warning fw-bold">@rev</span>
                 }
-                @if (@Model.Product.AverageUserScore >= 4)
+                @if (@Model.Product.AverageUserScore >= 3.5)
                 {
                     <span class="badge text-bg-success fw-bold">@us</span>
                 }
@@ -64,7 +67,7 @@
                 {
                     <span class="badge text-bg-warning fw-bold">@us</span>
                 }
-            </h3>
+            </h4>
             <h6>Your score</h6>
             @if (appUser != null)
             {

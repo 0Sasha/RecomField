@@ -36,12 +36,14 @@ public abstract class Product
 
     public Product() { }
 
-    public virtual async Task LoadAsync(ApplicationDbContext context)
+    public virtual async Task LoadAsync(ApplicationDbContext context, bool deep = false)
     {
         await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
-        await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).LoadAsync();
-        if (UserScores.Count > 0) AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 1);
+        if (deep) await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score)
+            .Include(r => r.Author).Include(r => r.Likes).LoadAsync();
+        else await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).LoadAsync();
+        if (UserScores.Count > 0) AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 2);
         if (Reviews.Count > 0) AverageReviewScore =
-                Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 1);
+                Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 2);
     }
 }

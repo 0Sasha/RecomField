@@ -1,11 +1,13 @@
-﻿@model IEnumerable<ApplicationUser>
+﻿@model (List<ApplicationUser>, List<IdentityUserRole<string>>)
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Microsoft.AspNetCore.Identity;
+@using RecomField.Data;
 @inject IHtmlLocalizer<SharedResource> Localizer
-@inject UserManager<ApplicationUser> userManager
 
-@foreach (var u in Model)
+@foreach (var u in Model.Item1)
 {
+    bool blocked = u.LockoutEnd > DateTime.UtcNow;
+    bool admin = Model.Item2.Any(r => r.UserId == u.Id);
     <tr>
         <td>
             <div class="dropdown">
@@ -19,7 +21,7 @@
                         </a>
                     </li>
                     <li>
-                        @if (u.LockoutEnd > DateTime.UtcNow)
+                        @if (blocked)
                         {
                             <a class="dropdown-item h-100 w-100 text-start btn" onclick="unblockUser('@u.Id')">
                                 Unblock
@@ -41,7 +43,7 @@
                         </a>
                     </li>
                     <li>
-                        @if (await userManager.IsInRoleAsync(u, "Admin"))
+                        @if (admin)
                         {
                             <a class="dropdown-item h-100 w-100 text-start btn" onclick="revokeAdminRole('@u.Id')">
                                 Revoke admin role
@@ -57,10 +59,7 @@
                 </ul>
             </div>
         </td>
-        <td>
-            @u.Email
-        </td>
-        @if (await userManager.IsInRoleAsync(u, "Admin"))
+        @if (admin)
         {
             <td class="fw-bolder">Admin</td>
         }
@@ -68,7 +67,7 @@
         {
             <td>User</td>
         }
-        @if (u.LockoutEnd > DateTime.UtcNow)
+        @if (blocked)
         {
             if (u.LockoutEnd == DateTimeOffset.MaxValue)
             {
