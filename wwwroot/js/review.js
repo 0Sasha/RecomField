@@ -135,19 +135,22 @@ function addComment(id, visibleCount) {
     });
 }
 
-function showMoreComments(id, count) {
+async function showMoreComments(id, count) {
+    let el = document.getElementById("visibleCount");
+    if (el != undefined) count += Number(el.value)
     $.ajax({
-        url: "/Review/ShowComments?id=" + id + "&count=" + (Number(document.getElementById("visibleCount").value) + count),
+        url: "/Review/ShowComments?id=" + id + "&count=" + count,
         type: "POST",
+        async: true,
         success: function (res) {
             $("#reviewComments").html(res);
         }
     });
 }
 
-function updateReviewComments(id) {
+async function updateReviewComments(id) {
     if (window.location.href.includes("Review/" + id) || window.location.href.includes("Review?id=" + id)) {
-        showMoreComments(id, 1);
+        await showMoreComments(id, 1);
     }
 }
 
@@ -157,6 +160,20 @@ function removeReview(id) {
         type: "POST",
         success: function () {
             updateReviews();
+        }
+    });
+}
+
+async function loadSimilarReviews(id) {
+    $.ajax({
+        url: "/Review/GetSimilarReviews?id=" + id,
+        type: "POST",
+        async: true,
+        success: function (res) {
+            if (res.length > 10) {
+                $("#tbodyReviews").html(res);
+                document.getElementById("similarDiv").hidden = false;
+            }
         }
     });
 }

@@ -42,18 +42,33 @@ public class Review
 
     public List<Comment<Review>> Comments { get; set; } = new();
 
-    public async Task LoadAsync(ApplicationDbContext context)
+    public int LikeCounter { get; set; }
+
+    public async Task LoadAsync(ApplicationDbContext context, string? userId, bool deep = false)
     {
-        if (Author == null) await context.Entry(this).Reference(r => r.Author).LoadAsync();
-        if (Author == null) throw new Exception("Author is not found");
-        await Author.LoadAsync(context);
-        if (Product == null) await context.Entry(this).Reference(r => r.Product).LoadAsync();
-        if (Product == null) throw new Exception("Product is not found");
-        await Product.LoadAsync(context);
-        if (Score == null) await context.Entry(this).Reference(u => u.Score).LoadAsync();
-        if (Score == null) throw new Exception("Score is not found");
+        if (Author == null)
+        {
+            await context.Entry(this).Reference(r => r.Author).LoadAsync();
+            if (Author == null) throw new Exception("Author is not found");
+        }
+        if (Product == null)
+        {
+            await context.Entry(this).Reference(r => r.Product).LoadAsync();
+            if (Product == null) throw new Exception("Product is not found");
+        }
+        await Product.LoadAsync(context, userId);
+        if (Score == null)
+        {
+            await context.Entry(this).Reference(u => u.Score).LoadAsync();
+            if (Score == null) throw new Exception("Score is not found");
+        }
         if (Tags.Count == 0) await context.Entry(this).Collection(u => u.Tags).LoadAsync();
-        if (Likes.Count == 0) await context.Entry(this).Collection(u => u.Likes).LoadAsync();
-        await context.ReviewComments.Where(k => k.Entity == this).Include(k => k.Sender).LoadAsync();
+        if (deep)
+        {
+            await context.Entry(this).Collection(u => u.Likes).LoadAsync();
+            await context.ReviewComments.Where(k => k.Entity == this).Include(k => k.Sender).LoadAsync();
+            LikeCounter = Likes.Count;
+        }
+        else await context.ReviewLikes.SingleOrDefaultAsync(l => l.SenderId == userId && l.EntityId == Id);
     }
 }

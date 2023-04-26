@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using System.ComponentModel.DataAnnotations;
+using static System.Formats.Asn1.AsnWriter;
+
 namespace RecomField.Models;
 
 [Index("Id", IsUnique = true)]
@@ -36,14 +38,27 @@ public abstract class Product
 
     public Product() { }
 
-    public virtual async Task LoadAsync(ApplicationDbContext context, bool deep = false)
+    public virtual async Task LoadAsync(ApplicationDbContext context, string? userId, bool deep = false)
+    {
+        if (userId != null) await context.ProductScores.SingleOrDefaultAsync(s => s.SenderId == userId && s.EntityId == Id);
+        if (deep) await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).Include(r => r.Author).LoadAsync();
+    }
+
+    public virtual async Task ChangeUserScoreAsync(ApplicationDbContext context, ApplicationUser user, int score)
     {
         await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
-        if (deep) await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score)
-            .Include(r => r.Author).Include(r => r.Likes).LoadAsync();
-        else await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).LoadAsync();
-        if (UserScores.Count > 0) AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 2);
-        if (Reviews.Count > 0) AverageReviewScore =
-                Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 2);
+        var s = UserScores.SingleOrDefault(s => s.Sender == user);
+        if (s != null) s.Value = score;
+        else UserScores.Add(new(user, this, score));
+        AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 2);
+    }
+
+    public virtual async Task UpdateAvScoresAsync(ApplicationDbContext context)
+    {
+        await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
+        await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).LoadAsync();
+        AverageUserScore = UserScores.Count > 0 ? Math.Round(UserScores.Select(s => s.Value).Average(), 2) : 0;
+        AverageReviewScore = Reviews.Count > 0 ?
+            Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 2) : 0;
     }
 }

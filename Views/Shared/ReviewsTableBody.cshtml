@@ -59,10 +59,7 @@
             }
         </td>
         <td>
-            <span class="badge text-bg-secondary align-middle" style="min-width:45px; font-size:medium">
-                <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:14px; max-height:14px;">
-                @review.Likes.Count
-            </span>
+            @await Html.PartialAsync("LikesPartial", @review.LikeCounter)
         </td>
         <td>@review.PublicationDate.ToString("dd/MM/yy")</td>
     </tr>

@@ -1,0 +1,13 @@
+﻿@model IEnumerable<Review>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+
+@foreach (var review in Model)
+{
+    <tr>
+        <td><a asp-action="Index" asp-controller="User" asp-route-id="@review.AuthorId">@review.Author?.UserName</a></td>
+        <td><a asp-action="Index" asp-controller="Review" asp-route-id="@review.Id">@review.Title</a></td>
+        <td>@review.Score?.Value</td>
+        <td>@review.LikeCounter</td>
+    </tr>
+}

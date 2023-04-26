@@ -39,11 +39,9 @@ public class ReviewController : Controller
 
     public async Task<IActionResult> Index(int id)
     {
-        var review = await FindReview(id);
-        await review.LoadAsync(context);
         var user = await userManager.GetUserAsync(User);
-        if (user != null)
-            await context.ProductScores.SingleOrDefaultAsync(s => s.Entity == review.Product && s.Sender == user);
+        var review = await FindReview(id);
+        await review.LoadAsync(context, user?.Id);
         return View(review);
     }
 
@@ -100,6 +98,7 @@ public class ReviewController : Controller
         review.Body = CustomizeStringHtml(review.Body);
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         await context.AddAsync(review);
+        await review.Product.UpdateAvScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id = review.Id });
     }
@@ -108,7 +107,7 @@ public class ReviewController : Controller
     private async Task<IActionResult> EditReview(ApplicationUser author, int id, string title, string tags, string body, int score)
     {
         var review = await FindReview(id);
-        await context.Products.FindAsync(review.ProductId);
+        await context.Entry(review).Reference(u => u.Product).LoadAsync();
         await context.Entry(review).Reference(u => u.Score).LoadAsync();
         await context.Entry(review).Collection(u => u.Tags).LoadAsync();
         review.Title = title;
@@ -116,6 +115,7 @@ public class ReviewController : Controller
         review.Tags.Clear();
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         review.Score = new(author, review, score);
+        if (review.Product != null) await review.Product.UpdateAvScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id });
     }
@@ -126,7 +126,7 @@ public class ReviewController : Controller
         var user = await GetUser();
         var review = await FindReview(id);
         if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
-        await review.LoadAsync(context);
+        await review.LoadAsync(context, user.Id, true);
         context.Reviews.Remove(review);
         await context.SaveChangesAsync();
         return RedirectToAction("Index", "User", new { id = review.AuthorId });
@@ -174,16 +174,32 @@ public class ReviewController : Controller
         var user = await GetUser();
         var review = await FindReview(id);
         await context.Entry(review).Collection(u => u.Likes).LoadAsync();
-        await context.Entry(review).Reference(u => u.Author).LoadAsync();
+        //await context.Entry(review).Reference(u => u.Author).LoadAsync();
         if (review.Likes.Any(l => l.Sender == user)) review.Likes.RemoveAll(l => l.Sender == user);
         else review.Likes.Add(new(user, review));
+        review.LikeCounter = review.Likes.Count;
         await context.SaveChangesAsync();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> GetSimilarReviews(int id)
+    {
+        var review = await FindReview(id);
+        var similar = await context.Reviews.Where(r => r.ProductId == review.ProductId).ToListAsync();
+        similar.Remove(review);
+        var sorted = similar.OrderByDescending(r => r.LikeCounter).Take(10);
+        foreach (var r in sorted)
+        {
+            await context.Entry(r).Reference(r => r.Author).LoadAsync();
+            await context.Entry(r).Reference(r => r.Score).LoadAsync();
+        }
+        return PartialView("SimilarTableBody", sorted);
     }
 
     public async Task<IActionResult> ConvertToPDF(int id)
     {
         var review = await FindReview(id);
-        await review.LoadAsync(context);
+        await review.LoadAsync(context, null);
         var backColor = review.Score.Value > 6 ? "forestgreen" : "orange";
         var html = "<h5>Review of " + review.Product.Title + "</h5><style>.badge { background-color: " + backColor + ";color: white; " +
             "padding: 4px 10px; text-align: center; border-radius: 5px;\r\n}</style> <h1>" +

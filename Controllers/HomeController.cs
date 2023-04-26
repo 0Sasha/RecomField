@@ -33,6 +33,13 @@ namespace RecomField.Controllers
 
         public async Task<IActionResult> Index()
         {
+            /*var prods = await context.Products.ToArrayAsync();
+            foreach (var p in prods) await p.UpdateAvScoresAsync(context);
+
+            var revs = await context.Reviews.ToArrayAsync();
+            foreach (var r in revs) await r.UpdateLikeCounter(context);
+            await context.SaveChangesAsync();*/
+
             UpdateUserCookies(await userManager.GetUserAsync(User), Response.Cookies);
             return View((await context.Reviews.Include(r => r.Product).Include(r => r.Score).ToArrayAsync()).TakeLast(10).Reverse());
         }
@@ -196,6 +203,26 @@ namespace RecomField.Controllers
                     count--;
                 }
                 foreach (var r in selected) r.Likes.Add(new(user, r));
+            }
+            await context.SaveChangesAsync();
+        }
+
+        private async Task GenerateComments()
+        {
+            Random rand = new();
+            var comments = System.IO.File.ReadAllLines("wwwroot/files/comments.txt");
+            var users = await context.Users.ToArrayAsync();
+            var reviews = await context.Reviews.ToArrayAsync();
+            for (int i = 0; i < reviews.Length; i++)
+            {
+                var count = rand.Next(0, 7);
+                while(count > 0)
+                {
+                    var user = users[rand.Next(users.Length)];
+                    var body = comments[rand.Next(comments.Length)];
+                    reviews[i].Comments.Add(new(user, reviews[i], body));
+                    count--;
+                }
             }
             await context.SaveChangesAsync();
         }

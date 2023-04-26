@@ -16,9 +16,9 @@ public class ApplicationUser : IdentityUser
     public async Task LoadAsync(ApplicationDbContext context, bool deep = false)
     {
         if (deep) await context.Reviews.Where(r => r.Author == this)
-                .Include(r => r.Product).Include(r => r.Score).Include(r => r.Likes).LoadAsync();
-        else await context.Reviews.Where(r => r.Author == this).Include(r => r.Likes).LoadAsync();
-        if (Reviews.Count > 0) ReviewLikes = Reviews.Select(r => r.Likes.Count).Sum();
+                .Include(r => r.Product).Include(r => r.Score).LoadAsync();
+        else await context.Entry(this).Collection(r => r.Reviews).LoadAsync();
+        if (Reviews.Count > 0) ReviewLikes = Reviews.Select(r => r.LikeCounter).Sum();
     }
 
     public async Task LoadAllDependent(ApplicationDbContext context)

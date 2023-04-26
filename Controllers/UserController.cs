@@ -29,7 +29,7 @@ public class UserController : Controller
 
     public async Task<IActionResult> Index(string? id = null)
     {
-        var user = (id == null ? await userManager.GetUserAsync(User) :
+        var user = (string.IsNullOrEmpty(id) ? await userManager.GetUserAsync(User) :
             await userManager.FindByIdAsync(id)) ?? throw new Exception("User is not found");
         await user.LoadAsync(context, true);
         return View(user);

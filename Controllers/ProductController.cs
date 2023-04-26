@@ -24,7 +24,8 @@ public class ProductController : Controller
     public async Task<IActionResult> Index(int id)
     {
         var prod = await FindProduct(id);
-        await prod.LoadAsync(context, true);
+        var user = await userManager.GetUserAsync(User);
+        await prod.LoadAsync(context, user?.Id, true);
         return View(prod);
     }
 
@@ -96,10 +97,7 @@ public class ProductController : Controller
     {
         var user = await GetUser();
         var prod = await FindProduct(id);
-        await context.Entry(prod).Collection(p => p.UserScores).LoadAsync();
-        var s = prod.UserScores.SingleOrDefault(s => s.Sender == user);
-        if (s != null) s.Value = score;
-        else prod.UserScores.Add(new(user, prod, score));
+        await prod.ChangeUserScoreAsync(context, user, score);
         await context.SaveChangesAsync();
     }
 

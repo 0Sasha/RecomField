@@ -1,0 +1,11 @@
+﻿@model int
+@{
+    string count;
+    if (Model < 1000) count = Model.ToString();
+    else count = Math.Round(Model / 1000D, 1).ToString() + "K";
+}
+
+<span class="badge text-bg-secondary fw-bold align-middle" style="font-size:medium">
+    <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:16px; max-height:16px;">
+    @count
+</span>

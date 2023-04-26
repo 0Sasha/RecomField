@@ -11,17 +11,8 @@
 
 <div class="container-fluid">
     <div class="row">
-        <h1 class="card-title">@Model.UserName</h1>
-    </div>
-    <div class="row mb-1">
-        <div class="col-md mb-1">
-            <h5 class="card-subtitle">
-                <span class="badge text-bg-secondary fw-bold align-middle">
-                    <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:16px; max-height:16px;">
-                    @Model.ReviewLikes
-                </span>
-                for @Model.Reviews.Count reviews
-            </h5>
+        <div class="col-md">
+            <h1 class="card-title">@Model.UserName</h1>
         </div>
         @if (authorOrAdmin)
         {
@@ -40,6 +31,14 @@
                 </div>
             </div>
         }
+    </div>
+    <div class="row">
+        <div class="col-md mb-1">
+            <h5 class="card-subtitle">
+                @await Html.PartialAsync("LikesPartial", @Model.ReviewLikes)
+                for @Model.Reviews.Count reviews
+            </h5>
+        </div>
     </div>
     <hr />
     <div class="row justify-content-between">
