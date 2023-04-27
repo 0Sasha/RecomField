@@ -33,7 +33,7 @@
                     return;
                 }
 
-                if (request.responseText == "The size of file is more 5MB") {
+                if (request.responseText.startsWith("Error")) {
                     reject(request.responseText);
                     tinymce.execCommand('Undo');
                     return;

@@ -47,15 +47,19 @@ public class ReviewController : Controller
 
     [Authorize]
     [HttpGet]
-    public async Task<IActionResult> AddReview(string? authorId = null)
+    public async Task<IActionResult> AddReview(int prodId, string? authorId = null)
     {
         var user = await GetUser();
-        if (authorId == null) return View("EditReview", new Review() { AuthorId = user.Id });
+        var id = authorId ?? user.Id;
+        if (await context.Reviews.SingleOrDefaultAsync(r => r.AuthorId == id && r.ProductId == prodId) != null)
+            return RedirectToAction(nameof(EditReview), new { id = prodId });
+        var prod = await context.Products.FindAsync(prodId) ?? throw new ArgumentException("Product is not found", nameof(prodId));
+        if (authorId == null) return View("EditReview", new Review() { Product = prod, AuthorId = user.Id });
         else if (authorId != user.Id && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
         else
         {
             var author = await userManager.FindByIdAsync(authorId) ?? throw new Exception("Author is not found");
-            return View("EditReview", new Review() { AuthorId = author.Id });
+            return View("EditReview", new Review() { Product = prod, AuthorId = author.Id });
         }
     }
 
@@ -66,6 +70,7 @@ public class ReviewController : Controller
         var user = await GetUser();
         var review = await FindReview(id);
         if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
+        await context.Entry(review).Reference(r => r.Product).LoadAsync();
         await context.Entry(review).Reference(r => r.Score).LoadAsync();
         await context.Entry(review).Collection(r => r.Tags).LoadAsync();
         review.Body = ReverseCustomizedStringHtml(review.Body);
@@ -75,26 +80,22 @@ public class ReviewController : Controller
     [Authorize]
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditReview([Bind("AuthorId,Title,Body")] Review review)
+    public async Task<IActionResult> EditReview([Bind("Id,AuthorId,ProductId,Title,Body")] Review review)
     {
-        if (review.Title == null) throw new ArgumentNullException(nameof(review.Title));
-        if (review.Body == null) throw new ArgumentNullException(nameof(review.Body));
-        if (review.AuthorId == null) throw new ArgumentNullException(nameof(review.Body));
-        var author = await userManager.FindByIdAsync(review.AuthorId) ?? throw new Exception("Author is not found");
+        if (review.AuthorId == null) throw new ArgumentNullException(nameof(review.AuthorId));
+        if (review.ProductId == 0) throw new ArgumentNullException(nameof(review.ProductId));
         string tags = Request.Form["TagsForServer"].Single() ?? throw new Exception("Tags is not filled");
         int score = int.Parse(Request.Form["RateForServer"].Single() ?? throw new Exception("Score is not defined"));
-        string? id = Request.Form["IdForServer"].SingleOrDefault();
-        return id == null ? await AddReview(author, review, tags, score) :
-            await EditReview(author, int.Parse(id), review.Title, tags, review.Body, score);
+        return review.Id == 0 ? await AddReview(review, tags, score) :
+            await EditReview(review.Id, review.Title, tags, review.Body, score);
     }
 
-    private async Task<IActionResult> AddReview(ApplicationUser author, Review review, string tags, int score)
+    private async Task<IActionResult> AddReview(Review review, string tags, int score)
     {
         review.PublicationDate = DateTime.UtcNow;
-        review.Author = author;
-        int idProd = int.Parse(Request.Form["ProductIdForServer"].Single() ?? throw new Exception("Product id is not filled"));
-        review.Product = await context.Products.FindAsync(idProd) ?? throw new Exception("Product is not found");
-        review.Score = new(author, review, score);
+        review.Author = await userManager.FindByIdAsync(review.AuthorId) ?? throw new Exception("Author is not found"); ;
+        review.Product = await context.Products.FindAsync(review.ProductId) ?? throw new Exception("Product is not found");
+        review.Score = new(review.Author, review, score);
         review.Body = CustomizeStringHtml(review.Body);
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         await context.AddAsync(review);
@@ -104,9 +105,10 @@ public class ReviewController : Controller
     }
     
     //TODO////////////////////////////////////////////////////////////////////////////////////////
-    private async Task<IActionResult> EditReview(ApplicationUser author, int id, string title, string tags, string body, int score)
+    private async Task<IActionResult> EditReview(int id, string title, string tags, string body, int score)
     {
         var review = await FindReview(id);
+        await context.Entry(review).Reference(u => u.Author).LoadAsync();
         await context.Entry(review).Reference(u => u.Product).LoadAsync();
         await context.Entry(review).Reference(u => u.Score).LoadAsync();
         await context.Entry(review).Collection(u => u.Tags).LoadAsync();
@@ -114,7 +116,7 @@ public class ReviewController : Controller
         review.Body = CustomizeStringHtml(body); //TODO////////////////////////////////////////////////////////////////
         review.Tags.Clear();
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
-        review.Score = new(author, review, score);
+        review.Score = new(review.Author, review, score);
         if (review.Product != null) await review.Product.UpdateAvScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id });
@@ -139,7 +141,18 @@ public class ReviewController : Controller
         if (file == null) throw new ArgumentNullException(nameof(file));
         if (file.Length > 5000000)
         {
-            await Response.WriteAsync("The size of file is more than 5MB");
+            await Response.WriteAsync("Error: The size of file is more than 5MB");
+            return;
+        }
+        if (!file.ContentType.StartsWith("image"))
+        {
+            await Response.WriteAsync("Error: The file is not an image");
+            return;
+        }
+        var format = file.ContentType[6..];
+        if (format != "jpeg" && format != "jpg" && format != "png")
+        {
+            await Response.WriteAsync("Error: Incorrect format of image");
             return;
         }
         var uploadParams = new ImageUploadParams() { File = new FileDescription("file", file.OpenReadStream()) };

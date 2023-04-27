@@ -8,7 +8,7 @@
     <tr>
         <td>
             <a class="h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
-                @review.Product.Title
+                @review.Product?.Title
             </a>
         </td>
         <td>
@@ -45,21 +45,10 @@
             }
         </td>
         <td>
-            @if (review.Score.Value >= 7)
-            {
-                <span class="badge text-bg-success align-middle" style="min-width:45px; font-size:medium">
-                    @review.Score.Value
-                </span>
-            }
-            else
-            {
-                <span class="badge text-bg-warning align-middle" style="min-width:45px; font-size:medium">
-                    @review.Score.Value
-                </span>
-            }
+            @await Html.PartialAsync("ScorePartial", review.Score?.Value)
         </td>
         <td>
-            @await Html.PartialAsync("LikesPartial", @review.LikeCounter)
+            @await Html.PartialAsync("LikesPartial", review.LikeCounter)
         </td>
         <td>@review.PublicationDate.ToString("dd/MM/yy")</td>
     </tr>

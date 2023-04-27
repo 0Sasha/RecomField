@@ -1,0 +1,15 @@
+﻿@model int
+
+
+@if (Model >= 7)
+{
+    <span class="badge text-bg-success align-middle" style="min-width:45px; min-height:32px; font-size:large; font-weight:700">
+        @Model
+    </span>
+}
+else
+{
+    <span class="badge text-bg-warning align-middle" style="min-width:45px; font-size:large; font-weight:700">
+        @Model
+    </span>
+}

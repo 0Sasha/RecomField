@@ -2,32 +2,26 @@
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IHtmlLocalizer<SharedResource> Localizer
 @{
-    ViewData["Title"] = @Localizer["Edit review"];
     if (Model.AuthorId == null) throw new ArgumentNullException(nameof(Model.AuthorId));
+    if (Model.Product == null) throw new ArgumentNullException(nameof(Model.Product));
+    Model.ProductId = Model.Product.Id;
+    string head = "Review of " + Model.Product.Title;
+    ViewData["Title"] = head;
 }
 
 <div class="container-fluid mb-5">
+    <h2>@head</h2>
+    <hr />
     <form asp-action="EditReview">
-        <input asp-for=AuthorId hidden/>
-        @if(Model.Id == 0)
-        {
-            <div class="row g-2 mb-3">
-                <div class="col-md-3">
-                    <button class="btn btn-primary w-100" type="button" onclick="updateProductsModal('@Model.AuthorId')" data-bs-toggle="modal" data-bs-target="#productsModal">Select product</button>
-                </div>
-                <div class="col-md">
-                    <input class="form-control" placeholder="Product title" id="titleProd" readonly>
-                </div>
-                <div class="col-md-2">
-                    <input class="form-control" placeholder="Product type" id="typeProd" readonly>
-                </div>
-                <div class="col-md-2">
-                    <input class="form-control" placeholder="Release year" id="releaseProd" readonly>
-                </div>
-            </div>
-            <hr />
-        }
-        <div class=" row g-2">
+        <div hidden>
+            <input asp-for=Id />
+            <input asp-for=AuthorId />
+            <input asp-for=ProductId />
+            <input name="TagsForServer" id="TagsForServer" required />
+            <input name="RateForServer" id="RateForServer" required />
+            <input id="bodyIsFull" required />
+        </div>
+        <div class="row g-2">
             <div class="col-md">
                 <h5>Title </h5>
                 <div class="form-floating mb-2">
@@ -50,7 +44,7 @@
         <hr />
         <h5>Content</h5>
         <div class="form-group mb-3">
-            <textarea asp-for=Body id="tiny" class="form-control" rows="15" placeholder="Content"></textarea>
+            <textarea asp-for=Body id="tiny" class="form-control" rows="20" placeholder="Content"></textarea>
             <span asp-validation-for="Body" class="text-danger"></span>
         </div>
         <hr />
@@ -65,25 +59,18 @@
                 }
             </div>
         </div>
-        <div hidden>
-            @if (Model.Id != 0)
-            {
-                <input name="IdForServer" id="IdForServer" value="@Model.Id" />
-            }
-            else
-            {
-                <input name="ProductIdForServer" id="ProductIdForServer" required />
-            }
-            <input name="TagsForServer" id="TagsForServer" required />
-            <input name="RateForServer" id="RateForServer" required />
-            <input id="bodyIsFull" required />
-        </div>
-        @foreach (var t in Model.Tags)
+        @if(Model.Tags.Count == 0)
         {
             <script>
-                addNewTag('@t.Body');
+                addNewTag('@Model.Product.ReleaseYear');
             </script>
         }
+        else foreach (var t in Model.Tags)
+            {
+                <script>
+                    addNewTag('@t.Body');
+                </script>
+            }
         @if (Model.Score != null)
         {
             <script>

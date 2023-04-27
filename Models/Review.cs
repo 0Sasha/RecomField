@@ -69,6 +69,6 @@ public class Review
             await context.ReviewComments.Where(k => k.Entity == this).Include(k => k.Sender).LoadAsync();
             LikeCounter = Likes.Count;
         }
-        else await context.ReviewLikes.SingleOrDefaultAsync(l => l.SenderId == userId && l.EntityId == Id);
+        else await context.ReviewLikes.FirstOrDefaultAsync(l => l.SenderId == userId && l.EntityId == Id);
     }
 }
