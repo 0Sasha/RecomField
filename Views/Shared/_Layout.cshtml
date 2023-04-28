@@ -102,21 +102,13 @@
                         <form class="d-flex dropdown" role="search" style="min-width:75%;" autocomplete="off">
                             <div class="input-group" >
                                 <select class="form-select" type="button" id="typeSearch" style="min-width:130px;max-width:130px;">
-                                    <option selected >Reviews</option>
+                                    <option value="0" selected>Products</option>
+                                    <option value="1">Reviews</option>
                                 </select>
                                 <input class="form-control dropdown-toggle" id="searchLine" aria-expanded="false" placeholder="Search" aria-label="Search review" aria-describedby="typeSearch" onblur="hideSearchList()" onfocus="updateSearchList()" onkeyup="updateSearchList()">
                                 <div class="dropdown-menu" style="width:100%" id="dropdownMenu" onmouseover="forbidHidingSearchList()" onmouseout="allowHidingSearchList()">
                                     <table class="table table-striped table-hover align-middle">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col">Product</th>
-                                                <th scope="col">Title</th>
-                                                <th scope="col">Score</th>
-                                                <th scope="col">Date</th>
-                                            </tr>
-                                        </thead>
                                         <tbody id="tbodySearch">
-
                                         </tbody>
                                     </table>
                                 </div>

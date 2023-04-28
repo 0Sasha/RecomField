@@ -1,0 +1,12 @@
+﻿@model IEnumerable<Product>
+
+@foreach (var product in Model)
+{
+    <tr>
+        <td>
+            <a asp-action="Index" asp-controller="Product" asp-route-id="@product.Id">
+                @await Html.PartialAsync("ProductCardPartialMini", product)
+            </a>
+        </td>
+    </tr>
+}

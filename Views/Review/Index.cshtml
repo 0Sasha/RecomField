@@ -38,36 +38,7 @@
             </h1>
         </div>
         <div class="col-md align-content-end align-items-end text-center">
-            @if (Model.Product?.Cover?.Length > 0)
-            {
-                <img src="@Model.Product.Cover" style="width:100%;"/>
-            }
-            @{
-                var title = Model.Product.Title.Length > 25 ? Model.Product.Title[..25] + "..." : Model.Product.Title;
-            }
-            <h5><a asp-action="Index" asp-controller="Product" asp-route-id="@Model.ProductId">@title</a></h5>
-            <h4>
-                @{
-                    var rev = @Model.Product.AverageReviewScore > 0.1 ? @Model.Product.AverageReviewScore.ToString() + "/10" : "n/10";
-                    var us = @Model.Product.AverageUserScore > 0.1 ? @Model.Product.AverageUserScore.ToString() + "/5" : "n/5";
-                }
-                @if (@Model.Product.AverageReviewScore >= 7)
-                {
-                    <span class="badge text-bg-success fw-bold">@rev</span>
-                }
-                else
-                {
-                    <span class="badge text-bg-warning fw-bold">@rev</span>
-                }
-                @if (@Model.Product.AverageUserScore >= 3.5)
-                {
-                    <span class="badge text-bg-success fw-bold">@us</span>
-                }
-                else
-                {
-                    <span class="badge text-bg-warning fw-bold">@us</span>
-                }
-            </h4>
+            @await Html.PartialAsync("ProductCardPartial", Model.Product)
             <h6>Your score</h6>
             @if (appUser != null)
             {

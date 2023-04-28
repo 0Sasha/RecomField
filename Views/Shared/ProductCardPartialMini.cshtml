@@ -1,0 +1,45 @@
+﻿@model Product
+
+<div class="row g-2">
+    @if (Model.Cover?.Length > 0)
+    {
+        <div class="col-auto" style="height:100px">
+            <img src="@Model.Cover" style="height:100px;" />
+        </div>
+    }
+    <div class="col">
+        <div class="row" style="font-size:120%; font-weight:500">
+            <div class="col">
+                @Model.Title
+            </div>
+        </div>
+        @{
+            var rev = @Model.AverageReviewScore > 0.1 ? @Model.AverageReviewScore.ToString() + "/10" : "n/10";
+            var us = @Model.AverageUserScore > 0.1 ? @Model.AverageUserScore.ToString() + "/5" : "n/5";
+        }
+        <div class="row" style="font-size:140%">
+            <div class="col">
+                @if (@Model.AverageReviewScore >= 7)
+                {
+                    <span class="badge text-bg-success rounded-3">@rev</span>
+                }
+                else
+                {
+                    <span class="badge text-bg-warning rounded-3">@rev</span>
+                }
+            </div>
+        </div>
+        <div class="row" style="font-size:110%">
+            <div class="col">
+                @if (@Model.AverageUserScore >= 3.5)
+                {
+                    <span class="badge text-bg-success">@us</span>
+                }
+                else
+                {
+                    <span class="badge text-bg-warning">@us</span>
+                }
+            </div>
+        </div>
+    </div>
+</div>

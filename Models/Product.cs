@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using System.ComponentModel.DataAnnotations;
-using static System.Formats.Asn1.AsnWriter;
-
 namespace RecomField.Models;
 
 [Index("Id", IsUnique = true)]

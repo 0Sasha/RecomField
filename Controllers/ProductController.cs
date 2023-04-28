@@ -86,10 +86,12 @@ public class ProductController : Controller
         var user = await GetUser(authorId);
         var reviewed = context.Reviews.Where(r => r.Author == user).Include(r => r.Product).Select(r => r.Product);
         if (string.IsNullOrEmpty(partTitle))
-            return PartialView("ProductsTableBody", await context.Products.Except(reviewed).Take(7).ToArrayAsync());
+            return PartialView("ProductsTableBody", (await context.Products.Except(reviewed).Take(7).ToListAsync(), authorId));
         var request = "\"" + partTitle + "*\" OR \"" + partTitle + "\"";
-        return PartialView("ProductsTableBody", await
-            context.Products.Where(p => EF.Functions.Contains(p.Title, request)).Except(reviewed).Take(7).ToArrayAsync());
+        var byTitle = await context.Products.Where(p => EF.Functions.Contains(p.Title, request)).ToArrayAsync();
+        var byAuthor = await context.Books.Where(p => EF.Functions.Contains(p.Author, request)).Select(b => (Product)b).ToArrayAsync();
+        var founded = byTitle.Union(byAuthor).Except(reviewed).Take(7).ToList();
+        return PartialView("ProductsTableBody", (founded, authorId));
     }
 
     [HttpPost]

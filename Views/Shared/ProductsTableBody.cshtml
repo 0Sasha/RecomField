@@ -1,16 +1,13 @@
-﻿@model IEnumerable<Product>
-@using static System.Web.HttpUtility;
+﻿@model (List<Product>, string)
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IHtmlLocalizer<SharedResource> Localizer
 
-@foreach (var p in Model)
+@foreach (var p in Model.Item1)
 {
     var type = p.GetType().Name;
     <tr>
         <td>@type</td>
-        <td>
-            <button class="btn w-100 h-100 text-start" data-bs-dismiss="modal" onclick="selectProduct('@p.Id', '@type', '@JavaScriptStringEncode(p.Title)', '@p.ReleaseYear')">@p.Title</button>
-        </td>
-        <td>@p.ReleaseYear</td>
+        <td><a asp-controller="Product" asp-action="Index" asp-route-id="@p.Id">@p.Title</a></td>
+        <td><a asp-controller="Review" asp-action="AddReview" asp-route-prodId="@p.Id" asp-route-authorId="@Model.Item2">Write a review</a></td>
     </tr>
 }

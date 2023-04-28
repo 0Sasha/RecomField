@@ -7,7 +7,7 @@
 {
     <tr>
         <td>
-            <a class="h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
+            <a asp-controller="Product" asp-action="Index" asp-route-id="@review.ProductId">
                 @review.Product?.Title
             </a>
         </td>
@@ -50,6 +50,5 @@
         <td>
             @await Html.PartialAsync("LikesPartial", review.LikeCounter)
         </td>
-        <td>@review.PublicationDate.ToString("dd/MM/yy")</td>
     </tr>
 }

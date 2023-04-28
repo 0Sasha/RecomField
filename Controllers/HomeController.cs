@@ -227,27 +227,36 @@ namespace RecomField.Controllers
             await context.SaveChangesAsync();
         }
 
-        public async Task<IActionResult> Search(string text)
+        public async Task<IActionResult> Search(string text, bool products) => products ?
+            await SearchProducts(text) : text.StartsWith('[') && text.EndsWith("]") ?
+                await SearchReviewsByTag(text[1..(text.Length - 1)]) : await SearchReviews(text);
+
+        private async Task<IActionResult> SearchProducts(string text)
         {
-            string request;
-            if (text.StartsWith('[') && text.EndsWith("]"))
-            {
-                text = text[1..(text.Length - 1)];
-                request = "\"" + text + "*\" OR \"" + text + "\"";
-                var res = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Include(r => r.Entity.Product).Include(r => r.Entity.Score);
-                return PartialView("MainReviewsTableBody", await res.Select(t => t.Entity).ToArrayAsync());
-            }
-            else
-            {
-                request = "\"" + text + "*\" OR \"" + text + "\"";
-                var byTitle = context.Reviews.Where(x => EF.Functions.Contains(x.Title, request));
-                var byBody = context.Reviews.Where(x => EF.Functions.Contains(x.Body, request));
-                var byProduct = context.Reviews.Where(x => EF.Functions.Contains(x.Product.Title, request));
-                var byTags = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
-                var byComments = context.ReviewComments.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
-                var founded = byTitle.Union(byBody).Union(byProduct).Union(byTags).Union(byComments);
-                return PartialView("MainReviewsTableBody", await founded.Include(r => r.Product).Include(r => r.Score).ToArrayAsync());
-            }
+            var request = "\"" + text + "*\" OR \"" + text + "\"";
+            var byTitle = await context.Products.Where(x => EF.Functions.Contains(x.Title, request)).ToArrayAsync();
+            var byDescription = await context.Products.Where(x => EF.Functions.Contains(x.Description, request)).ToArrayAsync();
+            var byAuthor = (await context.Books.Where(x => EF.Functions.Contains(x.Author, request)).ToArrayAsync()).Select(b => (Product)b);
+            return PartialView("MainProductsTableBody", byTitle.Union(byDescription).Union(byAuthor));
+        }
+
+        private async Task<IActionResult> SearchReviews(string text)
+        {
+            var request = "\"" + text + "*\" OR \"" + text + "\"";
+            var byTitle = context.Reviews.Where(x => EF.Functions.Contains(x.Title, request));
+            var byBody = context.Reviews.Where(x => EF.Functions.Contains(x.Body, request));
+            var byProduct = context.Reviews.Where(x => EF.Functions.Contains(x.Product.Title, request));
+            var byTags = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
+            var byComments = context.ReviewComments.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
+            var founded = byTitle.Union(byBody).Union(byProduct).Union(byTags).Union(byComments);
+            return PartialView("MainReviewsTableBody", await founded.Include(r => r.Product).Include(r => r.Score).ToArrayAsync());
+        }
+
+        private async Task<IActionResult> SearchReviewsByTag(string text)
+        {
+            var request = "\"" + text + "*\" OR \"" + text + "\"";
+            var res = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Include(r => r.Entity.Product).Include(r => r.Entity.Score);
+            return PartialView("MainReviewsTableBody", await res.Select(t => t.Entity).ToArrayAsync());
         }
 
         [HttpPost]

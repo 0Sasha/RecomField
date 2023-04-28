@@ -1,0 +1,32 @@
+﻿@model Product
+
+@if (Model.Cover?.Length > 0)
+{
+    <img src="@Model.Cover" style="width:100%;" />
+}
+@{
+    var title = Model.Title?.Length > 25 ? Model.Title[..25] + "..." : Model.Title;
+}
+<h5><a asp-action="Index" asp-controller="Product" asp-route-id="@Model.Id">@title</a></h5>
+<h4>
+    @{
+        var rev = @Model.AverageReviewScore > 0.1 ? @Model.AverageReviewScore.ToString() + "/10" : "n/10";
+        var us = @Model.AverageUserScore > 0.1 ? @Model.AverageUserScore.ToString() + "/5" : "n/5";
+    }
+    @if (@Model.AverageReviewScore >= 7)
+    {
+        <span class="badge text-bg-success fw-bold">@rev</span>
+    }
+    else
+    {
+        <span class="badge text-bg-warning fw-bold">@rev</span>
+    }
+    @if (@Model.AverageUserScore >= 3.5)
+    {
+        <span class="badge text-bg-success fw-bold">@us</span>
+    }
+    else
+    {
+        <span class="badge text-bg-warning fw-bold">@us</span>
+    }
+</h4>

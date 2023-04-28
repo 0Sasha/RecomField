@@ -50,17 +50,14 @@ public class ReviewController : Controller
     public async Task<IActionResult> AddReview(int prodId, string? authorId = null)
     {
         var user = await GetUser();
-        var id = authorId ?? user.Id;
-        if (await context.Reviews.SingleOrDefaultAsync(r => r.AuthorId == id && r.ProductId == prodId) != null)
-            return RedirectToAction(nameof(EditReview), new { id = prodId });
+        authorId ??= user.Id;
+        var review = await context.Reviews.SingleOrDefaultAsync(r => r.AuthorId == authorId && r.ProductId == prodId);
+        if (review != null) return RedirectToAction(nameof(EditReview), new { id = review.Id });
         var prod = await context.Products.FindAsync(prodId) ?? throw new ArgumentException("Product is not found", nameof(prodId));
-        if (authorId == null) return View("EditReview", new Review() { Product = prod, AuthorId = user.Id });
-        else if (authorId != user.Id && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
-        else
-        {
-            var author = await userManager.FindByIdAsync(authorId) ?? throw new Exception("Author is not found");
-            return View("EditReview", new Review() { Product = prod, AuthorId = author.Id });
-        }
+        if (authorId == user.Id) return View("EditReview", new Review() { Product = prod, AuthorId = user.Id });
+        else if (!User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
+        var author = await userManager.FindByIdAsync(authorId) ?? throw new Exception("Author is not found");
+        return View("EditReview", new Review() { Product = prod, AuthorId = author.Id });
     }
 
     [Authorize]

@@ -1,13 +1,4 @@
 ﻿
-function selectProduct(id, type, title, release) {
-    document.getElementById("ProductIdForServer").value = id;
-    document.getElementById("typeProd").value = type;
-    document.getElementById("titleProd").value = title;
-    document.getElementById("releaseProd").value = release;
-    clearTags();
-    addNewTag(release);
-}
-
 function checkTag() {
     let el = document.getElementById("tagForm");
     if (el.value[el.value.length - 1] == ',') {
@@ -55,14 +46,6 @@ function deleteTag(id) { // Check ////////////////////////////////////////////
     if (val == fullTag) el.value = "";
     else if (val.startsWith(fullTag)) el.value = val.replace(fullTag + ',', '');
     else el.value = val.replace(',' + fullTag, '');
-}
-
-function clearTags() {
-    const e = document.getElementById("tagsLine");
-    while (e.children.length > 0) {
-        e.removeChild(e.children[0]);
-    }
-    document.getElementById('TagsForServer').value = "";
 }
 
 function changeRate(rate) {

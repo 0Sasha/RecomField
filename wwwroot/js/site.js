@@ -88,18 +88,20 @@ function filterTable(idbodyTable, idSearchInput, urlMethod) {
 }
 
 
-function search(text) {
+function searchReviewsByTag(text) {
     if (text.length > 0) {
         document.getElementById('searchLine').value = text;
+        document.getElementById('typeSearch').value = '1';
         updateSearchList();
     }
 }
 
 function updateSearchList() {
     let text = document.getElementById('searchLine').value;
+    let type = document.getElementById('typeSearch').value == '0';
     if (text.length > 0) {
         $.ajax({
-            url: "/Home/Search?text=" + text,
+            url: "/Home/Search?text=" + text + "&products=" + type,
             type: "POST",
             async: true,
             success: function (res) {
