@@ -1,0 +1,104 @@
+﻿@model Product[]
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+
+@if (Model.Length != 6) throw new Exception("Unexpected count of elements");
+
+<div class="col-md">
+    <div class="row mb-2">
+        @foreach (var p in Model[..3])
+        {
+            <div class="col-4">
+                @if (p.Cover?.Length > 0)
+                {
+                    <a asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">
+                        <img src="@p.Cover" style="width:100%;" />
+                    </a>
+                }
+            </div>
+        }
+    </div>
+    <div class="row">
+        @foreach (var p in Model[..3])
+        {
+            var rev = p.AverageReviewScore > 0.1 ? p.AverageReviewScore.ToString() + "/10" : "n/10";
+            var us = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString() + "/5" : "n/5";
+            <div class="col-4">
+                @if (p.AverageReviewScore >= 7)
+                {
+                    <span class="badge text-bg-success mb-1" style="min-width:70px;font-weight:500; font-size:15px">@rev</span>
+                }
+                else
+                {
+                    <span class="badge text-bg-warning mb-1" style="min-width:70px;font-weight:500; font-size:15px">@rev</span>
+                }
+                @if (p.AverageUserScore >= 3.5)
+                {
+                    <span class="badge text-bg-success" style="min-width:70px;font-weight:500; font-size:15px">@us</span>
+                }
+                else
+                {
+                    <span class="badge text-bg-warning" style="min-width:70px;font-weight:500; font-size:15px">@us</span>
+                }
+            </div>
+        }
+    </div>
+    <div class="row">
+        @foreach (var p in Model[..3])
+        {
+            var title = p.Title?.Length > 25 ? p.Title[..25] + "..." : p.Title;
+            <div class="col-4">
+                <a style="font-weight:400; font-size:17px" asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">@title</a>
+            </div>
+        }
+    </div>
+</div>
+<div class="col-md">
+    <div class="row mb-2">
+        @foreach (var p in Model[3..])
+        {
+            <div class="col-4">
+                @if (p.Cover?.Length > 0)
+                {
+                    <a asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">
+                        <img src="@p.Cover" style="width:100%;" />
+                    </a>
+                }
+            </div>
+        }
+    </div>
+    <div class="row">
+        @foreach (var p in Model[3..])
+        {
+            var rev = p.AverageReviewScore > 0.1 ? p.AverageReviewScore.ToString() + "/10" : "n/10";
+            var us = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString() + "/5" : "n/5";
+            <div class="col-4">
+                @if (p.AverageReviewScore >= 7)
+                {
+                    <span class="badge text-bg-success mb-1" style="min-width:70px;font-weight:500; font-size:15px">@rev</span>
+                }
+                else
+                {
+                    <span class="badge text-bg-warning mb-1" style="min-width:70px;font-weight:500; font-size:15px">@rev</span>
+                }
+                @if (p.AverageUserScore >= 3.5)
+                {
+                    <span class="badge text-bg-success" style="min-width:70px;font-weight:500; font-size:15px">@us</span>
+                }
+                else
+                {
+                    <span class="badge text-bg-warning" style="min-width:70px;font-weight:500; font-size:15px">@us</span>
+                }
+            </div>
+        }
+    </div>
+    <div class="row">
+        @foreach (var p in Model[3..])
+        {
+            var title = p.Title?.Length > 25 ? p.Title[..25] + "..." : p.Title;
+            <div class="col-4">
+                <a style="font-weight:400; font-size:17px" asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">@title</a>
+            </div>
+        }
+    </div>
+</div>

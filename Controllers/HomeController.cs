@@ -41,7 +41,8 @@ namespace RecomField.Controllers
             await context.SaveChangesAsync();*/
 
             UpdateUserCookies(await userManager.GetUserAsync(User), Response.Cookies);
-            return View((await context.Reviews.Include(r => r.Product).Include(r => r.Score).ToArrayAsync()).TakeLast(10).Reverse());
+            var prods = await context.Products.OrderByDescending(p => p.AverageUserScore).Take(6).ToArrayAsync();
+            return View(prods);
         }
 
         private async Task GenerateProducts()
@@ -249,13 +250,13 @@ namespace RecomField.Controllers
             var byTags = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
             var byComments = context.ReviewComments.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
             var founded = byTitle.Union(byBody).Union(byProduct).Union(byTags).Union(byComments);
-            return PartialView("MainReviewsTableBody", await founded.Include(r => r.Product).Include(r => r.Score).ToArrayAsync());
+            return PartialView("MainReviewsTableBody", await founded.Include(r => r.Product).Include(r => r.Author).Include(r => r.Score).ToArrayAsync());
         }
 
         private async Task<IActionResult> SearchReviewsByTag(string text)
         {
             var request = "\"" + text + "*\" OR \"" + text + "\"";
-            var res = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Include(r => r.Entity.Product).Include(r => r.Entity.Score);
+            var res = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Include(r => r.Entity.Product).Include(r => r.Entity.Author).Include(r => r.Entity.Score);
             return PartialView("MainReviewsTableBody", await res.Select(t => t.Entity).ToArrayAsync());
         }
 
@@ -280,11 +281,26 @@ namespace RecomField.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> GetNewReviewsView()
+        {
+            var reviews = await context.Reviews.OrderByDescending(r => r.PublicationDate).Take(5).Include(r => r.Product).Include(r => r.Author).Include(r => r.Score).ToArrayAsync();
+            return PartialView("MainReviewsTableBody", reviews);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> GetHighScoresView()
         {
-            var reviews = await context.Reviews.Include(r => r.Product).Include(r => r.Score).ToListAsync();
+            var reviews = await context.Reviews.Include(r => r.Product).Include(r => r.Author).Include(r => r.Score).ToListAsync();
             var ordered = reviews.OrderBy(r => r.Score?.Value);
-            return PartialView("MainReviewsTableBody", ordered.TakeLast(10).Reverse());
+            return PartialView("MainReviewsTableBody", ordered.TakeLast(5).Reverse());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> GetMostLikedView()
+        {
+            var reviews = await context.Reviews.Include(r => r.Product).Include(r => r.Author).Include(r => r.Score).ToListAsync();
+            var ordered = reviews.OrderBy(r => r.LikeCounter);
+            return PartialView("MainReviewsTableBody", ordered.TakeLast(5).Reverse());
         }
 
         public async Task<IActionResult> ChangeLanguageAsync(string current, string returnUrl)

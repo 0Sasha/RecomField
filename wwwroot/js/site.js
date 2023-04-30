@@ -92,6 +92,7 @@ function searchReviewsByTag(text) {
     if (text.length > 0) {
         document.getElementById('searchLine').value = text;
         document.getElementById('typeSearch').value = '1';
+        $("#searchLine").focus();
         updateSearchList();
     }
 }
@@ -108,6 +109,7 @@ function updateSearchList() {
                 $('#tbodySearch').html(res);
             }
         });
+        canHideSearchList = true;
         if ($('#navbarCollapse').is(":hidden")) $('#navbarCollapse').collapse('toggle');
         if ($('#dropdownMenu').is(":hidden")) $('#searchLine').dropdown('toggle');
     }

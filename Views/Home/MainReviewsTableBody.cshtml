@@ -10,10 +10,8 @@
         </td>
         <td>
             <a asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
-                @review.Title
+                @await Html.PartialAsync("ReviewCardPartial", review)
             </a>
         </td>
-        <td>@await Html.PartialAsync("ScorePartial", review.Score?.Value)</td>
-        <td>@await Html.PartialAsync("LikesPartial", review.LikeCounter)</td>
     </tr>
 }

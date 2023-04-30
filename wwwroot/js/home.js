@@ -9,6 +9,22 @@ $.ajax({
 });
 
 $.ajax({
+    url: "/Home/GetNewReviewsView",
+    type: "POST",
+    success: function (res) {
+        $("#tbodyNewReviews").html(res);
+    }
+});
+
+$.ajax({
+    url: "/Home/GetMostLikedView",
+    type: "POST",
+    success: function (res) {
+        $("#tbodyLikedReviews").html(res);
+    }
+});
+
+$.ajax({
     url: "/Home/GetHighScoresView",
     type: "POST",
     success: function (res) {

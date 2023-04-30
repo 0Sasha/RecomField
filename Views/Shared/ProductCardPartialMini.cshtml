@@ -3,12 +3,12 @@
 <div class="row g-2">
     @if (Model.Cover?.Length > 0)
     {
-        <div class="col-auto" style="height:100px">
-            <img src="@Model.Cover" style="height:100px;" />
+        <div class="col-auto align-self-center" style="width:80px">
+            <img src="@Model.Cover" style="width:100%;" />
         </div>
     }
     <div class="col">
-        <div class="row" style="font-size:120%; font-weight:500">
+        <div class="row mt-1" style="font-size:120%; font-weight:500">
             <div class="col">
                 @Model.Title
             </div>
@@ -17,7 +17,7 @@
             var rev = @Model.AverageReviewScore > 0.1 ? @Model.AverageReviewScore.ToString() + "/10" : "n/10";
             var us = @Model.AverageUserScore > 0.1 ? @Model.AverageUserScore.ToString() + "/5" : "n/5";
         }
-        <div class="row" style="font-size:140%">
+        <div class="row" style="font-size:150%">
             <div class="col">
                 @if (@Model.AverageReviewScore >= 7)
                 {

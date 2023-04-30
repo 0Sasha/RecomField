@@ -13,13 +13,13 @@
         <div class="col-md-10">
             <h1>@Model.Title</h1>
             <h2>
-                By <a asp-controller="User" asp-route-id="@Model.AuthorId">@Model.Author.UserName</a> on @Model.PublicationDate.ToString("MMM dd, yyyy")
+                By <a asp-controller="User" asp-action="Index" asp-route-id="@Model.AuthorId">@Model.Author.UserName</a> on @Model.PublicationDate.ToString("MMM dd, yyyy")
             </h2>
             <h5 id="tagsLine" class="mt-3 mb-2">
                 @foreach (var t in Model.Tags)
                 {
                     var s = "[" + t.Body + "]";
-                    <span role="button" class='badge text-bg-primary mb-1' onclick="search('@s')">@t.Body</span>
+                    <span role="button" class='badge text-bg-primary mb-1' onclick="searchReviewsByTag('@s')">@t.Body</span>
                 }
             </h5>
             <h1 class="mb-3">
