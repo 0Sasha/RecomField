@@ -11,14 +11,14 @@
     </div>
 </div>
 <div class="row" style="font-size:150%">
-    <div class="col-auto">
+    <div class="col">
         @if (Model.Score?.Value >= 7)
         {
-            <span class="badge text-bg-success rounded-3">@Model.Score?.Value/10</span>
+            <span class="badge text-bg-success rounded-3" style="min-width:75px">@Model.Score?.Value/10</span>
         }
         else
         {
-            <span class="badge text-bg-warning rounded-3">@Model.Score?.Value/10</span>
+            <span class="badge text-bg-warning rounded-3" style="min-width:75px">@Model.Score?.Value/10</span>
         }
         @await Html.PartialAsync("LikesPartialMini", Model.LikeCounter)
     </div>

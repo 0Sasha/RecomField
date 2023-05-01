@@ -4,10 +4,12 @@
 
 @foreach (var p in Model.Item1)
 {
-    var type = p.GetType().Name;
     <tr>
-        <td>@type</td>
-        <td><a asp-controller="Product" asp-action="Index" asp-route-id="@p.Id">@p.Title</a></td>
+        <td>
+            <a asp-controller="Product" asp-action="Index" asp-route-id="@p.Id">
+                @await Html.PartialAsync("ProductCardPartialMini", p)
+            </a>
+        </td>
         <td><a asp-controller="Review" asp-action="AddReview" asp-route-prodId="@p.Id" asp-route-authorId="@Model.Item2">Write a review</a></td>
     </tr>
 }

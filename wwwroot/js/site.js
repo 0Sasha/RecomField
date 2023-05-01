@@ -37,19 +37,6 @@ function changeTheme() {
 }
 
 
-function updateReviews(id) {
-    let partURL = id == undefined || id.length == 0 ? "" : "?id=" + id;
-    let search = document.getElementById("searchReview").value;
-    if (search.length > 0) partURL += (partURL.length > 0 ? "&search=" : "?search=") + search;
-    $.ajax({
-        url: "/User/GetReviewsView" + partURL,
-        type: "POST",
-        success: function (res) {
-            $("#tbodyReviews").html(res);
-        }
-    });
-}
-
 function sortTable(col, idTable) {
     var table, rows, sorting, i, x, y;
     table = document.getElementById(idTable);
@@ -123,10 +110,16 @@ function hideSearchList() {
         $('#searchLine').dropdown('toggle');
 }
 
+function stronglyHideSearchList() {
+    canHideSearchList = true;
+    hideSearchList();
+}
+
 function forbidHidingSearchList() {
     canHideSearchList = false;
 }
 
 function allowHidingSearchList() {
     canHideSearchList = true;
+    if (!$('#searchLine').is(":focus")) hideSearchList();
 }

@@ -24,21 +24,13 @@
             var rev = p.AverageReviewScore > 0.1 ? p.AverageReviewScore.ToString() + "/10" : "n/10";
             var us = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString() + "/5" : "n/5";
             <div class="col-4">
-                @if (p.AverageReviewScore >= 7)
-                {
-                    <span class="badge text-bg-success mb-1" style="min-width:70px;font-weight:500; font-size:15px">@rev</span>
-                }
-                else
-                {
-                    <span class="badge text-bg-warning mb-1" style="min-width:70px;font-weight:500; font-size:15px">@rev</span>
-                }
                 @if (p.AverageUserScore >= 3.5)
                 {
-                    <span class="badge text-bg-success" style="min-width:70px;font-weight:500; font-size:15px">@us</span>
+                    <span class="badge text-bg-success" style="min-width:65px;font-weight:600; font-size:15px">@us</span>
                 }
                 else
                 {
-                    <span class="badge text-bg-warning" style="min-width:70px;font-weight:500; font-size:15px">@us</span>
+                    <span class="badge text-bg-warning" style="min-width:65px;font-weight:600; font-size:15px">@us</span>
                 }
             </div>
         }
@@ -73,21 +65,13 @@
             var rev = p.AverageReviewScore > 0.1 ? p.AverageReviewScore.ToString() + "/10" : "n/10";
             var us = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString() + "/5" : "n/5";
             <div class="col-4">
-                @if (p.AverageReviewScore >= 7)
-                {
-                    <span class="badge text-bg-success mb-1" style="min-width:70px;font-weight:500; font-size:15px">@rev</span>
-                }
-                else
-                {
-                    <span class="badge text-bg-warning mb-1" style="min-width:70px;font-weight:500; font-size:15px">@rev</span>
-                }
                 @if (p.AverageUserScore >= 3.5)
                 {
-                    <span class="badge text-bg-success" style="min-width:70px;font-weight:500; font-size:15px">@us</span>
+                    <span class="badge text-bg-success" style="min-width:65px;font-weight:600; font-size:15px">@us</span>
                 }
                 else
                 {
-                    <span class="badge text-bg-warning" style="min-width:70px;font-weight:500; font-size:15px">@us</span>
+                    <span class="badge text-bg-warning" style="min-width:65px;font-weight:600; font-size:15px">@us</span>
                 }
             </div>
         }

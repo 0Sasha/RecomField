@@ -45,14 +45,37 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> GetReviewsView(string? id = null, string? search = null)
+    public async Task<IActionResult> GetReviewsView(string userId, string? search, string sort, bool ascOrder)
     {
-        var user = await userManager.GetUserAsync(User);
-        var u = id == null ? user : await userManager.FindByIdAsync(id) ?? throw new Exception("User is not found");
-        await u.LoadAsync(context, true);
-        return PartialView("ReviewsTableBody", search == null ? (u.Reviews, user == u) :
-            (u.Reviews.Where(r => r.Title.Contains(search, StringComparison.OrdinalIgnoreCase) ||
-            r.Product.Title.Contains(search, StringComparison.OrdinalIgnoreCase)), user == u));
+        if (string.IsNullOrEmpty(userId)) throw new ArgumentNullException(nameof(userId));
+        if (string.IsNullOrEmpty(sort)) throw new ArgumentNullException(nameof(sort));
+        var curUser = await userManager.GetUserAsync(User);
+        var user = await userManager.FindByIdAsync(userId) ?? throw new Exception("User is not found");
+        await user.LoadAsync(context, true);
+        List<Review> founded = user.Reviews;
+        if (!string.IsNullOrEmpty(search))
+        {
+            var request = "\"" + search + "*\" OR \"" + search + "\"";
+            founded = await context.Reviews.Where(r => r.AuthorId == userId &&
+            (EF.Functions.Contains(r.Title, request) || EF.Functions.Contains(r.Body, request) ||
+            EF.Functions.Contains(r.Product.Title, request))).ToListAsync();
+        }
+        bool isAuthorOrAdmin = user == curUser || await userManager.IsInRoleAsync(user, "Admin");
+        return PartialView("ReviewsTableBody", (SortReviews(founded, sort, ascOrder), isAuthorOrAdmin));
+    }
+
+    private static IEnumerable<Review> SortReviews(IEnumerable<Review> reviews, string sort, bool ascOrder)
+    {
+        if (!reviews.Any()) return reviews;
+        if (sort == "date") return ascOrder ? reviews.OrderBy(r => r.PublicationDate).ToList() :
+                reviews.OrderByDescending(r => r.PublicationDate).ToList();
+        if (sort == "title") return ascOrder ? reviews.OrderBy(r => r.Title).ToList() :
+                reviews.OrderByDescending(r => r.Title).ToList();
+        if (sort == "likes") return ascOrder ? reviews.OrderBy(r => r.LikeCounter).ToList() :
+                reviews.OrderByDescending(r => r.LikeCounter).ToList();
+        if (sort == "score") return ascOrder ? reviews.OrderBy(r => r.Score.Value).ToList() :
+                reviews.OrderByDescending(r => r.Score.Value).ToList();
+        throw new ArgumentException("Unexpected value", nameof(sort));
     }
 
     [Authorize(Roles = "Admin")]

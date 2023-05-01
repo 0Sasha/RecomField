@@ -8,47 +8,39 @@
     <tr>
         <td>
             <a asp-controller="Product" asp-action="Index" asp-route-id="@review.ProductId">
-                @review.Product?.Title
+                @await Html.PartialAsync("ProductCardPartialMini", review.Product)
             </a>
         </td>
-        <td>
+        <td class="dropdown">
             @if (Model.Item2)
             {
-                <div class="dropdown">
-                    <button class="btn h-100 w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        @review.Title
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li>
-                            <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
-                                Open
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="Review" asp-action="EditReview" asp-route-id="@review.Id">
-                                Edit
-                            </a>
-                        </li>
-                        <li>
-                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="removeReview('@review.Id')">
-                                Remove
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+                <button class="btn h-100 w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    @await Html.PartialAsync("ReviewCardPartial", review)
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
+                            Open
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="Review" asp-action="EditReview" asp-route-id="@review.Id">
+                            Edit
+                        </a>
+                    </li>
+                    <li>
+                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="removeReview('@review.Id')">
+                            Remove
+                        </a>
+                    </li>
+                </ul>
             }
             else
             {
-                <a class="h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
-                    @review.Title
+                <a asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
+                    @await Html.PartialAsync("ReviewCardPartial", review)
                 </a>
             }
-        </td>
-        <td>
-            @await Html.PartialAsync("ScorePartial", review.Score?.Value)
-        </td>
-        <td>
-            @await Html.PartialAsync("LikesPartial", review.LikeCounter)
         </td>
     </tr>
 }

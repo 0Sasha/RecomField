@@ -12,12 +12,15 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md">
-            <h1 class="card-title">@Model.UserName</h1>
+            <h1 class="card-title">@Model.UserName
+                @await Html.PartialAsync("LikesPartial", @Model.ReviewLikes)
+                <small class="text-muted" style="font-size:large">for @Model.Reviews.Count reviews</small>
+            </h1>
         </div>
         @if (authorOrAdmin)
         {
             <div class="col-md">
-                <div class="float-end" role="group">
+                <div class="float-end mt-2" role="group">
                     <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         @Localizer["Add product"]
                     </button>
@@ -32,67 +35,39 @@
             </div>
         }
     </div>
-    <div class="row">
-        <div class="col-md mb-1">
-            <h5 class="card-subtitle">
-                @await Html.PartialAsync("LikesPartial", @Model.ReviewLikes)
-                for @Model.Reviews.Count reviews
-            </h5>
-        </div>
-    </div>
     <hr />
     <div class="row justify-content-between">
-        <div class="col-4">
-            <h4 class="mt-1">Reviews</h4>
+        <div class="col-auto">
+            <h4>Reviews</h4>
         </div>
-        <div class="col">
-            <input type="text" class="form-control float-end" id="searchReview" placeholder="Search a review" onkeyup="updateReviews('@Model.Id')" style="max-width:250px" />
+        <div class="col-auto">
+            <div class="row justify-content-end">
+                <div class="col">
+                    <div class="input-group" style="min-width:250px">
+                        <span class="input-group-text">Sorted by</span>
+                        <select id="sortedSel" ascOrder="true" class="form-select" onchange="updateReviews()">
+                            <option value="date" selected>Date</option>
+                            <option value="title">Title</option>
+                            <option value="likes">Likes</option>
+                            <option value="score">Score</option>
+                        </select>
+                        <span role="button" class="input-group-text" onclick="changeOrderSort()">
+                            <img src="~/icons/sort gray.svg" style="max-width:22px" />
+                        </span>
+                    </div>
+                </div>
+                <div class="col">
+                    <input type="text" class="form-control float-end" id="searchReview" userId="@Model.Id" placeholder="Search a review" onkeyup="updateReviews()" style="max-width:250px" />
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">
         <table id="userReviews" dirSort="asc" class="table table-striped table-hover align-middle">
             <thead>
                 <tr>
-                    <th role="button" scope="col" onclick="sortTable(0, 'userReviews')">
-                        <div class="row justify-content-between align-items-center">
-                            <div class="col-auto">
-                                Product
-                            </div>
-                            <div class="col-auto">
-                                <img src="~/icons/sort gray.svg" style="max-width:22px; max-height:22px" />
-                            </div>
-                        </div>
-                    </th>
-                    <th role="button" scope="col" onclick="sortTable(1, 'userReviews')">
-                        <div class="row justify-content-between align-items-center">
-                            <div class="col-auto">
-                                Title
-                            </div>
-                            <div class="col-auto">
-                                <img src="~/icons/sort gray.svg" style="max-width:22px; max-height:22px" />
-                            </div>
-                        </div>
-                    </th>
-                    <th role="button" scope="col" onclick="sortTable(2, 'userReviews')" style="min-width:80px">
-                        <div class="row justify-content-between align-items-center">
-                            <div class="col-auto" style="max-width:40px">
-                                Score
-                            </div>
-                            <div class="col-auto">
-                                <img src="~/icons/sort gray.svg" style="max-width:22px; max-height:22px" />
-                            </div>
-                        </div>
-                    </th>
-                    <th role="button" scope="col" onclick="sortTable(3, 'userReviews')" style="min-width:80px">
-                        <div class="row justify-content-between align-items-center">
-                            <div class="col-auto" style="max-width:40px">
-                                Likes
-                            </div>
-                            <div class="col-auto">
-                                <img src="~/icons/sort gray.svg" style="max-width:22px; max-height:22px" />
-                            </div>
-                        </div>
-                    </th>
+                    <th>Product</th>
+                    <th>Review</th>
                 </tr>
             </thead>
             <tbody id="tbodyReviews">
@@ -117,13 +92,6 @@
                     </div>
                 </div>
                 <table class="table table-striped table-hover align-middle">
-                    <thead>
-                        <tr>
-                            <th scope="col">Type</th>
-                            <th scope="col">Title</th>
-                            <th scope="col"></th>
-                        </tr>
-                    </thead>
                     <tbody id="tbodyProductsModal">
                     </tbody>
                 </table>
