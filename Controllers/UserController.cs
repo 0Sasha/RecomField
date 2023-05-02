@@ -36,12 +36,22 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> SearchUsers(string? text = null) // Very slow search - add fulltext///////////////
+    public async Task<IActionResult> GetUsersView(string? search, string type, int count) // Very slow search - add fulltext///////////////
     {
+        if (string.IsNullOrEmpty(type)) throw new ArgumentNullException(nameof(type));
+        if (count <= 0) count = int.MaxValue;
         var roles = await context.UserRoles.ToListAsync();
-        var users = await (string.IsNullOrEmpty(text) ? context.Users : context.Users
-            .Where(u => u.UserName.Contains(text))).Take(10).ToListAsync();
-        return PartialView("UsersTableBody", (users, roles));
+        var users = string.IsNullOrEmpty(search) ? context.Users : context.Users.Where(u => u.UserName.Contains(search));
+        List<ApplicationUser> selected;
+        if (type == "All") selected = await users.Take(count).ToListAsync();
+        else if (type == "Admins")
+        {
+            var idAdmins = roles.Select(r => r.UserId).ToList();
+            selected = await users.Where(u => idAdmins.Contains(u.Id)).Take(count).ToListAsync();
+        }
+        else if (type == "Blocked") selected = await users.Where(u => u.LockoutEnd != null && u.LockoutEnd != DateTimeOffset.MinValue).Take(count).ToListAsync();
+        else throw new ArgumentException("Unexpected value", nameof(type));
+        return PartialView("UsersTableBody", (selected, roles));
     }
 
     [HttpPost]
@@ -83,60 +93,57 @@ public class UserController : Controller
     {
         var roles = await context.UserRoles.ToListAsync();
         var users = await context.Users.Take(10).ToListAsync();
-        return View((users, roles));
+        return View((users, roles, await context.Users.CountAsync()));
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
-    public async Task<IActionResult> BlockUser(string id, int? days = null, string? filter = null)
+    public async Task BlockUser(string id, int? days = null)
     {
         var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
         user.LockoutEnd = days == null ? DateTimeOffset.MaxValue : DateTimeOffset.UtcNow.AddDays((double)days);
         await context.SaveChangesAsync();
+        await userManager.UpdateSecurityStampAsync(user);
         if (user == await userManager.GetUserAsync(User)) await signInManager.SignOutAsync();
-        return await SearchUsers(filter);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
-    public async Task<IActionResult> UnlockUser(string id, string? filter = null)
+    public async Task UnlockUser(string id)
     {
         var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
         user.LockoutEnd = DateTimeOffset.MinValue;
         await context.SaveChangesAsync();
-        return await SearchUsers(filter);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
-    public async Task<IActionResult> RemoveUser(string id, string? filter = null)
+    public async Task RemoveUser(string id)
     {
         var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
         await user.LoadAllDependent(context);
         context.Users.Remove(user);
         await context.SaveChangesAsync();
-        return await SearchUsers(filter);
+        if (user == await userManager.GetUserAsync(User)) await signInManager.SignOutAsync();
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
-    public async Task<IActionResult> AddAdminRole(string id, string? filter = null)
+    public async Task AddAdminRole(string id)
     {
         var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
         if (await userManager.IsInRoleAsync(user, "Admin")) throw new Exception("User is already an admin");
         await userManager.AddToRoleAsync(user, "Admin");
         await context.SaveChangesAsync();
-        return await SearchUsers(filter);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
-    public async Task<IActionResult> RevokeAdminRole(string id, string? filter = null)
+    public async Task RevokeAdminRole(string id)
     {
         var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
         if (!await userManager.IsInRoleAsync(user, "Admin")) throw new Exception("User is not an admin");
         await userManager.RemoveFromRoleAsync(user, "Admin");
         await context.SaveChangesAsync();
-        return await SearchUsers(filter);
     }
 }

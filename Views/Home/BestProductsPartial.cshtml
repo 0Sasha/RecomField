@@ -21,8 +21,8 @@
     <div class="row">
         @foreach (var p in Model[..3])
         {
-            var rev = p.AverageReviewScore > 0.1 ? p.AverageReviewScore.ToString() + "/10" : "n/10";
-            var us = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString() + "/5" : "n/5";
+            var rev = p.AverageReviewScore > 0.1 ? p.AverageReviewScore.ToString("F2") + "/10" : "n/10";
+            var us = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString("F2") + "/5" : "n/5";
             <div class="col-4">
                 @if (p.AverageUserScore >= 3.5)
                 {
@@ -62,8 +62,8 @@
     <div class="row">
         @foreach (var p in Model[3..])
         {
-            var rev = p.AverageReviewScore > 0.1 ? p.AverageReviewScore.ToString() + "/10" : "n/10";
-            var us = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString() + "/5" : "n/5";
+            var rev = p.AverageReviewScore > 0.1 ? p.AverageReviewScore.ToString("F2") + "/10" : "n/10";
+            var us = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString("F2") + "/5" : "n/5";
             <div class="col-4">
                 @if (p.AverageUserScore >= 3.5)
                 {

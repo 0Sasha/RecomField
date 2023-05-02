@@ -1,14 +1,33 @@
-﻿
+﻿let curReqUpdating = undefined;
+
 function updateReviews() {
+    if (curReqUpdating != undefined) curReqUpdating.abort();
     let search = document.getElementById("searchReview");
     let sortedSel = document.getElementById("sortedSel");
-    $.ajax({
+    curReqUpdating = $.ajax({
         url: "/User/GetReviewsView?userId=" + search.attributes.userId.value + "&search=" + search.value +
             "&sort=" + sortedSel.value + "&ascOrder=" + sortedSel.ascOrder,
         type: "POST",
         success: function (res) {
             $("#tbodyReviews").html(res);
+            curReqUpdating = undefined;
         }
+    });
+}
+
+function updateUsers() {
+    if (curReqUpdating != undefined) curReqUpdating.abort();
+    let search = document.getElementById("searchUser").value;
+    let typeUsers = document.getElementById("typeUsers").value;
+    let countUsers = document.getElementById("countUsers").value;
+    curReqUpdating = $.ajax({
+        url: "/User/GetUsersView?search=" + search + "&type=" + typeUsers + "&count=" + countUsers,
+        type: "POST",
+        success: function (res) {
+            $("#tbodyUsers").html(res);
+            curReqUpdating = undefined;
+        },
+        error: function (res) { curReqUpdating = undefined; }
     });
 }
 
@@ -19,57 +38,51 @@ function changeOrderSort() {
 }
 
 function blockUser(id, days) {
-    let partUrl = (days == undefined ? "" : "&days=" + days) + getFilterUrl();
     $.ajax({
-        url: "/User/BlockUser?id=" + id + partUrl,
+        url: "/User/BlockUser?id=" + id + "&days=" + days,
         type: "POST",
         success: function (res) {
-            $("#tbodyUsers").html(res);
+            updateUsers();
         }
     });
 }
 
 function unblockUser(id) {
     $.ajax({
-        url: "/User/UnlockUser?id=" + id + getFilterUrl(),
+        url: "/User/UnlockUser?id=" + id,
         type: "POST",
         success: function (res) {
-            $("#tbodyUsers").html(res);
+            updateUsers();
         }
     });
 }
 
 function removeUser(id) {
     $.ajax({
-        url: "/User/RemoveUser?id=" + id + getFilterUrl(),
+        url: "/User/RemoveUser?id=" + id,
         type: "POST",
         success: function (res) {
-            $("#tbodyUsers").html(res);
+            updateUsers();
         }
     });
 }
 
 function addAdminRole(id) {
     $.ajax({
-        url: "/User/AddAdminRole?id=" + id + getFilterUrl(),
+        url: "/User/AddAdminRole?id=" + id,
         type: "POST",
         success: function (res) {
-            $("#tbodyUsers").html(res);
+            updateUsers();
         }
     });
 }
 
 function revokeAdminRole(id) {
     $.ajax({
-        url: "/User/RevokeAdminRole?id=" + id + getFilterUrl(),
+        url: "/User/RevokeAdminRole?id=" + id,
         type: "POST",
         success: function (res) {
-            $("#tbodyUsers").html(res);
+            updateUsers();
         }
     });
-}
-
-function getFilterUrl() {
-    let filter = document.getElementById("searchInput").value;
-    return filter.length > 0 ? "&filter=" + filter : "";
 }

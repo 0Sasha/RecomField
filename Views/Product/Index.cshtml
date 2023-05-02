@@ -31,14 +31,14 @@
                 <div class="col">
                     @if (Model.AverageReviewScore > 7)
                     {
-                        <span class="badge bg-success rounded-4" style="font-size:220%; min-width:175px">
-                            @Model.AverageReviewScore/10
+                        <span class="badge bg-success rounded-4" style="font-size:220%">
+                            @Model.AverageReviewScore.ToString("F2")/10
                         </span>
                     }
                     else if (Model.AverageReviewScore > 0)
                     {
-                        <span class="badge bg-warning rounded-4" style="font-size:220%; min-width:175px">
-                            @Model.AverageReviewScore/10
+                        <span class="badge bg-warning rounded-4" style="font-size:220%">
+                            @Model.AverageReviewScore.ToString("F2")/10
                         </span>
                     }
                     else
@@ -51,14 +51,14 @@
                 <div class="col">
                     @if (Model.AverageUserScore > 3.5)
                     {
-                        <span class="badge bg-success rounded-3" style="font-size:120%; min-width:85px">
-                            @Model.AverageUserScore/5
+                        <span class="badge bg-success rounded-3" style="font-size:120%">
+                            @Model.AverageUserScore.ToString("F2")/5
                         </span>
                     }
                     else if (Model.AverageUserScore > 0)
                     {
-                        <span class="badge bg-warning rounded-3" style="font-size:120%; min-width:85px">
-                            @Model.AverageUserScore/5
+                        <span class="badge bg-warning rounded-3" style="font-size:120%">
+                            @Model.AverageUserScore.ToString("F2")/5
                         </span>
                     }
                     else

@@ -57,6 +57,9 @@ async function dropCoverInput(ev) {
             if (validFileType(file)) {
                 let url = await uploadCover(file);
                 document.getElementById("coverAspInput").value = url;
+                const coverInput = document.getElementById("coverInput");
+                coverInput.hidden = true;
+                coverInput.removeAttribute("required");
                 showCover(url);
             }
         }
@@ -75,6 +78,7 @@ async function setCover() {
             if (validFileType(file)) {
                 let url = await uploadCover(file);
                 document.getElementById("coverAspInput").value = url;
+                coverInput.hidden = true;
                 showCover(url);
             }
         }

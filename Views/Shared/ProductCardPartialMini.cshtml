@@ -14,8 +14,8 @@
             </div>
         </div>
         @{
-            var rev = @Model.AverageReviewScore > 0.1 ? @Model.AverageReviewScore.ToString() + "/10" : "n/10";
-            var us = @Model.AverageUserScore > 0.1 ? @Model.AverageUserScore.ToString() + "/5" : "n/5";
+            var rev = Model.AverageReviewScore > 0.1 ? Model.AverageReviewScore.ToString("F2") + "/10" : "n/10";
+            var us = Model.AverageUserScore > 0.1 ? Model.AverageUserScore.ToString("F2") + "/5" : "n/5";
         }
         <div class="row" style="font-size:150%">
             <div class="col">

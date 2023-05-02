@@ -28,10 +28,9 @@
         <div class="row g-2 mb-2">
             <input asp-for="Cover" id="coverAspInput" hidden required/>
             <div class="col-md-3">
-                <input id="coverInput" class="file-input" type="file" accept=".jpg, .jpeg, .png" onchange="setCover()" hidden>
                 <div class="file-drop-area mb-2" style="width:100%; height:100%" onclick="clickCoverInput()" ondrop="dropCoverInput(event);" ondragover="dragOverHandler(event);">
-                    <div class="col">
-                        <div id="uplIcon" class="row justify-content-center">
+                    <div class="col text-center">
+                        <div id="uplIcon" class="row justify-content-center mt-4">
                             <img src="~/icons/upload.svg" style="max-width:70px;max-height:70px" />
                         </div>
                         <div id="uplText" class="row text-center">
@@ -43,6 +42,7 @@
                             </div>
                         </div>
                         <img id="coverImg" style="width:100%; height:100%" hidden />
+                        <input id="coverInput" style="height:1px;width:1px" class="file-input" type="file" accept=".jpg, .jpeg, .png" onchange="setCover()" required>
                     </div>
                 </div>
             </div>

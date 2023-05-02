@@ -99,6 +99,7 @@ function updateSearchList() {
         canHideSearchList = true;
         if ($('#navbarCollapse').is(":hidden")) $('#navbarCollapse').collapse('toggle');
         if ($('#dropdownMenu').is(":hidden")) $('#searchLine').dropdown('toggle');
+        document.getElementById('searchLine').focus();
     }
     else hideSearchList();
 }
@@ -110,16 +111,11 @@ function hideSearchList() {
         $('#searchLine').dropdown('toggle');
 }
 
-function stronglyHideSearchList() {
-    canHideSearchList = true;
-    hideSearchList();
-}
-
 function forbidHidingSearchList() {
     canHideSearchList = false;
 }
 
 function allowHidingSearchList() {
     canHideSearchList = true;
-    if (!$('#searchLine').is(":focus")) hideSearchList();
+    //if (!$('#searchLine').is(":focus")) hideSearchList();
 }

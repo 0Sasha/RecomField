@@ -12,7 +12,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md">
-            <h1 class="card-title">@Model.UserName
+            <h1 class="mb-0">@Model.UserName
                 @await Html.PartialAsync("LikesPartial", @Model.ReviewLikes)
                 <small class="text-muted" style="font-size:large">for @Model.Reviews.Count reviews</small>
             </h1>
@@ -57,7 +57,7 @@
                     </div>
                 </div>
                 <div class="col">
-                    <input type="text" class="form-control float-end" id="searchReview" userId="@Model.Id" placeholder="Search a review" onkeyup="updateReviews()" style="max-width:250px" />
+                    <input type="search" class="form-control float-end" id="searchReview" userId="@Model.Id" placeholder="Search a review" oninput="updateReviews()" style="max-width:250px" />
                 </div>
             </div>
         </div>
