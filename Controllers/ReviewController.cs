@@ -184,10 +184,11 @@ public class ReviewController : Controller
         var user = await GetUser();
         var review = await FindReview(id);
         await context.Entry(review).Collection(u => u.Likes).LoadAsync();
-        //await context.Entry(review).Reference(u => u.Author).LoadAsync();
-        if (review.Likes.Any(l => l.Sender == user)) review.Likes.RemoveAll(l => l.Sender == user);
+        var curLike = review.Likes.SingleOrDefault(l => l.Sender == user);
+        if (curLike != null) review.Likes.Remove(curLike);
         else review.Likes.Add(new(user, review));
         review.LikeCounter = review.Likes.Count;
+        review.Version = Guid.NewGuid();
         await context.SaveChangesAsync();
     }
 

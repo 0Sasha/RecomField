@@ -44,6 +44,9 @@ public class Review
 
     public int LikeCounter { get; set; }
 
+    [ConcurrencyCheck]
+    public Guid Version { get; set; }
+
     public async Task LoadAsync(ApplicationDbContext context, string? userId, bool deep = false)
     {
         if (Author == null)

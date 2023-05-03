@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using RecomField.Data;
 
@@ -11,9 +12,11 @@ using RecomField.Data;
 namespace RecomField.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230503063739_AddReviewVersion")]
+    partial class AddReviewVersion
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -364,9 +367,9 @@ namespace RecomField.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("Version")
+                    b.Property<int>("Version")
                         .IsConcurrencyToken()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

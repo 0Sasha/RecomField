@@ -26,21 +26,12 @@
 @foreach (var c in Model.Item1)
 {
     var when = "";
-    if (c.PublicationDate.Year == DateTime.UtcNow.Year)
-    {
-        if (c.PublicationDate.Month == DateTime.UtcNow.Month)
-        {
-            if (c.PublicationDate.Day == DateTime.UtcNow.Day)
-            {
-                if (c.PublicationDate.TimeOfDay.Hours == DateTime.UtcNow.TimeOfDay.Hours)
-                when = (DateTime.UtcNow.TimeOfDay.Minutes - c.PublicationDate.TimeOfDay.Minutes) + " minutes ago";
-                else when = (DateTime.UtcNow.TimeOfDay.Hours - c.PublicationDate.TimeOfDay.Hours) + " hours ago";
-            }
-            else when = (DateTime.UtcNow.Day - c.PublicationDate.Day) + " days ago";
-        }
-        else when = (DateTime.UtcNow.Month - c.PublicationDate.Month) + " months ago";
-    }
-    else when = (DateTime.UtcNow.Year - c.PublicationDate.Year) + " years ago";
+    var diff = DateTime.UtcNow - c.PublicationDate;
+    if (diff.TotalDays > 365) when = (int)(diff.TotalDays / 365) + " years ago";
+    else if (diff.TotalDays > 30) when = (int)(diff.TotalDays / 30) + " months ago";
+    else if (diff.TotalHours > 24) when = (int)(diff.TotalHours / 24) + " days ago";
+    else if (diff.TotalMinutes > 60) when = (int)(diff.TotalMinutes / 60) + " hours ago";
+    else when = (int)diff.TotalMinutes + " minutes ago";
     <div class="row">
         <h6><a asp-controller="User" asp-action="Index" asp-route-id="@c.Sender.Id">@c.Sender</a> @when</h6>
         <p class="mb-4">@c.Body</p>

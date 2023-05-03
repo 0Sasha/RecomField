@@ -29,6 +29,7 @@ function addNewTag(tag) {
     $("#tagsLine").html($("#tagsLine").html() + "<span role='button' class='badge text-bg-primary mb-1' id='" + idTag + "' onclick=deleteTag('" + idTag + "')>" + tag + "</span > ");
     let el = document.getElementById('TagsForServer');
     el.value += (el.value == "") ? tag : "," + tag;
+    validateTags();
 }
 
 function addAllTags(tags) {
@@ -46,6 +47,7 @@ function deleteTag(id) { // Check ////////////////////////////////////////////
     if (val == fullTag) el.value = "";
     else if (val.startsWith(fullTag)) el.value = val.replace(fullTag + ',', '');
     else el.value = val.replace(',' + fullTag, '');
+    validateTags();
 }
 
 function changeRate(rate) {
@@ -62,6 +64,28 @@ function changeRate(rate) {
     }
     document.getElementById("myRating").textContent = "Rating: " + rate + "/10";
     document.getElementById("RateForServer").value = rate;
+    validateRate();
+}
+
+function validate() {
+    validateTags();
+    validateBody();
+    validateRate();
+}
+
+function validateTags() {
+    if (document.getElementById("TagsForServer").value == "") document.getElementById("tagFeedback").hidden = false;
+    else document.getElementById("tagFeedback").hidden = true;
+}
+
+function validateRate() {
+    if (document.getElementById("RateForServer").value == "") document.getElementById("rateFeedback").hidden = false;
+    else document.getElementById("rateFeedback").hidden = true;
+}
+
+function validateBody() {
+    if (document.getElementById("bodyIsFull").value == "") document.getElementById("bodyFeedback").hidden = false;
+    else document.getElementById("bodyFeedback").hidden = true;
 }
 
 function checkReview() {
@@ -132,7 +156,7 @@ async function showMoreComments(id, count) {
 }
 
 async function updateReviewComments(id) {
-    if (window.location.href.includes("Review/" + id) || window.location.href.includes("Review?id=" + id)) {
+    if (window.location.href.includes("Review/Index/" + id) || window.location.href.includes("Review/Index?id=" + id)) {
         await showMoreComments(id, 1);
     }
 }

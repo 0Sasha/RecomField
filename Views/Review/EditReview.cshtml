@@ -36,6 +36,9 @@
                     <input class="form-control" type="text" id="tagForm" list="tagsList" placeholder="Write tags separated by commas" maxlength="50" onkeyup="checkTag()" autocomplete="on" />
                     <label class="form-label">Write tags separated by commas</label>
                 </div>
+                <h5 id="tagFeedback" style="color:red" hidden>
+                    Please write at least one tag and add a comma.
+                </h5>
                 <datalist id="tagsList">
                 </datalist>
             </div>
@@ -46,6 +49,9 @@
         <div class="form-group mb-3">
             <textarea asp-for=Body id="tiny" class="form-control" rows="20" placeholder="Content"></textarea>
             <span asp-validation-for="Body" class="text-danger"></span>
+            <h5 class="mt-2" id="bodyFeedback" style="color:red" hidden>
+                Please fill in the body of the review.
+            </h5>
         </div>
         <hr />
         <h5 class="mt-2" id="myRating">Rating: -/10</h5>
@@ -58,6 +64,9 @@
                     </a>
                 }
             </div>
+            <h5 class="mt-1" id="rateFeedback" style="color:red" hidden>
+                Please rate the product.
+            </h5>
         </div>
         @if(Model.Tags.Count == 0)
         {
@@ -78,6 +87,6 @@
             </script>
         }
         <hr />
-        <button class="btn btn-primary float-end" type="submit" style="min-width:100px">Save review</button>
+        <button class="btn btn-primary float-end" type="submit" style="min-width:100px" onclick="validate()">Save review</button>
     </form>
 </div>
