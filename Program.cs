@@ -83,7 +83,14 @@ namespace RecomField
                 pattern: "{controller=Home}/{action=Index}/{id?}");
             app.MapRazorPages();
             app.MapHub<MainHub>("/mainHub");
-
+            app.MapWhen(context => context.Request.Path.HasValue && context.Request.Path.Value.StartsWith("/Identity") &&
+            !context.Request.Path.Value.EndsWith("Login") && !context.Request.Path.Value.EndsWith("Logout") &&
+            !context.Request.Path.Value.EndsWith("ExternalLogin") && !context.Request.Path.Value.EndsWith("Lockout"),
+            appBuilder => appBuilder.Run(async context =>
+            {
+                context.Response.StatusCode = 404;
+                await context.Response.CompleteAsync();
+            }));
             app.Run();
         }
     }

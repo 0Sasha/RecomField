@@ -31,19 +31,19 @@
                 <div class="col">
                     @if (Model.AverageReviewScore > 7)
                     {
-                        <span class="badge bg-success rounded-4" style="font-size:220%">
+                        <span class="badge bg-success rounded-4" style="font-size:180%">
                             @Model.AverageReviewScore.ToString("F2")/10
                         </span>
                     }
                     else if (Model.AverageReviewScore > 0)
                     {
-                        <span class="badge bg-warning rounded-4" style="font-size:220%">
+                        <span class="badge bg-warning rounded-4" style="font-size:180%">
                             @Model.AverageReviewScore.ToString("F2")/10
                         </span>
                     }
                     else
                     {
-                        <span class="badge bg-secondary rounded-4" style="font-size:220%">n/10</span>
+                        <span class="badge bg-secondary rounded-4" style="font-size:180%">n/10</span>
                     }
                 </div>
             </div>
