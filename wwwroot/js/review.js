@@ -1,4 +1,68 @@
 ﻿
+const image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.withCredentials = false;
+    request.open('POST', '/Review/UploadImage', true);
+
+    request.upload.onprogress = (e) => {
+        progress(e.loaded / e.total * 100);
+    };
+
+    request.onload = () => {
+        if (request.status === 403) {
+            reject({ message: 'HTTP Error: ' + request.status, remove: true });
+            return;
+        }
+
+        if (request.status < 200 || request.status >= 300) {
+            reject('HTTP Error: ' + request.status);
+            return;
+        }
+
+        if (request.responseText.startsWith("Error")) {
+            reject(request.responseText);
+            tinymce.execCommand('Undo');
+            return;
+        }
+        const json = JSON.parse(request.responseText);
+
+        if (!json || typeof json.location != 'string') {
+            reject('Invalid JSON: ' + request.responseText);
+            return;
+        }
+
+        resolve(json.location);
+    };
+
+    request.onerror = () => {
+        reject('Image upload failed due to a request Transport error. Code: ' + request.status);
+    };
+
+    const formData = new FormData();
+    formData.append('file', blobInfo.blob(), blobInfo.filename());
+
+    request.send(formData);
+});
+
+tinymce.init({
+    selector: 'textarea#tiny',
+    language: siteLanguage,
+    images_upload_handler: image_upload_handler,
+    extended_valid_elements: 'img[class=img-fluid|src|alt|width|height]',
+    plugins: [
+        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
+        'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
+        'insertdatetime', 'media', 'table', 'help', 'wordcount'
+    ],
+    init_instance_callback: (editor) => {
+        checkReview();
+        editor.on('Change', (e) => {
+            console.log(`The editor content changes have been committed.`);
+            checkReview();
+        });
+    }
+});
+
 function checkTag() {
     let el = document.getElementById("tagForm");
     if (el.value[el.value.length - 1] == ',') {

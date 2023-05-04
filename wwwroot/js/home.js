@@ -62,6 +62,7 @@ function initTagCloud(tags) {
     });
 
     series.labels.template.events.on("hit", function (ev) {
+        ev.event.preventDefault();
         searchReviewsByTag("[" + ev.target.dataItem.properties.word + "]");
     });
     series.labels.template.url = "#";

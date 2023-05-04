@@ -4,13 +4,13 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IHtmlLocalizer<SharedResource> Localizer
 
-<ul class="navbar-nav">
+<ul class="navbar-nav justify-content-end" style="min-width:270px">
 @if (SignInManager.IsSignedIn(User))
 {
     if (User.IsInRole("Admin"))
     {
         <li class="nav-item">
-            <a class="nav-link" asp-controller="User" asp-action="AdminPage">Administration</a>
+                <a class="nav-link" asp-controller="User" asp-action="AdminPage">@Localizer["Administration"]</a>
         </li>
     }
     <li class="nav-item">

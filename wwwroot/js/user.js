@@ -11,7 +11,8 @@ function updateReviews() {
         success: function (res) {
             $("#tbodyReviews").html(res);
             curReqUpdating = undefined;
-        }
+        },
+        error: function (jqXHR, exception) { curReqUpdating = undefined; }
     });
 }
 
@@ -27,7 +28,7 @@ function updateUsers() {
             $("#tbodyUsers").html(res);
             curReqUpdating = undefined;
         },
-        error: function (res) { curReqUpdating = undefined; }
+        error: function (jqXHR, exception) { curReqUpdating = undefined; }
     });
 }
 

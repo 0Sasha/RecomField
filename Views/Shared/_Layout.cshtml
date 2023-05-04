@@ -12,101 +12,41 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/RecomField.styles.css" asp-append-version="true" />
     <script src="~/lib/tinymce/tinymce.min.js"></script>
-    <script>
-        const image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
-            const request = new XMLHttpRequest();
-            request.withCredentials = false;
-            request.open('POST', '/Review/UploadImage', true);
-
-            request.upload.onprogress = (e) => {
-                progress(e.loaded / e.total * 100);
-            };
-
-            request.onload = () => {
-                if (request.status === 403) {
-                    reject({ message: 'HTTP Error: ' + request.status, remove: true });
-                    return;
-                }
-
-                if (request.status < 200 || request.status >= 300) {
-                    reject('HTTP Error: ' + request.status);
-                    return;
-                }
-
-                if (request.responseText.startsWith("Error")) {
-                    reject(request.responseText);
-                    tinymce.execCommand('Undo');
-                    return;
-                }
-                const json = JSON.parse(request.responseText);
-
-                if (!json || typeof json.location != 'string') {
-                    reject('Invalid JSON: ' + request.responseText);
-                    return;
-                }
-
-                resolve(json.location);
-            };
-
-            request.onerror = () => {
-                reject('Image upload failed due to a request Transport error. Code: ' + request.status);
-            };
-
-            const formData = new FormData();
-            formData.append('file', blobInfo.blob(), blobInfo.filename());
-
-            request.send(formData);
-        });
-        tinymce.init({
-            selector: 'textarea#tiny',
-            language: 'ru',
-            images_upload_handler: image_upload_handler,
-            extended_valid_elements: 'img[class=img-fluid|src|alt|width|height]',
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview',
-                'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen',
-                'insertdatetime', 'media', 'table', 'help', 'wordcount'
-            ],
-            init_instance_callback: (editor) => {
-                checkReview();
-                editor.on('Change', (e) => {
-                    console.log(`The editor content changes have been committed.`);
-                    checkReview();
-                });
-            }
-        });
-    </script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/user.js" asp-append-version="true"></script>
     <script src="~/js/review.js" asp-append-version="true"></script>
     <script src="~/js/product.js" asp-append-version="true"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/signalr/dist/browser/signalr.js"></script>
+    <script src="~/js/hub.js"></script>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-xl navbar-light bg-body-tertiary border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand badge text-bg-warning rounded-1" asp-area="" asp-controller="Home" style="font-size:larger; font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif">RecomField</a>
-                <button class="navbar-toggler" id="navbarToggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" id="navbarToggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse justify-content-between" id="navbarCollapse">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item d-flex ">
+                <div class="collapse navbar-collapse justify-content-between" id="navbarCollapse">
+                    <ul class="navbar-nav flex-grow-1" style="min-width:200px">
+                        <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a>
                         </li>
-                        <li class="nav-item d-flex ">
+                        <li class="nav-item">
                             <a class="nav-link" asp-area="" asp-controller="User" asp-action="Index" asp-route-id="">@Localizer["My page"]</a>
                         </li>
-                        <form class="d-flex dropdown" role="search" style="min-width:75%;" autocomplete="off">
-                            <div class="input-group" >
-                                <select class="form-select" type="button" id="typeSearch" style="min-width:130px;max-width:130px;">
-                                    <option value="0" selected>Products</option>
-                                    <option value="1">Reviews</option>
+                    </ul>
+                    <ul class="navbar-nav w-100">
+                        <form class="w-100 dropdown" role="search" autocomplete="off">
+                            <div class="input-group">
+                                <select class="form-select" type="button" id="typeSearch" style="min-width:160px;max-width:160px;">
+                                    <option value="true" selected>@Localizer["Products"]</option>
+                                    <option value="false">@Localizer["Reviews"]</option>
                                 </select>
-                                <input class="form-control dropdown-toggle" id="searchLine" aria-expanded="false" placeholder="Search" aria-label="Search review" aria-describedby="typeSearch" onblur="hideSearchList()" onfocus="updateSearchList()" onkeyup="updateSearchList()">
-                                <div class="dropdown-menu" style="width:100%" id="dropdownMenu" onmouseover="forbidHidingSearchList()" onmouseout="allowHidingSearchList()">
+                                <input class="form-control dropdown-toggle" id="searchLine" data-bs-toggle="dropdown" aria-expanded="false" placeholder="@Localizer["Search"]" onclick="updateSearchList()" oninput="updateSearchList()">
+                                <div class="dropdown-menu" style="width:100%" id="dropdownMenu">
                                     <table class="table table-striped table-hover align-middle">
                                         <tbody id="tbodySearch">
                                         </tbody>
@@ -143,15 +83,11 @@
             @RenderBody()
         </main>
     </div>
-
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2023 - RecomField - <a class="link-secondary text-decoration-none" asp-area="" asp-controller="Home" asp-action="Privacy">@Localizer["Privacy"]</a>
+            &copy; 2023 - RecomField
         </div>
     </footer>
-    <script src="~/lib/bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/hub.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Administration" xml:space="preserve">
+    <value>Администрация</value>
+  </data>
   <data name="Already a member?" xml:space="preserve">
     <value>Уже есть учётная запись?</value>
   </data>
@@ -162,8 +165,17 @@
   <data name="Privacy Policy" xml:space="preserve">
     <value>Политика конфиденциальности</value>
   </data>
+  <data name="Products" xml:space="preserve">
+    <value>Произведения</value>
+  </data>
   <data name="Register" xml:space="preserve">
     <value>Зарегистрироваться</value>
+  </data>
+  <data name="Reviews" xml:space="preserve">
+    <value>Рецензии</value>
+  </data>
+  <data name="Search" xml:space="preserve">
+    <value>Введите запрос</value>
   </data>
   <data name="Sign in" xml:space="preserve">
     <value>Войти</value>
