@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Product>
+﻿@model (Movie[], string)
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IHtmlLocalizer<SharedResource> Localizer
 @{
@@ -15,10 +15,22 @@
     </div>
     <hr />
 
-    <h1 class="fw-bolder mb-3" style="color:#cc9900">Best products</h1>
+    <h1 class="fw-bolder mb-3" style="color:#cc9900">Best movies</h1>
     <div class="row">
-        @await Html.PartialAsync("BestProductsPartial")
+        @await Html.PartialAsync("BestProductsPartial", Model.Item1)
     </div>
+    <hr />
+
+    <h1 class="fw-bolder mb-3" style="color:#cc9900">Best series</h1>
+    <div class="row" id="rowBestSeries"></div>
+    <hr />
+
+    <h1 class="fw-bolder mb-3" style="color:#cc9900">Best games</h1>
+    <div class="row" id="rowBestGames"></div>
+    <hr />
+
+    <h1 class="fw-bolder mb-3" style="color:#cc9900">Best books</h1>
+    <div class="row" id="rowBestBooks"></div>
     <hr />
 
     <h1 class="fw-bolder" style="color:#cc9900">New reviews</h1>
@@ -60,10 +72,14 @@
                     <th scope="col">Review</th>
                 </tr>
             </thead>
-            <tbody id="tbodyReviews">
+            <tbody id="tbodyHighScoresReviews">
             </tbody>
         </table>
     </div>
 </div>
 
-<script src="~/js/home.js" async></script>
+<script src="~/js/home.js"></script>
+<script>
+    initTagCloud("@Model.Item2");
+    loadPartialViews();
+</script>

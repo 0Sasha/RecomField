@@ -72,7 +72,7 @@ function checkTag() {
     }
     else if (el.value.length > 0) {
         $.ajax({
-            url: "/Home/GetTagList?partTag=" + el.value,
+            url: "/Review/GetTagList?partTag=" + el.value,
             type: "POST",
             success: function (res) {
                 $("#tagsList").html(res);

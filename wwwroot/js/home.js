@@ -1,38 +1,6 @@
 ﻿
-$.ajax({
-    url: "/Home/GetAllTags",
-    type: "POST",
-    success: function (tags) {
-        let t = tags.split(',');
-        if (t.length > 5) initTagCloud(t);
-    }
-});
-
-$.ajax({
-    url: "/Home/GetNewReviewsView",
-    type: "POST",
-    success: function (res) {
-        $("#tbodyNewReviews").html(res);
-    }
-});
-
-$.ajax({
-    url: "/Home/GetMostLikedView",
-    type: "POST",
-    success: function (res) {
-        $("#tbodyLikedReviews").html(res);
-    }
-});
-
-$.ajax({
-    url: "/Home/GetHighScoresView",
-    type: "POST",
-    success: function (res) {
-        $("#tbodyReviews").html(res);
-    }
-});
-
 function initTagCloud(tags) {
+    tags = tags.split(',');
     var chart = am4core.create("tagCloud", am4plugins_wordCloud.WordCloud);
     //chart.fontFamily = "Courier New";
     chart.fontWeight = "500";
@@ -67,4 +35,54 @@ function initTagCloud(tags) {
     });
     series.labels.template.url = "#";
     series.labels.template.tooltipText = "{word}:\n{value} reviews[/]";
+}
+
+function loadPartialViews() {
+    $.ajax({
+        url: "/Home/GetBestSeries",
+        type: "POST",
+        success: function (res) {
+            $("#rowBestSeries").html(res);
+        }
+    });
+
+    $.ajax({
+        url: "/Home/GetBestGames",
+        type: "POST",
+        success: function (res) {
+            $("#rowBestGames").html(res);
+        }
+    });
+
+    $.ajax({
+        url: "/Home/GetBestBooks",
+        type: "POST",
+        success: function (res) {
+            $("#rowBestBooks").html(res);
+        }
+    });
+
+    $.ajax({
+        url: "/Home/GetNewReviews",
+        type: "POST",
+        success: function (res) {
+            $("#tbodyNewReviews").html(res);
+        }
+    });
+
+    $.ajax({
+        url: "/Home/GetMostLikedReviews",
+        type: "POST",
+        success: function (res) {
+            $("#tbodyLikedReviews").html(res);
+        }
+    });
+
+    $.ajax({
+        url: "/Home/GetHighScoresReviews",
+        type: "POST",
+        success: function (res) {
+            $("#tbodyHighScoresReviews").html(res);
+        }
+    });
 }

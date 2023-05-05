@@ -131,6 +131,13 @@ public class ReviewController : Controller
         return RedirectToAction("Index", "User", new { id = review.AuthorId });
     }
 
+    [HttpPost]
+    public async Task<IActionResult> GetTagList(string partTag)
+    {
+        var t = (await context.ReviewTags.Select(t => t.Body).ToListAsync()).Where(b => b.Contains(partTag, StringComparison.OrdinalIgnoreCase));
+        return PartialView("OptionsList", t.Distinct().TakeLast(7));
+    }
+
     [Authorize]
     [HttpPost]
     public async Task UploadImage(IFormFile file)

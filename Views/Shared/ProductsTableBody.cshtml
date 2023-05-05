@@ -1,8 +1,9 @@
-﻿@model (List<Product>, string)
-@using Microsoft.AspNetCore.Mvc.Localization
-@inject IHtmlLocalizer<SharedResource> Localizer
+﻿@model IEnumerable<Product>
+@{
+    string? authorId = ViewData["authorIdForNewReview"] as string;
+}
 
-@foreach (var p in Model.Item1)
+@foreach (var p in Model)
 {
     <tr>
         <td>
@@ -10,6 +11,11 @@
                 @await Html.PartialAsync("ProductCardPartialMini", p)
             </a>
         </td>
-        <td><a asp-controller="Review" asp-action="AddReview" asp-route-prodId="@p.Id" asp-route-authorId="@Model.Item2">Write a review</a></td>
+        @if (authorId != null)
+        {
+            <td>
+                <a asp-controller="Review" asp-action="AddReview" asp-route-prodId="@p.Id" asp-route-authorId="@authorId">Write a review</a>
+            </td>
+        }
     </tr>
 }

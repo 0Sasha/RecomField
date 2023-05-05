@@ -1,9 +1,9 @@
-﻿@model (IEnumerable<Review>, bool)
-@using static System.Web.HttpUtility;
-@using Microsoft.AspNetCore.Mvc.Localization
-@inject IHtmlLocalizer<SharedResource> Localizer
+﻿@model IEnumerable<Review>
+@{
+    bool addMenu = ViewData["addMenu"]?.Equals(true) ?? false;
+}
 
-@foreach (var review in Model.Item1)
+@foreach (var review in Model)
 {
     <tr>
         <td>
@@ -11,9 +11,9 @@
                 @await Html.PartialAsync("ProductCardPartialMini", review.Product)
             </a>
         </td>
-        <td class="dropdown">
-            @if (Model.Item2)
-            {
+        @if (addMenu)
+        {
+            <td class="dropdown">
                 <button class="btn h-100 w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                     @await Html.PartialAsync("ReviewCardPartial", review)
                 </button>
@@ -34,13 +34,15 @@
                         </a>
                     </li>
                 </ul>
-            }
-            else
-            {
+            </td>
+        }
+        else
+        {
+            <td>
                 <a asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
                     @await Html.PartialAsync("ReviewCardPartial", review)
                 </a>
-            }
-        </td>
+            </td>
+        }
     </tr>
 }

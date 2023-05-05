@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using RecomField.Models;
+using RecomField.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Localization;
@@ -128,8 +129,7 @@ namespace RecomField.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
-                HomeController.UpdateUserCookies(
-                    await _userManager.FindByNameAsync(info.Principal.Identity.Name), Response.Cookies);
+                Response.Cookies.AddUserCookies(await _userManager.FindByNameAsync(info.Principal.Identity.Name));
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)

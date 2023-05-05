@@ -7,6 +7,7 @@
     var u = await userManager.GetUserAsync(User);
     ViewData["Title"] = u == Model ? Localizer["My page"] : Model.UserName;
     bool authorOrAdmin = u == Model || u != null && await userManager.IsInRoleAsync(u, "Admin");
+    ViewData["addMenu"] = authorOrAdmin;
 }
 
 <div class="container-fluid">
@@ -71,7 +72,7 @@
                 </tr>
             </thead>
             <tbody id="tbodyReviews">
-                @await Html.PartialAsync("ReviewsTableBody", (Model.Reviews.AsEnumerable().Reverse(), authorOrAdmin))
+                @await Html.PartialAsync("ReviewsTableBody", Model.Reviews.AsEnumerable().Reverse())
             </tbody>
         </table>
     </div>

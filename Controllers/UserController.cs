@@ -70,8 +70,8 @@ public class UserController : Controller
             (EF.Functions.Contains(r.Title, request) || EF.Functions.Contains(r.Body, request) ||
             EF.Functions.Contains(r.Product.Title, request))).ToListAsync();
         }
-        bool isAuthorOrAdmin = user == curUser || await userManager.IsInRoleAsync(user, "Admin");
-        return PartialView("ReviewsTableBody", (SortReviews(founded, sort, ascOrder), isAuthorOrAdmin));
+        ViewData["addMenu"] = user == curUser || await userManager.IsInRoleAsync(user, "Admin");
+        return PartialView("ReviewsTableBody", SortReviews(founded, sort, ascOrder));
     }
 
     private static IEnumerable<Review> SortReviews(IEnumerable<Review> reviews, string sort, bool ascOrder)
