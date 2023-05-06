@@ -26,10 +26,10 @@
                         @Localizer["Add product"]
                     </button>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" asp-action="AddMovie" asp-controller="Product">@Localizer["Movie"]</a></li>
-                        <li><a class="dropdown-item" asp-action="AddSeries" asp-controller="Product">@Localizer["Series"]</a></li>
-                        <li><a class="dropdown-item" asp-action="AddBook" asp-controller="Product">@Localizer["Book"]</a></li>
-                        <li><a class="dropdown-item" asp-action="AddGame" asp-controller="Product">@Localizer["Game"]</a></li>
+                        <li><a class="dropdown-item" asp-action="AddProduct" asp-controller="Product" asp-route-type="Movie">@Localizer["Movie"]</a></li>
+                        <li><a class="dropdown-item" asp-action="AddProduct" asp-controller="Product" asp-route-type="Series">@Localizer["Series"]</a></li>
+                        <li><a class="dropdown-item" asp-action="AddProduct" asp-controller="Product" asp-route-type="Book">@Localizer["Book"]</a></li>
+                        <li><a class="dropdown-item" asp-action="AddProduct" asp-controller="Product" asp-route-type="Game">@Localizer["Game"]</a></li>
                     </ul>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productsModal" onclick="updateProductsModal('@Model.Id')">@Localizer["Write a review"]</button>
                 </div>
@@ -96,17 +96,6 @@
                     <tbody id="tbodyProductsModal">
                     </tbody>
                 </table>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    @Localizer["Add product"]
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" asp-action="AddMovie" asp-controller="Product">@Localizer["Movie"]</a></li>
-                    <li><a class="dropdown-item" asp-action="AddSeries" asp-controller="Product">@Localizer["Series"]</a></li>
-                    <li><a class="dropdown-item" asp-action="AddBook" asp-controller="Product">@Localizer["Book"]</a></li>
-                    <li><a class="dropdown-item" asp-action="AddGame" asp-controller="Product">@Localizer["Game"]</a></li>
-                </ul>
             </div>
         </div>
     </div>

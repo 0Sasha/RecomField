@@ -11,27 +11,29 @@ public class Review
     public int Id { get; set; }
 
     [Required]
-    public string? AuthorId { get; set; }
+    [MinLength(1)]
+    public string AuthorId { get; set; }
 
     [Required]
     [ForeignKey("AuthorId")]
-    public ApplicationUser? Author { get; set; }
+    public ApplicationUser Author { get; set; }
 
     public int ProductId { get; set; }
 
     [Required]
     [ForeignKey("ProductId")]
-    public Product? Product { get; set; }
+    public Product Product { get; set; }
 
     [Required]
-    public string? Title { get; set; }
+    [MinLength(1)]
+    public string Title { get; set; }
 
     [Required]
     [MinLength(10)]
-    public string? Body { get; set; }
+    public string Body { get; set; }
 
     [Required]
-    public Score<Review>? Score { get; set; }
+    public Score<Review> Score { get; set; }
 
     [DataType(DataType.Date)]
     public DateTime PublicationDate { get; set; }
@@ -46,6 +48,8 @@ public class Review
 
     [ConcurrencyCheck]
     public Guid Version { get; set; }
+
+    public Review() { }
 
     public async Task LoadAsync(ApplicationDbContext context, string? userId, bool deep = false)
     {

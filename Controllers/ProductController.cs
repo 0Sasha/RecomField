@@ -30,19 +30,15 @@ public class ProductController : Controller
     }
 
     [HttpGet]
-    public IActionResult AddProduct() => View("AddMovie");
-
-    [HttpGet]
-    public IActionResult AddMovie() => View();
-
-    [HttpGet]
-    public IActionResult AddSeries() => View();
-
-    [HttpGet]
-    public IActionResult AddBook() => View();
-
-    [HttpGet]
-    public IActionResult AddGame() => View();
+    public IActionResult AddProduct(string type)
+    {
+        if (string.IsNullOrEmpty(type)) throw new ArgumentNullException(nameof(type));
+        if (type == "Movie") return View(new Movie());
+        if (type == "Series") return View(new Series());
+        if (type == "Book") return View(new Book());
+        if (type == "Game") return View(new Game());
+        throw new ArgumentException("Unexpected value", nameof(type));
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]

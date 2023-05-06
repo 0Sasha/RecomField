@@ -9,13 +9,14 @@ public class Tag<T>
     public int Id { get; set; }
 
     [Required]
-    public string? Body { get; set; }
+    [MinLength(1)]
+    public string Body { get; set; }
 
     public int EntityId { get; set; }
 
     [Required]
     [ForeignKey("EntityId")]
-    public T? Entity { get; set; }
+    public T Entity { get; set; }
 
     public Tag() { }
 
@@ -24,4 +25,6 @@ public class Tag<T>
         Body = body;
         Entity = entity;
     }
+
+    public override string ToString() => Body ?? "";
 }

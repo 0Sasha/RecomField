@@ -25,16 +25,9 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        /*var prods = await context.Products.ToArrayAsync();
-        foreach (var p in prods) await p.UpdateAvScoresAsync(context);
-
-        var revs = await context.Reviews.ToArrayAsync();
-        foreach (var r in revs) await r.UpdateLikeCounter(context);
-        await context.SaveChangesAsync();*/
-
         Response.Cookies.AddUserCookies(await userManager.GetUserAsync(User));
-        var movies = await context.Movies.OrderByDescending(p => p.AverageUserScore).Take(6).ToArrayAsync();
-        return View((movies, await GetTagsForCloud()));
+        ViewData["Tags"] = await GetTagsForCloud();
+        return View(await context.Movies.OrderByDescending(p => p.AverageUserScore).Take(6).ToArrayAsync());
     }
 
     private async Task<string> GetTagsForCloud()
@@ -49,36 +42,37 @@ public class HomeController : Controller
         return res;
     }
 
-    public async Task<IActionResult> Search(string text, bool products) => products ?
-        await SearchProducts(text) : text.StartsWith('[') && text.EndsWith("]") ?
-            await SearchReviewsByTag(text[1..(text.Length - 1)]) : await SearchReviews(text);
+    [HttpPost]
+    public async Task<IActionResult> Search(string text, bool products) => products ? await SearchProducts(text) :
+        text.StartsWith('[') && text.EndsWith("]") ? await SearchReviewsByTag(text) : await SearchReviews(text);
 
     private async Task<IActionResult> SearchProducts(string text)
     {
         var request = "\"" + text + "*\" OR \"" + text + "\"";
-        var byTitle = await context.Products.Where(x => EF.Functions.Contains(x.Title, request)).ToArrayAsync();
-        var byDescription = await context.Products.Where(x => EF.Functions.Contains(x.Description, request)).ToArrayAsync();
-        var byAuthor = (await context.Books.Where(x => EF.Functions.Contains(x.Author, request)).ToArrayAsync()).Select(b => (Product)b);
-        return PartialView("ProductsTableBody", byTitle.Union(byDescription).Union(byAuthor));
+        var prods = await context.Products.Where(x =>
+        EF.Functions.Contains(x.Title, request) || EF.Functions.Contains(x.Description, request)).ToArrayAsync();
+        var byAuthor = await context.Books.Where(x => EF.Functions.Contains(x.Author, request)).ToArrayAsync();
+        return PartialView("ProductsTableBody", prods.Union(byAuthor));
     }
 
     private async Task<IActionResult> SearchReviews(string text)
     {
         var request = "\"" + text + "*\" OR \"" + text + "\"";
-        var byTitle = context.Reviews.Where(x => EF.Functions.Contains(x.Title, request));
-        var byBody = context.Reviews.Where(x => EF.Functions.Contains(x.Body, request));
-        var byProduct = context.Reviews.Where(x => EF.Functions.Contains(x.Product.Title, request));
+        var revs = context.Reviews.Where(x => EF.Functions.Contains(x.Title, request) ||
+        EF.Functions.Contains(x.Body, request) || EF.Functions.Contains(x.Product.Title, request));
         var byTags = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
         var byComments = context.ReviewComments.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
-        var founded = byTitle.Union(byBody).Union(byProduct).Union(byTags).Union(byComments);
-        return PartialView("ReviewsTableBody", await founded.Include(r => r.Product).Include(r => r.Author).Include(r => r.Score).ToArrayAsync());
+        var founded = revs.Union(byTags).Union(byComments).Include(r => r.Product).Include(r => r.Author).Include(r => r.Score);
+        return PartialView("ReviewsTableBody", await founded.ToArrayAsync());
     }
 
     private async Task<IActionResult> SearchReviewsByTag(string text)
     {
+        text = text[1..(text.Length - 1)];
         var request = "\"" + text + "*\" OR \"" + text + "\"";
-        var res = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Include(r => r.Entity.Product).Include(r => r.Entity.Author).Include(r => r.Entity.Score);
-        return PartialView("ReviewsTableBody", await res.Select(t => t.Entity).ToArrayAsync());
+        return PartialView("ReviewsTableBody", await context.ReviewTags.Where(x =>
+        EF.Functions.Contains(x.Body, request)).Include(r => r.Entity.Product)
+        .Include(r => r.Entity.Author).Include(r => r.Entity.Score).Select(t => t.Entity).ToArrayAsync());
     }
 
     public async Task<IActionResult> ChangeLanguage(string current, string returnUrl)
@@ -89,13 +83,18 @@ public class HomeController : Controller
         Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
             CookieRequestCultureProvider.MakeCookieValue(lang),
             new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) });
+        await SaveLanguage(current == "en" ? Language.Russian : Language.English);
+        return Redirect(returnUrl);
+    }
+
+    private async Task SaveLanguage(Language language)
+    {
         var u = await userManager.GetUserAsync(User);
         if (u != null)
         {
-            u.InterfaceLanguage = current == "en" ? Language.Russian : Language.English;
+            u.InterfaceLanguage = language;
             await userManager.UpdateAsync(u);
         }
-        return Redirect(returnUrl);
     }
 
     [HttpPost]

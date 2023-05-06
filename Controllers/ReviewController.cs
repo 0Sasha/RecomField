@@ -114,7 +114,7 @@ public class ReviewController : Controller
         review.Tags.Clear();
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         review.Score = new(review.Author, review, score);
-        if (review.Product != null) await review.Product.UpdateAvScoresAsync(context);
+        await review.Product.UpdateAvScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id });
     }
@@ -127,6 +127,7 @@ public class ReviewController : Controller
         if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
         await review.LoadAsync(context, user.Id, true);
         context.Reviews.Remove(review);
+        await review.Product.UpdateAvScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction("Index", "User", new { id = review.AuthorId });
     }

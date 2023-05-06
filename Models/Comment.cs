@@ -9,20 +9,22 @@ public class Comment<T>
     public int Id { get; set; }
 
     [Required]
-    public string? SenderId { get; set; }
+    [MinLength(1)]
+    public string SenderId { get; set; }
 
     [Required]
     [ForeignKey("SenderId")]
-    public ApplicationUser? Sender { get; set; }
+    public ApplicationUser Sender { get; set; }
 
     public int EntityId { get; set; }
 
     [Required]
     [ForeignKey("EntityId")]
-    public T? Entity { get; set; }
+    public T Entity { get; set; }
 
     [Required]
-    public string? Body { get; set; }
+    [MinLength(1)]
+    public string Body { get; set; }
 
     public DateTime PublicationDate { get; set; }
 

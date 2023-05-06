@@ -1,28 +1,45 @@
-﻿@model Movie
+﻿@model Product
 @using Microsoft.AspNetCore.Mvc.Localization
 @inject IHtmlLocalizer<SharedResource> Localizer
 @{
-    ViewData["Title"] = Localizer["Add movie"];
+    string type = Model.GetType().Name;
+    string lowerType = type.ToLower();
+    string action = "Add" + type;
+    ViewData["Title"] = Localizer["Add " + lowerType];
 }
 
 <div class="container-fluid">
-    <h2>Movie</h2>
-    <form asp-action="AddMovie" class="mb-5">
+    <h2>@Localizer[type]</h2>
+    <form asp-action="@action" class="mb-5">
         <div class="row g-2 mb-2">
             <div class="col-md-6 form-floating">
-                <input asp-for=Title class="form-control" type="text" placeholder="Title" required />
-                <label asp-for="Title" class="form-label">Title</label>
+                <input asp-for=Title class="form-control" type="text" placeholder="@Localizer["Title"]" required />
+                <label asp-for="Title" class="form-label">@Localizer["Title"]</label>
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="col-md-2 form-floating">
-                <input asp-for=ReleaseYear class="form-control" type="number" min="0" placeholder="Release year" required />
-                <label asp-for="ReleaseYear" class="form-label">Release year</label>
+                <input asp-for=ReleaseYear class="form-control" type="number" min="0" placeholder="@Localizer["Release year"]" required />
+                <label asp-for="ReleaseYear" class="form-label">@Localizer["Release year"]</label>
                 <span asp-validation-for="ReleaseYear" class="text-danger"></span>
             </div>
             <div class="col-md form-floating">
-                <input id="linkToTrailer" asp-for=Trailer class="form-control" type="text" placeholder="Link to YouTube trailer" onchange="showTrailer()"/>
-                <label asp-for="Trailer" class="form-label">Link to YouTube trailer</label>
-                <span asp-validation-for="Trailer" class="text-danger"></span>
+                @if (type == "Movie")
+                {
+                    @await Html.PartialAsync("MoviePartForm", Model as Movie)
+                }
+                else if (type == "Series")
+                {
+                    @await Html.PartialAsync("SeriesPartForm", Model as Series)
+                }
+                else if (type == "Game")
+                {
+                    @await Html.PartialAsync("GamePartForm", Model as Game)
+                }
+                else if (type == "Book")
+                {
+                    @await Html.PartialAsync("BookPartForm", Model as Book)
+                }
+                else throw new Exception("Unexpected type of model");
             </div>
         </div>
         <div class="row g-2 mb-2">
@@ -34,11 +51,11 @@
                             <img src="~/icons/upload.svg" style="max-width:70px;max-height:70px" />
                         </div>
                         <div id="uplText" class="row text-center">
-                            <h6>Upload cover</h6>
+                            <h6>@Localizer["Upload cover"]</h6>
                         </div>
                         <div id="spinner" class="row justify-content-center" hidden>
                             <div class="spinner-border text-warning " role="status">
-                                <span class="visually-hidden">Loading...</span>
+                                <span class="visually-hidden">@Localizer["Loading..."]</span>
                             </div>
                         </div>
                         <img id="coverImg" style="width:100%; height:100%" hidden />
@@ -51,11 +68,11 @@
             </div>
             <div class="col-md">
                 <div class="form-group">
-                    <textarea asp-for=Description class="form-control" rows="5" placeholder="Description" required>@Model.Description</textarea>
+                    <textarea asp-for=Description class="form-control" rows="5" placeholder="@Localizer["Description"]" required>@Model.Description</textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
             </div>
         </div>
-        <button class="btn btn-primary float-end" type="submit" style="min-width:100px">Add movie</button>
+        <button class="btn btn-primary float-end" type="submit" style="min-width:100px">@Localizer["Add " + lowerType]</button>
     </form>
 </div>

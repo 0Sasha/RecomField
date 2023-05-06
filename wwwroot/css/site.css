@@ -49,3 +49,8 @@ body {
     cursor: pointer;
     opacity: 0;
 }
+
+.h-gold {
+    font-weight: 600;
+    color: #e6ac00;
+}

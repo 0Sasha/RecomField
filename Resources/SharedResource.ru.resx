@@ -153,6 +153,9 @@
   <data name="My page" xml:space="preserve">
     <value>Моя страница</value>
   </data>
+  <data name="New reviews" xml:space="preserve">
+    <value>Новые рецензии</value>
+  </data>
   <data name="Not a member?" xml:space="preserve">
     <value>Нет учётной записи?</value>
   </data>
@@ -165,14 +168,23 @@
   <data name="Privacy Policy" xml:space="preserve">
     <value>Политика конфиденциальности</value>
   </data>
+  <data name="Product" xml:space="preserve">
+    <value>Произведение</value>
+  </data>
   <data name="Products" xml:space="preserve">
     <value>Произведения</value>
   </data>
   <data name="Register" xml:space="preserve">
     <value>Зарегистрироваться</value>
   </data>
+  <data name="Review" xml:space="preserve">
+    <value>Рецензия</value>
+  </data>
   <data name="Reviews" xml:space="preserve">
     <value>Рецензии</value>
+  </data>
+  <data name="Reviews with the highest scores" xml:space="preserve">
+    <value>Рецензии с наивысшими оценками</value>
   </data>
   <data name="Search" xml:space="preserve">
     <value>Введите запрос</value>
@@ -182,6 +194,21 @@
   </data>
   <data name="There are no external authentication services configured" xml:space="preserve">
     <value>Внешние службы аутентификации не настроены</value>
+  </data>
+  <data name="Top books" xml:space="preserve">
+    <value>Лучшие книги</value>
+  </data>
+  <data name="Top games" xml:space="preserve">
+    <value>Лучшие игры</value>
+  </data>
+  <data name="Top movies" xml:space="preserve">
+    <value>Лучшие фильмы</value>
+  </data>
+  <data name="Top reviews" xml:space="preserve">
+    <value>Лучшие рецензии</value>
+  </data>
+  <data name="Top series" xml:space="preserve">
+    <value>Лучшие сериалы</value>
   </data>
   <data name="Use this page to detail your site's privacy policy" xml:space="preserve">
     <value>Используйте эту страницу для раскрытия информации о политике конфиденциальности вашего сайта</value>

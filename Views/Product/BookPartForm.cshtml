@@ -1,0 +1,7 @@
+﻿@model Book
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+
+<input asp-for=Author class="form-control" type="text" placeholder="@Localizer["Author"]" required />
+<label asp-for="Author" class="form-label">@Localizer["Author"]</label>
+<span asp-validation-for="Author" class="text-danger"></span>

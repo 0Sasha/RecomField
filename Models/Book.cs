@@ -5,5 +5,5 @@ public class Book : Product
 {
     [Required]
     [MinLength(1)]
-    public string? Author { get; set; }
+    public string Author { get; set; } = "";
 }

@@ -124,24 +124,15 @@ public static class DataGenerator
         Random r = new();
         var users = await context.Users.ToArrayAsync();
         var prods = await context.Products.ToArrayAsync();
-        foreach (var user in users)
+        foreach (var prod in prods)
         {
-            var count = r.Next(5);
-            List<Product> pr = new();
-            while (count > 0)
+            var count = r.Next(4, (int)(users.Length * 0.4));
+            for (int i = 0; i < count; i++)
             {
-                var p = prods[r.Next(prods.Length)];
-                if (!pr.Contains(p)) pr.Add(p);
-                count--;
-            }
-            foreach (var p in pr)
-            {
-                await context.Entry(p).Collection(p => p.UserScores).LoadAsync();
-                int score = r.Next(1, 11);
-                if (score == 1) score = r.Next(1, 3);
-                if (score < 10) score = r.Next(4, 5);
-                else score = r.Next(3, 5);
-                p.UserScores.Add(new(user, p, score));
+                int score = r.Next(1, 10);
+                if (score == 10) score = 4;
+                else if (score > 5) score = 5;
+                prod.UserScores.Add(new(users[i], prod, score));
             }
         }
         await context.SaveChangesAsync();
@@ -156,17 +147,10 @@ public static class DataGenerator
         Random rand = new();
         var users = await context.Users.ToArrayAsync();
         var reviews = await context.Reviews.ToArrayAsync();
-        foreach (var user in users)
+        foreach (var rev in reviews)
         {
-            var count = rand.Next(10);
-            List<Review> selected = new();
-            while (count > 0)
-            {
-                var rev = reviews[rand.Next(reviews.Length)];
-                if (!selected.Contains(rev)) selected.Add(rev);
-                count--;
-            }
-            foreach (var r in selected) r.Likes.Add(new(user, r));
+            var count = rand.Next((int)(users.Length * 0.6));
+            for(int i = 0; i < count; i++) rev.Likes.Add(new(users[i], rev));
         }
         await context.SaveChangesAsync();
     }

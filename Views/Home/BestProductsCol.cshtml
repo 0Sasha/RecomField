@@ -4,38 +4,28 @@
     @foreach (var p in Model)
     {
         <div class="col-4">
-            @if (p.Cover?.Length > 0)
-            {
-                <a asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">
-                    <img src="@p.Cover" style="width:100%;" />
-                </a>
-            }
+            <a asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">
+                <img src="@p.Cover" style="width:100%;" />
+            </a>
         </div>
     }
 </div>
-<div class="row mb-2">
+<div class="row">
     @foreach (var p in Model)
     {
-        var rev = p.AverageReviewScore > 0.1 ? p.AverageReviewScore.ToString("F2") + "/10" : "n/10";
-        var us = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString("F2") + "/5" : "n/5";
+        var s = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString("F2") + "/5" : "n/5";
+        var c = p.AverageUserScore >= 3.5 ? "badge text-bg-success" : "badge text-bg-warning";
         <div class="col-4">
-            @if (p.AverageUserScore >= 3.5)
-            {
-                <span class="badge text-bg-success" style="min-width:65px;font-weight:600; font-size:15px">@us</span>
-            }
-            else
-            {
-                <span class="badge text-bg-warning" style="min-width:65px;font-weight:600; font-size:15px">@us</span>
-            }
+            <span class='@c' style="font-weight:600; font-size:15px">@s</span>
         </div>
     }
 </div>
-<div class="row mb-2">
+<div class="row">
     @foreach (var p in Model)
     {
-        var title = p.Title?.Length > 25 ? p.Title[..25] + "..." : p.Title;
+        var title = p.Title?.Length > 35 ? p.Title[..35] + "..." : p.Title;
         <div class="col-4">
-            <a style="font-weight:400; font-size:17px" asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">@title</a>
+            <a asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">@title</a>
         </div>
     }
 </div>

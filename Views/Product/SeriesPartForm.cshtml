@@ -1,0 +1,7 @@
+﻿@model Series
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
+
+<input id="linkToTrailer" asp-for=Trailer class="form-control" type="text" placeholder="@Localizer["Link to YouTube trailer"]" onchange="showTrailer()" />
+<label asp-for="Trailer" class="form-label">@Localizer["Link to YouTube trailer"]</label>
+<span asp-validation-for="Trailer" class="text-danger"></span>
