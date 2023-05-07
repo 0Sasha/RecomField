@@ -1,15 +1,15 @@
-﻿using iText.Layout.Element;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.CodeAnalysis.Elfie.Model.Strings;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
-using static System.Net.Mime.MediaTypeNames;
+using RecomField.Services;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace RecomField.Controllers;
 
+[Authorize]
 public class ProductController : Controller
 {
     private readonly UserManager<ApplicationUser> userManager;
@@ -21,6 +21,7 @@ public class ProductController : Controller
         this.context = context;
     }
 
+    [AllowAnonymous]
     public async Task<IActionResult> Index(int id)
     {
         var prod = await FindProduct(id);
@@ -29,7 +30,6 @@ public class ProductController : Controller
         return View(prod);
     }
 
-    [HttpGet]
     public IActionResult AddProduct(string type)
     {
         if (string.IsNullOrEmpty(type)) throw new ArgumentNullException(nameof(type));
@@ -42,18 +42,27 @@ public class ProductController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddMovie([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Movie product) =>
-        await AddProduct(product);
+    public async Task<IActionResult> AddMovie([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Movie product)
+    {
+        product.Trailer?.CustomizeYouTubeLink();
+        return await AddProduct(product);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddSeries([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Series product) =>
-        await AddProduct(product);
+    public async Task<IActionResult> AddSeries([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Series product)
+    {
+        product.Trailer?.CustomizeYouTubeLink();
+        return await AddProduct(product);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddGame([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Game product) =>
-        await AddProduct(product);
+    public async Task<IActionResult> AddGame([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Game product)
+    {
+        product.Trailer?.CustomizeYouTubeLink();
+        return await AddProduct(product);
+    }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -62,39 +71,33 @@ public class ProductController : Controller
 
     private async Task<IActionResult> AddProduct(Product product)
     {
-        var prods = await context.Products.Where(p => p.Title == product.Title &&
-        p.ReleaseYear == product.ReleaseYear).ToArrayAsync();
+        var prods = await context.Products
+            .Where(p => p.Title == product.Title && p.ReleaseYear == product.ReleaseYear).ToArrayAsync();
         if (prods.Any(p => p.GetType() == product.GetType()))
             throw new ArgumentException("This product already exists in the database", nameof(product));
-        product.Description ??= "";
-        if (product is Movie m && m.Trailer != null) m.Trailer = CustomizeLinkToTrailer(m.Trailer);
-        else if (product is Series s && s.Trailer != null) s.Trailer = CustomizeLinkToTrailer(s.Trailer);
-        else if (product is Game g && g.Trailer != null) g.Trailer = CustomizeLinkToTrailer(g.Trailer);
         await context.AddAsync(product);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id = product.Id });
     }
 
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> GetProductsForReview(string authorId, string? partTitle = null)
     {
-        var user = await GetUser(authorId);
+        var user = await userManager.FindByIdAsync(authorId) ?? throw new Exception("User is not found");
         var reviewed = context.Reviews.Where(r => r.Author == user).Include(r => r.Product).Select(r => r.Product);
         ViewData["authorIdForNewReview"] = authorId;
         if (string.IsNullOrEmpty(partTitle))
-            return PartialView("ProductsTableBody", await context.Products.Except(reviewed).Take(7).ToListAsync());
+            return PartialView("ProductsTableBody", await context.Products.Except(reviewed).Take(7).ToArrayAsync());
         var request = "\"" + partTitle + "*\" OR \"" + partTitle + "\"";
         var byTitle = await context.Products.Where(p => EF.Functions.Contains(p.Title, request)).ToArrayAsync();
         var byAuthor = await context.Books.Where(p => EF.Functions.Contains(p.Author, request)).Select(b => (Product)b).ToArrayAsync();
-        var founded = byTitle.Union(byAuthor).Except(reviewed).Take(7).ToList();
-        return PartialView("ProductsTableBody", founded);
+        return PartialView("ProductsTableBody", byTitle.Union(byAuthor).Except(reviewed).Take(7));
     }
 
     [HttpPost]
     public async Task ChangeScoreProduct(int id, int score)
     {
-        var user = await GetUser();
+        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
         var prod = await FindProduct(id);
         await prod.ChangeUserScoreAsync(context, user, score);
         await context.SaveChangesAsync();
@@ -102,17 +105,4 @@ public class ProductController : Controller
 
     private async Task<Product> FindProduct(int id) =>
         await context.Products.FindAsync(id) ?? throw new Exception("Product is not found");
-
-    private async Task<ApplicationUser> GetUser() =>
-        await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
-
-    private async Task<ApplicationUser> GetUser(string id) =>
-        await userManager.FindByIdAsync(id) ?? throw new Exception("User is not found");
-
-    private static string CustomizeLinkToTrailer(string link)
-    {
-        var startId = link.IndexOf("v=") + 2;
-        var endId = link.IndexOf("&", startId);
-        return "https://www.youtube.com/embed/" + (endId >= 0 ? link[startId..endId] : link[startId..]);
-    }
 }

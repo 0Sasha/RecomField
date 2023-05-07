@@ -53,12 +53,11 @@ public abstract class Product
         AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 2);
     }
 
-    public virtual async Task UpdateAvScoresAsync(ApplicationDbContext context)
+    public virtual async Task UpdateAverageScoresAsync(ApplicationDbContext context)
     {
         await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
         await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).LoadAsync();
         AverageUserScore = UserScores.Count > 0 ? Math.Round(UserScores.Select(s => s.Value).Average(), 2) : 0;
-        AverageReviewScore = Reviews.Count > 0 ?
-            Math.Round(Reviews.Select(s => s.Score?.Value ?? throw new Exception("Score is null")).Average(), 2) : 0;
+        AverageReviewScore = Reviews.Count > 0 ? Math.Round(Reviews.Select(s => s.Score.Value).Average(), 2) : 0;
     }
 }

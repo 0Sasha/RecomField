@@ -1,5 +1,5 @@
 ﻿
-if (getCookie("IsDarkTheme") == "false")
+if (getCookie("IsDarkTheme").toLowerCase() == "false")
     document.documentElement.setAttribute("data-bs-theme", "light");
 
 function getCookie(name) {
@@ -50,11 +50,11 @@ function sendSearchRequest(text, isProds) {
         async: true,
         success: function (res) {
             $('#tbodySearch').html(res);
-            if ($('#navbarCollapse').is(":hidden")) $('#navbarCollapse').collapse('toggle');
             if ($('#dropdownMenu').is(":hidden")) $('#searchLine').dropdown('toggle');
             curSearchRequest = undefined;
         }
     });
+    if ($('#navbarCollapse').is(":hidden")) $('#navbarCollapse').collapse('toggle');
     if ($('#dropdownMenu').is(":hidden")) $('#searchLine').dropdown('toggle');
 }
 

@@ -1,34 +1,46 @@
 ﻿@model Product
+@{
+    var verticalCard = ViewData["verticalCard"]?.Equals(true) ?? false;
+    var title = Model.Title?.Length > 27 ? Model.Title[..24] + "..." : Model.Title;
+    var revSc = Model.AverageReviewScore > 0.1 ? Model.AverageReviewScore.ToString("F2") + "/10" : "n/10";
+    var usSc = Model.AverageUserScore > 0.1 ? Model.AverageUserScore.ToString("F2") + "/5" : "n/5";
+    var clRevSc = Model.AverageReviewScore >= 7 ? "badge text-bg-success rounded-3" : "badge text-bg-warning rounded-3";
+    var clUsSc = Model.AverageUserScore >= 3.5 ? "badge text-bg-success rounded-3" : "badge text-bg-warning rounded-3";
+}
 
-@if (Model.Cover?.Length > 0)
+@if (verticalCard)
 {
     <a asp-action="Index" asp-controller="Product" asp-route-id="@Model.Id">
         <img src="@Model.Cover" style="width:100%;" />
     </a>
+    <h5 class="mb-0"><a asp-action="Index" asp-controller="Product" asp-route-id="@Model.Id">@title</a></h5>
+    <h4 class="mb-0">
+        <span class="@clRevSc" style="min-width:85px">@revSc</span>
+        <span class="@clUsSc" style="min-width:85px">@usSc</span>
+    </h4>
 }
-@{
-    var title = Model.Title?.Length > 25 ? Model.Title[..25] + "..." : Model.Title;
+else
+{
+    <div class="row g-2">
+        <div class="col-auto align-self-center" style="width:80px">
+            <img src="@Model.Cover" style="width:100%;" />
+        </div>
+        <div class="col">
+            <div class="row" style="font-size:120%; font-weight:500; line-height:110%">
+                <div class="col">
+                    @Model.Title
+                </div>
+            </div>
+            <div class="row" style="font-size:150%">
+                <div class="col">
+                    <span class="@clRevSc">@revSc</span>
+                </div>
+            </div>
+            <div class="row" style="font-size:110%">
+                <div class="col">
+                    <span class="@clUsSc">@usSc</span>
+                </div>
+            </div>
+        </div>
+    </div>
 }
-<h5 class="mb-0"><a asp-action="Index" asp-controller="Product" asp-route-id="@Model.Id">@title</a></h5>
-<h4 class="mb-0">
-    @{
-        var rev = Model.AverageReviewScore > 0.1 ? Model.AverageReviewScore.ToString("F2") + "/10" : "n/10";
-        var us = Model.AverageUserScore > 0.1 ? Model.AverageUserScore.ToString("F2") + "/5" : "n/5";
-    }
-    @if (@Model.AverageReviewScore >= 7)
-    {
-        <span class="badge text-bg-success" style="min-width:85px">@rev</span>
-    }
-    else
-    {
-        <span class="badge text-bg-warning" style="min-width:85px">@rev</span>
-    }
-    @if (@Model.AverageUserScore >= 3.5)
-    {
-        <span class="badge text-bg-success" style="min-width:85px">@us</span>
-    }
-    else
-    {
-        <span class="badge text-bg-warning" style="min-width:85px">@us</span>
-    }
-</h4>

@@ -117,20 +117,44 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Add book" xml:space="preserve">
+    <value>Добавить книгу</value>
+  </data>
+  <data name="Add game" xml:space="preserve">
+    <value>Добавить игру</value>
+  </data>
+  <data name="Add movie" xml:space="preserve">
+    <value>Добавить фильм</value>
+  </data>
+  <data name="Add product" xml:space="preserve">
+    <value>Добавить произведение</value>
+  </data>
+  <data name="Add series" xml:space="preserve">
+    <value>Добавить сериал</value>
+  </data>
   <data name="Administration" xml:space="preserve">
     <value>Администрация</value>
   </data>
   <data name="Already a member?" xml:space="preserve">
     <value>Уже есть учётная запись?</value>
   </data>
+  <data name="Author" xml:space="preserve">
+    <value>Автор</value>
+  </data>
   <data name="Back to sign in" xml:space="preserve">
     <value>Вернуться</value>
+  </data>
+  <data name="Book" xml:space="preserve">
+    <value>Книга</value>
   </data>
   <data name="Check your permissions in" xml:space="preserve">
     <value>Проверьте ваши разрешения в</value>
   </data>
   <data name="Continue with" xml:space="preserve">
     <value>Продолжить с</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Описание</value>
   </data>
   <data name="en" xml:space="preserve">
     <value>ru</value>
@@ -141,14 +165,26 @@
   <data name="Failed to sign in with" xml:space="preserve">
     <value>Не удалось войти через</value>
   </data>
+  <data name="Game" xml:space="preserve">
+    <value>Игра</value>
+  </data>
   <data name="Home" xml:space="preserve">
     <value>Главная</value>
   </data>
   <data name="Home Page" xml:space="preserve">
     <value>Главная</value>
   </data>
+  <data name="Link to YouTube trailer" xml:space="preserve">
+    <value>Ссылка на YouTube трейлер</value>
+  </data>
+  <data name="Loading..." xml:space="preserve">
+    <value>Загрузка...</value>
+  </data>
   <data name="Logout" xml:space="preserve">
     <value>Выйти</value>
+  </data>
+  <data name="Movie" xml:space="preserve">
+    <value>Фильм</value>
   </data>
   <data name="My page" xml:space="preserve">
     <value>Моя страница</value>
@@ -161,6 +197,9 @@
   </data>
   <data name="Not a member? Sign up with the following services" xml:space="preserve">
     <value>Нет учётной записи? Регистрируйтесь через следующие сервисы</value>
+  </data>
+  <data name="Please use formats: jpg, jpeg, png" xml:space="preserve">
+    <value>Пожалуйста, используйте форматы: jpg, jpeg, png</value>
   </data>
   <data name="Privacy" xml:space="preserve">
     <value>Политика конфиденциальности</value>
@@ -177,6 +216,9 @@
   <data name="Register" xml:space="preserve">
     <value>Зарегистрироваться</value>
   </data>
+  <data name="Release year" xml:space="preserve">
+    <value>Год выпуска</value>
+  </data>
   <data name="Review" xml:space="preserve">
     <value>Рецензия</value>
   </data>
@@ -189,11 +231,17 @@
   <data name="Search" xml:space="preserve">
     <value>Введите запрос</value>
   </data>
+  <data name="Series" xml:space="preserve">
+    <value>Сериал</value>
+  </data>
   <data name="Sign in" xml:space="preserve">
     <value>Войти</value>
   </data>
   <data name="There are no external authentication services configured" xml:space="preserve">
     <value>Внешние службы аутентификации не настроены</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Название</value>
   </data>
   <data name="Top books" xml:space="preserve">
     <value>Лучшие книги</value>
@@ -210,8 +258,14 @@
   <data name="Top series" xml:space="preserve">
     <value>Лучшие сериалы</value>
   </data>
+  <data name="Upload cover" xml:space="preserve">
+    <value>Загрузить обложку</value>
+  </data>
   <data name="Use this page to detail your site's privacy policy" xml:space="preserve">
     <value>Используйте эту страницу для раскрытия информации о политике конфиденциальности вашего сайта</value>
+  </data>
+  <data name="User reviews" xml:space="preserve">
+    <value>Рецензии пользователей</value>
   </data>
   <data name="Welcome" xml:space="preserve">
     <value>Добро пожаловать</value>
@@ -221,5 +275,8 @@
   </data>
   <data name="You have successfully authenticated, but the email address was not provided by the external service" xml:space="preserve">
     <value>Вы успешно прошли аутентификацию, но адрес электронной почты не был предоставлен внешней службой</value>
+  </data>
+  <data name="Your score" xml:space="preserve">
+    <value>Ваша оценка</value>
   </data>
 </root>

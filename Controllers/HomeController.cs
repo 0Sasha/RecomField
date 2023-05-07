@@ -52,7 +52,9 @@ public class HomeController : Controller
         var prods = await context.Products.Where(x =>
         EF.Functions.Contains(x.Title, request) || EF.Functions.Contains(x.Description, request)).ToArrayAsync();
         var byAuthor = await context.Books.Where(x => EF.Functions.Contains(x.Author, request)).ToArrayAsync();
-        return PartialView("ProductsTableBody", prods.Union(byAuthor));
+        var byYear = int.TryParse(text, out var number) ?
+            await context.Products.Where(p => p.ReleaseYear == number).ToArrayAsync() : Array.Empty<Product>();
+        return PartialView("ProductsTableBody", prods.Union(byAuthor).Union(byYear));
     }
 
     private async Task<IActionResult> SearchReviews(string text)

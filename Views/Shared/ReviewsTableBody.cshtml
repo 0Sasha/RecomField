@@ -1,16 +1,20 @@
 ﻿@model IEnumerable<Review>
 @{
     bool addMenu = ViewData["addMenu"]?.Equals(true) ?? false;
+    bool withProd = ViewData["withProd"]?.Equals(true) ?? true;
 }
 
 @foreach (var review in Model)
 {
     <tr>
-        <td>
-            <a asp-controller="Product" asp-action="Index" asp-route-id="@review.ProductId">
-                @await Html.PartialAsync("ProductCardPartialMini", review.Product)
-            </a>
-        </td>
+        @if (withProd)
+        {
+            <td>
+                <a asp-controller="Product" asp-action="Index" asp-route-id="@review.ProductId">
+                    @await Html.PartialAsync("ProductCardPartial", review.Product)
+                </a>
+            </td>
+        }
         @if (addMenu)
         {
             <td class="dropdown">

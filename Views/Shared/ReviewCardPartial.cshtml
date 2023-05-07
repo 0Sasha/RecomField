@@ -1,13 +1,13 @@
 ﻿@model Review
 
-<div class="row" style="font-size:120%; font-weight:500">
+<div class="row" style="font-size:120%; font-weight:500; line-height:110%">
     <div class="col">
         @Model.Title
     </div>
 </div>
 <div class="row" style="font-size:100%; font-weight:500">
     <div class="col">
-        By @Model.Author?.UserName
+        @Model.Author?.UserName
     </div>
 </div>
 <div class="row" style="font-size:150%">

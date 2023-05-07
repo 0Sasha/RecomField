@@ -96,7 +96,7 @@ public class ReviewController : Controller
         review.Body = CustomizeStringHtml(review.Body);
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         await context.AddAsync(review);
-        await review.Product.UpdateAvScoresAsync(context);
+        await review.Product.UpdateAverageScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id = review.Id });
     }
@@ -114,7 +114,7 @@ public class ReviewController : Controller
         review.Tags.Clear();
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         review.Score = new(review.Author, review, score);
-        await review.Product.UpdateAvScoresAsync(context);
+        await review.Product.UpdateAverageScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id });
     }
@@ -127,7 +127,7 @@ public class ReviewController : Controller
         if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
         await review.LoadAsync(context, user.Id, true);
         context.Reviews.Remove(review);
-        await review.Product.UpdateAvScoresAsync(context);
+        await review.Product.UpdateAverageScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction("Index", "User", new { id = review.AuthorId });
     }
@@ -212,7 +212,8 @@ public class ReviewController : Controller
             await context.Entry(r).Reference(r => r.Author).LoadAsync();
             await context.Entry(r).Reference(r => r.Score).LoadAsync();
         }
-        return PartialView("SimilarTableBody", sorted);
+        ViewData["withProd"] = false;
+        return PartialView("ReviewsTableBody", sorted);
     }
 
     public async Task<IActionResult> ConvertToPDF(int id)

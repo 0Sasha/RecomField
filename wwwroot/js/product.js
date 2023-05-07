@@ -31,21 +31,28 @@ function setInitRateProd(rate) {
     }
 }
 
+let curSearchProdsRequest = undefined;
+
 function updateProductsModal(authorId) {
     let txt = document.getElementById("searchProductsModal").value;
     if (txt == undefined) txt = "";
-    $.ajax({
+    if (curSearchProdsRequest != undefined) curSearchProdsRequest.abort();
+    curSearchProdsRequest = $.ajax({
         url: "/Product/GetProductsForReview?authorId=" + authorId + "&partTitle=" + txt,
         type: "POST",
-        dataType: "html",
         success: function (res) {
             $("#tbodyProductsModal").html(res);
+            curSearchProdsRequest = undefined;
         }
     });
 }
 
 function clickCoverInput() {
     document.getElementById("coverInput").click();
+}
+
+function dragOverHandler(ev) {
+    ev.preventDefault();
 }
 
 async function dropCoverInput(ev) {
@@ -57,52 +64,65 @@ async function dropCoverInput(ev) {
             if (validFileType(file)) {
                 let url = await uploadCover(file);
                 document.getElementById("coverAspInput").value = url;
-                const coverInput = document.getElementById("coverInput");
-                coverInput.hidden = true;
-                coverInput.removeAttribute("required");
                 showCover(url);
+                return;
             }
         }
+        document.getElementById("coverFeedback").hidden = false;
     }
-}
-
-function dragOverHandler(ev) {
-    ev.preventDefault();
 }
 
 async function setCover() {
     const coverInput = document.getElementById("coverInput");
-    const curFiles = coverInput.files;
-    if (curFiles.length != 0) {
-        for (const file of curFiles) {
-            if (validFileType(file)) {
-                let url = await uploadCover(file);
-                document.getElementById("coverAspInput").value = url;
-                coverInput.hidden = true;
-                showCover(url);
-            }
+    if (coverInput.files.length != 0) {
+        const file = coverInput.files[0];
+        if (validFileType(file)) {
+            let url = await uploadCover(file);
+            document.getElementById("coverAspInput").value = url;
+            showCover(url);
         }
+        else document.getElementById("coverFeedback").hidden = false;
     }
 }
 
 async function uploadCover(file) {
     let formData = new FormData();
     formData.append("file", file);
-    document.getElementById("uplIcon").hidden = true;
-    document.getElementById("uplText").hidden = true;
-    document.getElementById("spinner").hidden = false;
+    startSpinner();
     let response = await fetch('/Review/UploadImage', { method: "POST", body: formData });
     if (response.ok) {
         const jsonValue = await response.json();
         return jsonValue.location;
     }
+    else cancelSpinner();
+}
+
+function startSpinner() {
+    document.getElementById("uplIcon").hidden = true;
+    document.getElementById("uplText").hidden = true;
+    document.getElementById("coverFeedback").hidden = true;
+    document.getElementById("spinner").hidden = false;
+}
+
+function cancelSpinner() {
+    document.getElementById("spinner").hidden = true;
+    document.getElementById("uplIcon").hidden = false;
+    document.getElementById("uplText").hidden = false;
 }
 
 function showCover(url) {
     let img = document.getElementById("coverImg");
     img.src = url;
-    document.getElementById("spinner").hidden = true;
+    hideCoverElements();
     img.hidden = false;
+}
+
+function hideCoverElements() {
+    const coverInput = document.getElementById("coverInput");
+    coverInput.hidden = true;
+    coverInput.removeAttribute("required");
+    document.getElementById("coverFeedback").hidden = true;
+    document.getElementById("spinner").hidden = true;
 }
 
 function showTrailer() {
@@ -130,13 +150,7 @@ function validFileType(file) {
 
 const fileTypes = [
     "image/apng",
-    "image/bmp",
-    "image/gif",
     "image/jpeg",
     "image/pjpeg",
-    "image/png",
-    "image/svg+xml",
-    "image/tiff",
-    "image/webp",
-    "image/x-icon"
+    "image/png"
 ];

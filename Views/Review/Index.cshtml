@@ -6,6 +6,7 @@
 @{
     var appUser = await userManager.GetUserAsync(User);
     ViewData["Title"] = Model.Title;
+    ViewData["verticalCard"] = true;
 }
 
 <div class="container-fluid ">

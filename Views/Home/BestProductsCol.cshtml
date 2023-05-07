@@ -23,7 +23,7 @@
 <div class="row">
     @foreach (var p in Model)
     {
-        var title = p.Title?.Length > 35 ? p.Title[..35] + "..." : p.Title;
+        var title = p.Title?.Length > 24 ? p.Title[..22] + "..." : p.Title;
         <div class="col-4">
             <a asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">@title</a>
         </div>
