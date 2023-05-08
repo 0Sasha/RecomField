@@ -1,7 +1,7 @@
 ﻿@model Product
 @{
     var verticalCard = ViewData["verticalCard"]?.Equals(true) ?? false;
-    var title = Model.Title?.Length > 27 ? Model.Title[..24] + "..." : Model.Title;
+    var title = Model.Title.Length > 27 ? Model.Title[..24] + "..." : Model.Title;
     var revSc = Model.AverageReviewScore > 0.1 ? Model.AverageReviewScore.ToString("F2") + "/10" : "n/10";
     var usSc = Model.AverageUserScore > 0.1 ? Model.AverageUserScore.ToString("F2") + "/5" : "n/5";
     var clRevSc = Model.AverageReviewScore >= 7 ? "badge text-bg-success rounded-3" : "badge text-bg-warning rounded-3";
@@ -22,7 +22,7 @@
 else
 {
     <div class="row g-2">
-        <div class="col-auto align-self-center" style="width:80px">
+        <div class="col-auto" style="width:80px">
             <img src="@Model.Cover" style="width:100%;" />
         </div>
         <div class="col">
@@ -36,7 +36,7 @@ else
                     <span class="@clRevSc">@revSc</span>
                 </div>
             </div>
-            <div class="row" style="font-size:110%">
+            <div class="row" style="font-size:120%">
                 <div class="col">
                     <span class="@clUsSc">@usSc</span>
                 </div>

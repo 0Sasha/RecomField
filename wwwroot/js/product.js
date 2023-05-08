@@ -43,7 +43,8 @@ function updateProductsModal(authorId) {
         success: function (res) {
             $("#tbodyProductsModal").html(res);
             curSearchProdsRequest = undefined;
-        }
+        },
+        error: function (jqXHR, exception) { curSearchProdsRequest = undefined; }
     });
 }
 

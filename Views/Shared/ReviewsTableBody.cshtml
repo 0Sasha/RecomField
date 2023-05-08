@@ -18,22 +18,22 @@
         @if (addMenu)
         {
             <td class="dropdown">
-                <button class="btn h-100 w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="h-100 w-100" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     @await Html.PartialAsync("ReviewCardPartial", review)
-                </button>
+                </a>
                 <ul class="dropdown-menu">
                     <li>
-                        <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
+                        <a class="dropdown-item text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
                             Open
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="Review" asp-action="EditReview" asp-route-id="@review.Id">
+                        <a class="dropdown-item text-start btn" asp-controller="Review" asp-action="EditReview" asp-route-id="@review.Id">
                             Edit
                         </a>
                     </li>
                     <li>
-                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="removeReview('@review.Id')">
+                        <a class="dropdown-item text-start btn" onclick="removeReview('@review.Id')">
                             Remove
                         </a>
                     </li>

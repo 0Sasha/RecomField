@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
 using RecomField.Services;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
-
 namespace RecomField.Controllers;
 
 [Authorize]

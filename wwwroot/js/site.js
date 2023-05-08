@@ -52,7 +52,8 @@ function sendSearchRequest(text, isProds) {
             $('#tbodySearch').html(res);
             if ($('#dropdownMenu').is(":hidden")) $('#searchLine').dropdown('toggle');
             curSearchRequest = undefined;
-        }
+        },
+        error: function (jqXHR, exception) { curSearchRequest = undefined; }
     });
     if ($('#navbarCollapse').is(":hidden")) $('#navbarCollapse').collapse('toggle');
     if ($('#dropdownMenu').is(":hidden")) $('#searchLine').dropdown('toggle');

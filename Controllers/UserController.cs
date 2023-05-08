@@ -4,25 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
-using System.Security.Claims;
-
 namespace RecomField.Controllers;
 
 [Authorize]
 public class UserController : Controller
 {
     private readonly UserManager<ApplicationUser> userManager;
-    private readonly RoleManager<IdentityRole> roleManager;
     private readonly SignInManager<ApplicationUser> signInManager;
     private readonly ApplicationDbContext context;
 
-    public UserController(UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager, 
-        RoleManager<IdentityRole> roleManager,
+    public UserController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, 
         ApplicationDbContext context)
     {
         this.userManager = userManager;
-        this.roleManager = roleManager;
         this.signInManager = signInManager;
         this.context = context;
     }
@@ -36,22 +30,24 @@ public class UserController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> GetUsersView(string? search, string type, int count) // Very slow search - add fulltext///////////////
+    public async Task<IActionResult> GetUsersView(string? search, string type, int count)
     {
         if (string.IsNullOrEmpty(type)) throw new ArgumentNullException(nameof(type));
-        if (count <= 0) count = int.MaxValue;
-        var roles = await context.UserRoles.ToListAsync();
-        var users = string.IsNullOrEmpty(search) ? context.Users : context.Users.Where(u => u.UserName.Contains(search));
-        List<ApplicationUser> selected;
-        if (type == "All") selected = await users.Take(count).ToListAsync();
-        else if (type == "Admins")
-        {
-            var idAdmins = roles.Select(r => r.UserId).ToList();
-            selected = await users.Where(u => idAdmins.Contains(u.Id)).Take(count).ToListAsync();
-        }
-        else if (type == "Blocked") selected = await users.Where(u => u.LockoutEnd != null && u.LockoutEnd != DateTimeOffset.MinValue).Take(count).ToListAsync();
-        else throw new ArgumentException("Unexpected value", nameof(type));
-        return PartialView("UsersTableBody", (selected, roles));
+        if (count < 1) count = int.MaxValue;
+        var admins = await context.UserRoles.Select(r => r.UserId).ToArrayAsync();
+        ViewData["Admins"] = admins;
+        return PartialView("UsersTableBody", await FilterUsers(search, type, count, admins));
+    }
+
+    private async Task<ApplicationUser[]> FilterUsers(string? search, string type, int count, string[] admins)
+    {
+        var users = string.IsNullOrEmpty(search) ? context.Users :
+            context.Users.Where(u => u.UserName != null && u.UserName.Contains(search));
+        return type == "Admins" ? await users.Where(u => admins.Contains(u.Id)).Take(count).ToArrayAsync() :
+            type == "All" ? await users.Take(count).ToArrayAsync() :
+            type == "Blocked" ? await users.Where(u => u.LockoutEnd != null &&
+            u.LockoutEnd != DateTimeOffset.MinValue).Take(count).ToArrayAsync() :
+            throw new ArgumentException("Unexpected value", nameof(type));
     }
 
     [HttpPost]
@@ -59,49 +55,55 @@ public class UserController : Controller
     {
         if (string.IsNullOrEmpty(userId)) throw new ArgumentNullException(nameof(userId));
         if (string.IsNullOrEmpty(sort)) throw new ArgumentNullException(nameof(sort));
-        var curUser = await userManager.GetUserAsync(User);
+        var curUser = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
         var user = await userManager.FindByIdAsync(userId) ?? throw new Exception("User is not found");
         await user.LoadAsync(context, true);
-        List<Review> founded = user.Reviews;
+        ViewData["addMenu"] = user == curUser || await userManager.IsInRoleAsync(curUser, "Admin");
+        return PartialView("ReviewsTableBody", await FilterReviews(user, search, sort, ascOrder));
+    }
+
+    private async Task<Review[]> FilterReviews(ApplicationUser user, string? search, string sort, bool ascOrder)
+    {
+        Review[] filtered;
         if (!string.IsNullOrEmpty(search))
         {
             var request = "\"" + search + "*\" OR \"" + search + "\"";
-            founded = await context.Reviews.Where(r => r.AuthorId == userId &&
+            filtered = await context.Reviews.Where(r => r.AuthorId == user.Id &&
             (EF.Functions.Contains(r.Title, request) || EF.Functions.Contains(r.Body, request) ||
-            EF.Functions.Contains(r.Product.Title, request))).ToListAsync();
+            EF.Functions.Contains(r.Product.Title, request))).ToArrayAsync();
         }
-        ViewData["addMenu"] = user == curUser || await userManager.IsInRoleAsync(user, "Admin");
-        return PartialView("ReviewsTableBody", SortReviews(founded, sort, ascOrder));
+        else filtered = user.Reviews.ToArray();
+        return SortReviews(filtered, sort, ascOrder);
     }
 
-    private static IEnumerable<Review> SortReviews(IEnumerable<Review> reviews, string sort, bool ascOrder)
+    private static Review[] SortReviews(IEnumerable<Review> reviews, string sort, bool ascOrder)
     {
-        if (!reviews.Any()) return reviews;
-        if (sort == "date") return ascOrder ? reviews.OrderBy(r => r.PublicationDate).ToList() :
-                reviews.OrderByDescending(r => r.PublicationDate).ToList();
-        if (sort == "title") return ascOrder ? reviews.OrderBy(r => r.Title).ToList() :
-                reviews.OrderByDescending(r => r.Title).ToList();
-        if (sort == "likes") return ascOrder ? reviews.OrderBy(r => r.LikeCounter).ToList() :
-                reviews.OrderByDescending(r => r.LikeCounter).ToList();
-        if (sort == "score") return ascOrder ? reviews.OrderBy(r => r.Score.Value).ToList() :
-                reviews.OrderByDescending(r => r.Score.Value).ToList();
+        if (sort == "date") return ascOrder ? reviews.OrderBy(r => r.PublicationDate).ToArray() :
+                reviews.OrderByDescending(r => r.PublicationDate).ToArray();
+        if (sort == "title") return ascOrder ? reviews.OrderBy(r => r.Title).ToArray() :
+                reviews.OrderByDescending(r => r.Title).ToArray();
+        if (sort == "likes") return ascOrder ? reviews.OrderBy(r => r.LikeCounter).ToArray() :
+                reviews.OrderByDescending(r => r.LikeCounter).ToArray();
+        if (sort == "score") return ascOrder ? reviews.OrderBy(r => r.Score.Value).ToArray() :
+                reviews.OrderByDescending(r => r.Score.Value).ToArray();
         throw new ArgumentException("Unexpected value", nameof(sort));
     }
 
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> AdminPage()
     {
-        var roles = await context.UserRoles.ToListAsync();
-        var users = await context.Users.Take(10).ToListAsync();
-        return View((users, roles, await context.Users.CountAsync()));
+        var users = await context.Users.Take(10).ToArrayAsync();
+        ViewData["Admins"] = await context.UserRoles.Select(r => r.UserId).ToArrayAsync();
+        ViewData["CountUsers"] = await context.Users.CountAsync();
+        return View(users);
     }
 
     [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task BlockUser(string id, int? days = null)
     {
-        var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
-        user.LockoutEnd = days == null ? DateTimeOffset.MaxValue : DateTimeOffset.UtcNow.AddDays((double)days);
+        var user = await GetUserAsync(id);
+        user.LockoutEnd = days == null ? DateTimeOffset.MaxValue : DateTimeOffset.UtcNow.AddDays(days.Value);
         await context.SaveChangesAsync();
         await userManager.UpdateSecurityStampAsync(user);
         if (user == await userManager.GetUserAsync(User)) await signInManager.SignOutAsync();
@@ -111,7 +113,7 @@ public class UserController : Controller
     [HttpPost]
     public async Task UnlockUser(string id)
     {
-        var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
+        var user = await GetUserAsync(id);
         user.LockoutEnd = DateTimeOffset.MinValue;
         await context.SaveChangesAsync();
     }
@@ -120,9 +122,10 @@ public class UserController : Controller
     [HttpPost]
     public async Task RemoveUser(string id)
     {
-        var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
+        var user = await GetUserAsync(id);
         await user.LoadAllDependent(context);
         context.Users.Remove(user);
+        // Can update product AverageScores
         await context.SaveChangesAsync();
         if (user == await userManager.GetUserAsync(User)) await signInManager.SignOutAsync();
     }
@@ -131,7 +134,7 @@ public class UserController : Controller
     [HttpPost]
     public async Task AddAdminRole(string id)
     {
-        var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
+        var user = await GetUserAsync(id);
         if (await userManager.IsInRoleAsync(user, "Admin")) throw new Exception("User is already an admin");
         await userManager.AddToRoleAsync(user, "Admin");
         await context.SaveChangesAsync();
@@ -141,9 +144,12 @@ public class UserController : Controller
     [HttpPost]
     public async Task RevokeAdminRole(string id)
     {
-        var user = await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
+        var user = await GetUserAsync(id);
         if (!await userManager.IsInRoleAsync(user, "Admin")) throw new Exception("User is not an admin");
         await userManager.RemoveFromRoleAsync(user, "Admin");
         await context.SaveChangesAsync();
     }
+
+    private async Task<ApplicationUser> GetUserAsync(string id) =>
+        await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
 }

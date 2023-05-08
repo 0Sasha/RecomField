@@ -13,10 +13,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md">
-            <h1 class="mb-0">@Model.UserName
-                @await Html.PartialAsync("LikesPartial", @Model.ReviewLikes)
-                <small class="text-muted" style="font-size:large">for @Model.Reviews.Count reviews</small>
-            </h1>
+            <h1 class="mb-0">@Model.UserName @await Html.PartialAsync("LikesPartial", @Model.ReviewLikes)</h1>
         </div>
         @if (authorOrAdmin)
         {
@@ -39,18 +36,18 @@
     <hr />
     <div class="row justify-content-between">
         <div class="col-auto">
-            <h4>Reviews</h4>
+            <h4>@Localizer["Reviews"] <small class="text-muted" style="font-size:large">@Model.Reviews.Count</small></h4>
         </div>
         <div class="col-auto">
             <div class="row justify-content-end">
                 <div class="col">
-                    <div class="input-group" style="min-width:250px">
-                        <span class="input-group-text">Sorted by</span>
+                    <div class="input-group" >
+                        <span class="input-group-text">@Localizer["Sort by"]</span>
                         <select id="sortedSel" ascOrder="true" class="form-select" onchange="updateReviews()">
-                            <option value="date" selected>Date</option>
-                            <option value="title">Title</option>
-                            <option value="likes">Likes</option>
-                            <option value="score">Score</option>
+                            <option value="date" selected>@Localizer["Date"]</option>
+                            <option value="title">@Localizer["Title"]</option>
+                            <option value="likes">@Localizer["Likes"]</option>
+                            <option value="score">@Localizer["Score"]</option>
                         </select>
                         <span role="button" class="input-group-text" onclick="changeOrderSort()">
                             <img src="~/icons/sort gray.svg" style="max-width:22px" />
@@ -58,17 +55,17 @@
                     </div>
                 </div>
                 <div class="col">
-                    <input type="search" class="form-control float-end" id="searchReview" userId="@Model.Id" placeholder="Search a review" oninput="updateReviews()" style="max-width:250px" />
+                    <input type="search" class="form-control float-end" id="searchReview" userId="@Model.Id" placeholder="@Localizer["Search a review"]" oninput="updateReviews()" style="max-width:250px" />
                 </div>
             </div>
         </div>
     </div>
     <div class="row">
-        <table id="userReviews" dirSort="asc" class="table table-striped table-hover align-middle">
+        <table id="userReviews" dirSort="asc" class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th>Product</th>
-                    <th>Review</th>
+                    <th>@Localizer["Product"]</th>
+                    <th>@Localizer["Review"]</th>
                 </tr>
             </thead>
             <tbody id="tbodyReviews">
@@ -82,14 +79,14 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h1 class="modal-title fs-5">Select product</h1>
+                <h1 class="modal-title fs-5">@Localizer["Select product"]</h1>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div class="input-group mb-3">
                     <div class="form-floating">
-                        <input id="searchProductsModal" class="form-control" placeholder="Search" onkeyup="updateProductsModal('@Model.Id')" />
-                        <label class="form-label">Search</label>
+                        <input id="searchProductsModal" class="form-control" placeholder="@Localizer["Search"]" onkeyup="updateProductsModal('@Model.Id')" />
+                        <label class="form-label">@Localizer["Search"]</label>
                     </div>
                 </div>
                 <table class="table table-striped table-hover align-middle">

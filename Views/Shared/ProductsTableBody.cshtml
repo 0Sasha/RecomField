@@ -1,4 +1,6 @@
 ﻿@model IEnumerable<Product>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
 @{
     string? authorId = ViewData["authorIdForNewReview"] as string;
 }
@@ -14,7 +16,9 @@
         @if (authorId != null)
         {
             <td>
-                <a asp-controller="Review" asp-action="AddReview" asp-route-prodId="@p.Id" asp-route-authorId="@authorId">Write a review</a>
+                <h5>
+                    <a asp-controller="Review" asp-action="AddReview" asp-route-prodId="@p.Id" asp-route-authorId="@authorId">@Localizer["Write a review"]</a>
+                </h5>
             </td>
         }
     </tr>

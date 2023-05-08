@@ -28,5 +28,6 @@ public class ApplicationUser : IdentityUser
         await context.ReviewLikes.Where(l => l.Sender == this).LoadAsync();
         await context.ReviewComments.Where(l => l.Sender == this).LoadAsync();
         await context.ReviewScores.Where(l => l.Sender == this).LoadAsync();
+        await context.ProductScores.Where(l => l.Sender == this).LoadAsync();
     }
 }

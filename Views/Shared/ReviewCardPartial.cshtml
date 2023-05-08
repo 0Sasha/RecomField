@@ -1,25 +1,27 @@
 ﻿@model Review
+@{
+    if (Model.Score == null) throw new ArgumentNullException(nameof(Model.Score));
+    var title = Model.Title.Length > 50 ? Model.Title[..48] + "..." : Model.Title;
+    var clSc = Model.Score.Value >= 7 ? "badge text-bg-success rounded-3" : "badge text-bg-warning rounded-3";
+}
 
 <div class="row" style="font-size:120%; font-weight:500; line-height:110%">
     <div class="col">
-        @Model.Title
+        @title
     </div>
 </div>
-<div class="row" style="font-size:100%; font-weight:500">
+<div class="row" style="font-size:100%; font-weight:500; line-height:110%">
     <div class="col">
-        @Model.Author?.UserName
+        @Model.Author.UserName
     </div>
 </div>
 <div class="row" style="font-size:150%">
     <div class="col">
-        @if (Model.Score?.Value >= 7)
-        {
-            <span class="badge text-bg-success rounded-3" style="min-width:75px">@Model.Score?.Value/10</span>
-        }
-        else
-        {
-            <span class="badge text-bg-warning rounded-3" style="min-width:75px">@Model.Score?.Value/10</span>
-        }
+        <span class="@clSc" style="min-width:75px">@Model.Score.Value/10</span>
+    </div>
+</div>
+<div class="row" style="font-size:120%">
+    <div class="col">
         @await Html.PartialAsync("LikesPartialMini", Model.LikeCounter)
     </div>
 </div>

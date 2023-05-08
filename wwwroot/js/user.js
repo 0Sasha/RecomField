@@ -38,49 +38,10 @@ function changeOrderSort() {
     updateReviews();
 }
 
-function blockUser(id, days) {
+function changeUser(id, method, nameArg, valArg) {
+    let addPart = nameArg != undefined ? "&" + nameArg + "=" + valArg : "";
     $.ajax({
-        url: "/User/BlockUser?id=" + id + "&days=" + days,
-        type: "POST",
-        success: function (res) {
-            updateUsers();
-        }
-    });
-}
-
-function unblockUser(id) {
-    $.ajax({
-        url: "/User/UnlockUser?id=" + id,
-        type: "POST",
-        success: function (res) {
-            updateUsers();
-        }
-    });
-}
-
-function removeUser(id) {
-    $.ajax({
-        url: "/User/RemoveUser?id=" + id,
-        type: "POST",
-        success: function (res) {
-            updateUsers();
-        }
-    });
-}
-
-function addAdminRole(id) {
-    $.ajax({
-        url: "/User/AddAdminRole?id=" + id,
-        type: "POST",
-        success: function (res) {
-            updateUsers();
-        }
-    });
-}
-
-function revokeAdminRole(id) {
-    $.ajax({
-        url: "/User/RevokeAdminRole?id=" + id,
+        url: "/User/" + method + "?id=" + id + addPart,
         type: "POST",
         success: function (res) {
             updateUsers();

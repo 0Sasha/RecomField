@@ -1,86 +1,86 @@
-﻿@model (List<ApplicationUser>, List<IdentityUserRole<string>>)
+﻿@model IEnumerable<ApplicationUser>
 @using Microsoft.AspNetCore.Mvc.Localization
 @using Microsoft.AspNetCore.Identity;
-@using RecomField.Data;
 @inject IHtmlLocalizer<SharedResource> Localizer
+@{
+    var admins = ViewData["Admins"] as string[] ?? throw new ArgumentNullException("Admins");
+}
 
-@foreach (var u in Model.Item1)
+@foreach (var u in Model)
 {
     bool blocked = u.LockoutEnd > DateTime.UtcNow;
-    bool admin = Model.Item2.Any(r => r.UserId == u.Id);
+    bool admin = admins.Contains(u.Id);
     <tr>
-        <td>
-            <div class="dropdown">
-                <button class="btn h-100 w-100 text-start" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    @u.UserName
-                </button>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="User" asp-action="Index" asp-route-id="@u.Id">
-                            Open user page
-                        </a>
-                    </li>
-                    <li>
-                        @if (blocked)
-                        {
-                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="unblockUser('@u.Id')">
-                                Unblock
-                            </a>
-                        }
-                        else
-                        {
-                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="blockUser('@u.Id', 7)">
-                                Block for a week
-                            </a>
-                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="blockUser('@u.Id')">
-                                Block forever
-                            </a>
-                        }
-                    </li>
-                    <li>
-                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="removeUser('@u.Id')">
-                            Remove
-                        </a>
-                    </li>
-                    <li>
-                        @if (admin)
-                        {
-                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="revokeAdminRole('@u.Id')">
-                                Revoke admin role
-                            </a>
-                        }
-                        else
-                        {
-                            <a class="dropdown-item h-100 w-100 text-start btn" onclick="addAdminRole('@u.Id')">
-                                Add admin role
-                            </a>
-                        }
-                    </li>
-                </ul>
+        <td class="dropdown">
+            <div role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                @u.UserName
             </div>
+            <ul class="dropdown-menu">
+                <li>
+                    <a class="dropdown-item h-100 w-100 text-start btn" asp-controller="User" asp-action="Index" asp-route-id="@u.Id">
+                        @Localizer["Go to user page"]
+                    </a>
+                </li>
+                <li>
+                    @if (blocked)
+                    {
+                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="changeUser('@u.Id', 'UnlockUser')">
+                            @Localizer["Unblock"]
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="changeUser('@u.Id', 'BlockUser', 'days', '7')">
+                            @Localizer["Block for a week"]
+                        </a>
+                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="changeUser('@u.Id', 'BlockUser')">
+                            @Localizer["Block forever"]
+                        </a>
+                    }
+                </li>
+                <li>
+                    <a class="dropdown-item h-100 w-100 text-start btn" onclick="changeUser('@u.Id', 'RemoveUser')">
+                        @Localizer["Remove"]
+                    </a>
+                </li>
+                <li>
+                    @if (admin)
+                    {
+                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="changeUser('@u.Id', 'RevokeAdminRole')">
+                            @Localizer["Revoke an admin role"]
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="dropdown-item h-100 w-100 text-start btn" onclick="changeUser('@u.Id', 'AddAdminRole')">
+                            @Localizer["Assign an admin role"]
+                        </a>
+                    }
+                </li>
+            </ul>
         </td>
         @if (admin)
         {
-            <td class="fw-bolder">Admin</td>
+            <td class="fw-bolder">@Localizer["Admin"]</td>
         }
         else
         {
-            <td>User</td>
+            <td>@Localizer["User"]</td>
         }
         @if (blocked)
         {
             if (u.LockoutEnd == DateTimeOffset.MaxValue)
             {
-                <td class="fw-bolder">Blocked forever</td>
+                <td class="fw-bolder">@Localizer["Blocked forever"]</td>
             }
-            else
+            else if (u.LockoutEnd != null)
             {
-                <td class="fw-bolder">Blocked until @u.LockoutEnd.Value.ToString("dd/MM/yy")</td>
+                <td class="fw-bolder">@Localizer["Blocked until"] @u.LockoutEnd.Value.ToString("dd/MM/yy")</td>
             }
         }
         else
         {
-            <td>Active</td>
+            <td>@Localizer["Active"]</td>
         }
     </tr>
 }
