@@ -17,9 +17,9 @@
         </div>
         @if (authorOrAdmin)
         {
-            <div class="col-md">
+            <div class="col-md text-end">
                 <div class="float-end mt-2" role="group">
-                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <button class="btn btn-secondary dropdown-toggle mb-1" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                         @Localizer["Add product"]
                     </button>
                     <ul class="dropdown-menu">
@@ -28,7 +28,7 @@
                         <li><a class="dropdown-item" asp-action="AddProduct" asp-controller="Product" asp-route-type="Book">@Localizer["Book"]</a></li>
                         <li><a class="dropdown-item" asp-action="AddProduct" asp-controller="Product" asp-route-type="Game">@Localizer["Game"]</a></li>
                     </ul>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productsModal" onclick="updateProductsModal('@Model.Id')">@Localizer["Write a review"]</button>
+                    <button class="btn btn-primary mb-1" data-bs-toggle="modal" data-bs-target="#productsModal" onclick="updateProductsModal('@Model.Id')">@Localizer["Write a review"]</button>
                 </div>
             </div>
         }
@@ -40,10 +40,10 @@
         </div>
         <div class="col-auto">
             <div class="row justify-content-end">
-                <div class="col">
+                <div class="col-auto">
                     <div class="input-group" >
                         <span class="input-group-text">@Localizer["Sort by"]</span>
-                        <select id="sortedSel" ascOrder="true" class="form-select" onchange="updateReviews()">
+                        <select id="sortedSel" ascOrder="true" class="form-select" onchange="updateReviews()" style="max-width:max-content">
                             <option value="date" selected>@Localizer["Date"]</option>
                             <option value="title">@Localizer["Title"]</option>
                             <option value="likes">@Localizer["Likes"]</option>
