@@ -13,7 +13,7 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md">
-            <h1 class="mb-0">@Model.UserName @await Html.PartialAsync("LikesPartial", @Model.ReviewLikes)</h1>
+            <h1 class="mb-0">@Model.UserName @await Html.PartialAsync("LikesPartial", (Model.ReviewLikes, false))</h1>
         </div>
         @if (authorOrAdmin)
         {
@@ -34,16 +34,16 @@
         }
     </div>
     <hr />
-    <div class="row justify-content-between">
-        <div class="col-auto">
+    <div class="row g-1 justify-content-between">
+        <div class="col-md-auto">
             <h4>@Localizer["Reviews"] <small class="text-muted" style="font-size:large">@Model.Reviews.Count</small></h4>
         </div>
-        <div class="col-auto">
-            <div class="row justify-content-end">
-                <div class="col-auto">
+        <div class="col-md-auto">
+            <div class="row g-1 justify-content-end">
+                <div class="col-md-auto">
                     <div class="input-group" >
                         <span class="input-group-text">@Localizer["Sort by"]</span>
-                        <select id="sortedSel" ascOrder="true" class="form-select" onchange="updateReviews()" style="max-width:max-content">
+                        <select id="sortedSel" ascOrder="true" class="form-select" onchange="updateReviews()">
                             <option value="date" selected>@Localizer["Date"]</option>
                             <option value="title">@Localizer["Title"]</option>
                             <option value="likes">@Localizer["Likes"]</option>
@@ -54,8 +54,8 @@
                         </span>
                     </div>
                 </div>
-                <div class="col">
-                    <input type="search" class="form-control float-end" id="searchReview" userId="@Model.Id" placeholder="@Localizer["Search a review"]" oninput="updateReviews()" style="max-width:250px" />
+                <div class="col-md-auto">
+                    <input type="search" class="form-control float-end" id="searchReview" userId="@Model.Id" placeholder="@Localizer["Search a review"]" oninput="updateReviews()" />
                 </div>
             </div>
         </div>

@@ -1,11 +1,13 @@
 ﻿@model Review
 @using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Localization;
 @inject IHtmlLocalizer<SharedResource> Localizer
+@inject IStringLocalizer<SharedResource> SLocalizer
 @{
     if (Model.AuthorId == null) throw new ArgumentNullException(nameof(Model.AuthorId));
     if (Model.Product == null) throw new ArgumentNullException(nameof(Model.Product));
     Model.ProductId = Model.Product.Id;
-    string head = "Review of " + Model.Product.Title;
+    string head = SLocalizer["Review of"] + " " + Model.Product.Title;
     ViewData["Title"] = head;
 }
 
@@ -23,38 +25,38 @@
         </div>
         <div class="row g-2">
             <div class="col-md">
-                <h5>Title </h5>
+                <h5>@Localizer["Title"]</h5>
                 <div class="form-floating mb-2">
-                    <input asp-for=Title class="form-control" style="font-weight:bolder" type="text" placeholder="Review title" required />
-                    <label asp-for="Title" class="form-label">Review title</label>
+                    <input asp-for=Title class="form-control" style="font-weight:bolder" type="text" placeholder="@Localizer["Review title"]" required />
+                    <label asp-for="Title" class="form-label">@Localizer["Review title"]</label>
                     <span asp-validation-for="Title" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md">
-                <h5>Tags </h5>
+                <h5>@Localizer["Tags"]</h5>
                 <div class="form-floating mb-2">
-                    <input class="form-control" type="text" id="tagForm" list="tagsList" placeholder="Write tags separated by commas" maxlength="50" onkeyup="checkTag()" autocomplete="on" />
-                    <label class="form-label">Write tags separated by commas</label>
+                    <input class="form-control" type="text" id="tagForm" list="tagsList" placeholder="@Localizer["Write tags separated by commas"]" maxlength="50" onkeyup="checkTag()" autocomplete="on" />
+                    <label class="form-label">@Localizer["Write tags separated by commas"]</label>
                 </div>
-                <h5 id="tagFeedback" style="color:red" hidden>
-                    Please write at least one tag and add a comma.
-                </h5>
+                <h6 id="tagFeedback" style="color:red" hidden>
+                    @Localizer["Please write at least one tag and add a comma."]
+                </h6>
                 <datalist id="tagsList">
                 </datalist>
             </div>
         </div>
         <h5 id="tagsLine"></h5>
         <hr />
-        <h5>Content</h5>
+        <h5>@Localizer["Content"]</h5>
         <div class="form-group mb-3">
-            <textarea asp-for=Body id="tiny" class="form-control" rows="20" placeholder="Content"></textarea>
+            <textarea asp-for=Body id="tiny" class="form-control" rows="20" placeholder="@Localizer["Content"]"></textarea>
             <span asp-validation-for="Body" class="text-danger"></span>
-            <h5 class="mt-2" id="bodyFeedback" style="color:red" hidden>
-                Please fill in the body of the review.
-            </h5>
+            <h6 class="mt-2" id="bodyFeedback" style="color:red" hidden>
+                @Localizer["Please fill in the body of the review."]
+            </h6>
         </div>
         <hr />
-        <h5 class="mt-2" id="myRating">Rating: -/10</h5>
+        <h5 class="mt-2" id="myRating">@Localizer["Score"]: -/10</h5>
         <div class="row">
             <div class="col-12">
                 @for (int i = 1; i <= 10; i++)
@@ -64,9 +66,9 @@
                     </a>
                 }
             </div>
-            <h5 class="mt-1" id="rateFeedback" style="color:red" hidden>
-                Please rate the product.
-            </h5>
+            <h6 class="mt-1" id="rateFeedback" style="color:red" hidden>
+                @Localizer["Please rate the product."]
+            </h6>
         </div>
         @if(Model.Tags.Count == 0)
         {
@@ -87,6 +89,6 @@
             </script>
         }
         <hr />
-        <button class="btn btn-primary float-end" type="submit" style="min-width:100px" onclick="validate()">Save review</button>
+        <button class="btn btn-primary float-end" type="submit" style="min-width:100px" onclick="validate()">@Localizer["Save review"]</button>
     </form>
 </div>

@@ -1,39 +1,43 @@
-﻿@model (IEnumerable<Comment<Review>>, int, int)
-@using Microsoft.AspNetCore.Mvc.Localization
+﻿@model IEnumerable<Comment<Review>>
 @using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.Extensions.Localization;
 @inject IHtmlLocalizer<SharedResource> Localizer
+@inject IStringLocalizer<SharedResource> SLocalizer
 @inject UserManager<ApplicationUser> userManager
 @{
+    var id = ViewData["id"] as int? ?? throw new ArgumentNullException("ViewData[id]");
+    var count = ViewData["count"] as int? ?? throw new ArgumentNullException("ViewData[count]");
+    var visibleCount = Model.Count();
     var appUser = await userManager.GetUserAsync(User);
-    var visibleCount = Model.Item1.Count();
 }
 
 <p class="mb-2">
-    @Model.Item3 Comments
+    @count @Localizer["Comments"]
 </p>
 @if (appUser != null)
 {
-    <div class="row">
+    <div class="row g-2 mb-2">
         <div class="col-auto">
             <label for="comment" class="col-form-label fw-bold">@appUser.UserName</label>
         </div>
         <div class="col">
-            <textarea type="text" id="comment" rows="1" class="form-control" placeholder="Add a comment"></textarea>
-            <button class="d-flex float-end btn btn-primary mt-2" onclick="addComment('@Model.Item2', '@visibleCount')">Comment</button>
+            <textarea type="text" id="comment" rows="1" class="form-control" placeholder="@Localizer["Add a comment"]"></textarea>
+            <button class="d-flex float-end btn btn-primary mt-2" onclick="addComment('@id', '@visibleCount')">@Localizer["Comment"]</button>
         </div>
     </div>
 }
-@foreach (var c in Model.Item1)
+@foreach (var c in Model)
 {
     var when = "";
     var diff = DateTime.UtcNow - c.PublicationDate;
-    if (diff.TotalDays > 365) when = (int)(diff.TotalDays / 365) + " years ago";
-    else if (diff.TotalDays > 30) when = (int)(diff.TotalDays / 30) + " months ago";
-    else if (diff.TotalHours > 24) when = (int)(diff.TotalHours / 24) + " days ago";
-    else if (diff.TotalMinutes > 60) when = (int)(diff.TotalMinutes / 60) + " hours ago";
-    else when = (int)diff.TotalMinutes + " minutes ago";
+    if (diff.TotalDays > 365) when = (int)(diff.TotalDays / 365) + " " + SLocalizer["years ago"];
+    else if (diff.TotalDays > 30) when = (int)(diff.TotalDays / 30) + " " + SLocalizer["months ago"];
+    else if (diff.TotalHours > 24) when = (int)(diff.TotalHours / 24) + " " + SLocalizer["days ago"];
+    else if (diff.TotalMinutes > 60) when = (int)(diff.TotalMinutes / 60) + " " + SLocalizer["hours ago"];
+    else when = (int)diff.TotalMinutes + " " + SLocalizer["minutes ago"];
     <div class="row">
-        <h6><a asp-controller="User" asp-action="Index" asp-route-id="@c.Sender.Id">@c.Sender</a> @when</h6>
+        <h6 class="mb-1"><a asp-controller="User" asp-action="Index" asp-route-id="@c.Sender.Id">@c.Sender</a> @when</h6>
         <p class="mb-4">@c.Body</p>
     </div>
 }
@@ -41,6 +45,6 @@
 
 <script>
     window.onscroll = function () {
-        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) showMoreComments('@Model.Item2', 5);
+        if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight) showMoreComments('@id', 5);
     };
 </script>

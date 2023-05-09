@@ -1,4 +1,6 @@
 ﻿@model Review
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
 @{
     if (Model.Score == null) throw new ArgumentNullException(nameof(Model.Score));
     var title = Model.Title.Length > 50 ? Model.Title[..48] + "..." : Model.Title;
@@ -12,7 +14,7 @@
 </div>
 <div class="row" style="font-size:100%; font-weight:500; line-height:110%">
     <div class="col">
-        @Model.Author.UserName
+        @Localizer["By"] @Model.Author.UserName
     </div>
 </div>
 <div class="row" style="font-size:150%">
@@ -22,6 +24,6 @@
 </div>
 <div class="row" style="font-size:120%">
     <div class="col">
-        @await Html.PartialAsync("LikesPartialMini", Model.LikeCounter)
+        @await Html.PartialAsync("LikesPartial", (Model.LikeCounter, true))
     </div>
 </div>

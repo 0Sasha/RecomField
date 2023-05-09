@@ -55,13 +55,19 @@ tinymce.init({
         'insertdatetime', 'media', 'table', 'help', 'wordcount'
     ],
     init_instance_callback: (editor) => {
-        checkReview();
+        checkReview(false);
         editor.on('Change', (e) => {
             console.log(`The editor content changes have been committed.`);
-            checkReview();
+            checkReview(true);
         });
     }
 });
+
+function addAllTags(tags) {
+    let code = "";
+    String(tags).split(',').forEach(t => code += "<span class='badge text-bg-primary mb-1'>" + t + "</span > ");
+    $("#tagsLine").html(code);
+}
 
 function checkTag() {
     let el = document.getElementById("tagForm");
@@ -81,36 +87,23 @@ function checkTag() {
     }
 }
 
-function addTag() {
-    const tag = document.getElementById("tagForm").value;
-    document.getElementById("tagForm").value = "";
-    if (tag != undefined && tag.length > 0) addNewTag(tag);
-}
+let idTag = 1;
+let allTags = [];
 
 function addNewTag(tag) {
-    let idTag = String(tag).replace(/\s/g, '').replace(/'/g, '').replace(/"/g, '') + "Tag";
-    if (document.getElementById(idTag) != undefined) return;
-    $("#tagsLine").html($("#tagsLine").html() + "<span role='button' class='badge text-bg-primary mb-1' id='" + idTag + "' onclick=deleteTag('" + idTag + "')>" + tag + "</span > ");
-    let el = document.getElementById('TagsForServer');
-    el.value += (el.value == "") ? tag : "," + tag;
+    if (tag.includes(",") || allTags.includes(tag)) return;
+    let id = "unIdTag" + idTag;
+    idTag++;
+    $("#tagsLine").html($("#tagsLine").html() + "<span role='button' class='badge text-bg-primary mb-1' id='" + id + "' onclick=deleteTag('" + id + "')>" + tag + "</span > ");
+    allTags.push(tag);
     validateTags();
 }
 
-function addAllTags(tags) {
-    let code = "";
-    String(tags).split(',').forEach(t => code += "<span class='badge text-bg-primary mb-1'>" + t + "</span > ");
-    $("#tagsLine").html(code);
-}
-
-function deleteTag(id) { // Check ////////////////////////////////////////////
+function deleteTag(id) {
     let e = document.getElementById(id);
-    let fullTag = e.textContent;
+    let tag = e.textContent;
     document.getElementById("tagsLine").removeChild(e);
-    let el = document.getElementById('TagsForServer');
-    let val = String(el.value);
-    if (val == fullTag) el.value = "";
-    else if (val.startsWith(fullTag)) el.value = val.replace(fullTag + ',', '');
-    else el.value = val.replace(',' + fullTag, '');
+    allTags.splice(allTags.indexOf(tag), 1);
     validateTags();
 }
 
@@ -126,7 +119,8 @@ function changeRate(rate) {
             el[i - 1].classList.add('btn-light');
         }
     }
-    document.getElementById("myRating").textContent = "Rating: " + rate + "/10";
+    let rt = document.getElementById("myRating");
+    rt.textContent = rt.textContent.slice(0, rt.textContent.indexOf(":")) + ": " + rate + "/10";
     document.getElementById("RateForServer").value = rate;
     validateRate();
 }
@@ -138,23 +132,23 @@ function validate() {
 }
 
 function validateTags() {
-    if (document.getElementById("TagsForServer").value == "") document.getElementById("tagFeedback").hidden = false;
-    else document.getElementById("tagFeedback").hidden = true;
+    let el = document.getElementById('TagsForServer');
+    el.value = allTags.join(',');
+    document.getElementById("tagFeedback").hidden = el.value != "";
 }
 
 function validateRate() {
-    if (document.getElementById("RateForServer").value == "") document.getElementById("rateFeedback").hidden = false;
-    else document.getElementById("rateFeedback").hidden = true;
+    document.getElementById("rateFeedback").hidden = document.getElementById("RateForServer").value != "";
 }
 
 function validateBody() {
-    if (document.getElementById("bodyIsFull").value == "") document.getElementById("bodyFeedback").hidden = false;
-    else document.getElementById("bodyFeedback").hidden = true;
+    document.getElementById("bodyFeedback").hidden = tinymce.activeEditor.getContent().length > 10;
 }
 
-function checkReview() {
+function checkReview(feedback) {
     if (tinymce.activeEditor.getContent().length > 10) document.getElementById("bodyIsFull").value = 1;
     else document.getElementById("bodyIsFull").value = "";
+    if (feedback) validateBody();
 }
 
 function changeLike(id) {
@@ -164,32 +158,16 @@ function changeLike(id) {
         el.ariaLabel = "";
         el.setAttribute("src", "/icons/thumb white.svg");
         count.textContent = Number(count.textContent) - 1;
-        $.ajax({
-            url: "/Review/ChangeLike?id=" + id,
-            type: "POST",
-            error: function (data, textStatus, jqXHR) {
-                //el.ariaLabel = "Liked";
-                //el.setAttribute("src", "/icons/thumb white full.svg");
-                //count.textContent = Number(count.textContent) + 1;
-                console.log(data.status + " | " + data.statusText);
-            }
-        });
     }
     else {
         el.ariaLabel = "Liked";
         el.setAttribute("src", "/icons/thumb white full.svg");
         count.textContent = Number(count.textContent) + 1;
-        $.ajax({
-            url: "/Review/ChangeLike?id=" + id,
-            type: "POST",
-            error: function (data, textStatus, jqXHR) {
-                //el.ariaLabel = "";
-                //el.setAttribute("src", "/icons/thumb white.svg");
-                //count.textContent = Number(count.textContent) - 1;
-                console.log(data.status + " | " + data.statusText);
-            }
-        });
     }
+    $.ajax({
+        url: "/Review/ChangeLike?id=" + id,
+        type: "POST"
+    });
 }
 
 function addComment(id, visibleCount) {
@@ -206,22 +184,21 @@ function addComment(id, visibleCount) {
     });
 }
 
-async function showMoreComments(id, count) {
+function showMoreComments(id, count) {
     let el = document.getElementById("visibleCount");
     if (el != undefined) count += Number(el.value)
     $.ajax({
         url: "/Review/ShowComments?id=" + id + "&count=" + count,
         type: "POST",
-        async: true,
         success: function (res) {
             $("#reviewComments").html(res);
         }
     });
 }
 
-async function updateReviewComments(id) {
+function updateReviewComments(id) {
     if (window.location.href.includes("Review/Index/" + id) || window.location.href.includes("Review/Index?id=" + id)) {
-        await showMoreComments(id, 1);
+        showMoreComments(id, 1);
     }
 }
 
@@ -235,11 +212,10 @@ function removeReview(id) {
     });
 }
 
-async function loadSimilarReviews(id) {
+function loadSimilarReviews(id) {
     $.ajax({
         url: "/Review/GetSimilarReviews?id=" + id,
         type: "POST",
-        async: true,
         success: function (res) {
             if (res.length > 10) {
                 $("#tbodyReviews").html(res);

@@ -1,4 +1,6 @@
 ﻿@model IEnumerable<Review>
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IHtmlLocalizer<SharedResource> Localizer
 @{
     bool addMenu = ViewData["addMenu"]?.Equals(true) ?? false;
     bool withProd = ViewData["withProd"]?.Equals(true) ?? true;
@@ -24,17 +26,17 @@
                 <ul class="dropdown-menu">
                     <li>
                         <a class="dropdown-item text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
-                            Open
+                            @Localizer["Open"]
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item text-start btn" asp-controller="Review" asp-action="EditReview" asp-route-id="@review.Id">
-                            Edit
+                            @Localizer["Edit"]
                         </a>
                     </li>
                     <li>
                         <a class="dropdown-item text-start btn" onclick="removeReview('@review.Id')">
-                            Remove
+                            @Localizer["Remove"]
                         </a>
                     </li>
                 </ul>

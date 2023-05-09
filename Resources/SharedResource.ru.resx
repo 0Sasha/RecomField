@@ -120,6 +120,9 @@
   <data name="Active" xml:space="preserve">
     <value>Активен</value>
   </data>
+  <data name="Add a comment" xml:space="preserve">
+    <value>Введите комментарий</value>
+  </data>
   <data name="Add book" xml:space="preserve">
     <value>Добавить книгу</value>
   </data>
@@ -177,17 +180,38 @@
   <data name="Book" xml:space="preserve">
     <value>Книга</value>
   </data>
+  <data name="By" xml:space="preserve">
+    <value />
+  </data>
   <data name="Check your permissions in" xml:space="preserve">
     <value>Проверьте ваши разрешения в</value>
+  </data>
+  <data name="Comment" xml:space="preserve">
+    <value>Оставить комментарий</value>
+  </data>
+  <data name="Comments" xml:space="preserve">
+    <value>комментариев</value>
+  </data>
+  <data name="Content" xml:space="preserve">
+    <value>Содержание</value>
   </data>
   <data name="Continue with" xml:space="preserve">
     <value>Продолжить с</value>
   </data>
+  <data name="Convert to PDF" xml:space="preserve">
+    <value>Конвертировать в PDF</value>
+  </data>
   <data name="Date" xml:space="preserve">
     <value>Дата</value>
   </data>
+  <data name="days ago" xml:space="preserve">
+    <value>дней назад</value>
+  </data>
   <data name="Description" xml:space="preserve">
     <value>Описание</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Изменить</value>
   </data>
   <data name="en" xml:space="preserve">
     <value>ru</value>
@@ -210,6 +234,9 @@
   <data name="Home Page" xml:space="preserve">
     <value>Главная</value>
   </data>
+  <data name="hours ago" xml:space="preserve">
+    <value>часов назад</value>
+  </data>
   <data name="Likes" xml:space="preserve">
     <value>Лайки</value>
   </data>
@@ -221,6 +248,12 @@
   </data>
   <data name="Logout" xml:space="preserve">
     <value>Выйти</value>
+  </data>
+  <data name="minutes ago" xml:space="preserve">
+    <value>минут назад</value>
+  </data>
+  <data name="months ago" xml:space="preserve">
+    <value>месяца назад</value>
   </data>
   <data name="Movie" xml:space="preserve">
     <value>Фильм</value>
@@ -240,8 +273,26 @@
   <data name="Not a member? Sign up with the following services" xml:space="preserve">
     <value>Нет учётной записи? Регистрируйтесь через следующие сервисы</value>
   </data>
+  <data name="on" xml:space="preserve">
+    <value />
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Открыть</value>
+  </data>
+  <data name="Other reviews of" xml:space="preserve">
+    <value>Другие рецензии на</value>
+  </data>
+  <data name="Please fill in the body of the review." xml:space="preserve">
+    <value>Пожалуйста, заполните тело рецензии.</value>
+  </data>
+  <data name="Please rate the product." xml:space="preserve">
+    <value>Пожалуйста, оцените продукт.</value>
+  </data>
   <data name="Please use formats: jpg, jpeg, png" xml:space="preserve">
     <value>Пожалуйста, используйте форматы: jpg, jpeg, png</value>
+  </data>
+  <data name="Please write at least one tag and add a comma." xml:space="preserve">
+    <value>Пожалуйста, напишите хотя бы один тег и добавьте запятую.</value>
   </data>
   <data name="Privacy" xml:space="preserve">
     <value>Политика конфиденциальности</value>
@@ -267,6 +318,12 @@
   <data name="Review" xml:space="preserve">
     <value>Рецензия</value>
   </data>
+  <data name="Review of" xml:space="preserve">
+    <value>Рецензия на</value>
+  </data>
+  <data name="Review title" xml:space="preserve">
+    <value>Заголовок рецензии</value>
+  </data>
   <data name="Reviews" xml:space="preserve">
     <value>Рецензии</value>
   </data>
@@ -278,6 +335,9 @@
   </data>
   <data name="Role" xml:space="preserve">
     <value>Роль</value>
+  </data>
+  <data name="Save review" xml:space="preserve">
+    <value>Сохранить рецензию</value>
   </data>
   <data name="Score" xml:space="preserve">
     <value>Оценка</value>
@@ -305,6 +365,9 @@
   </data>
   <data name="Status" xml:space="preserve">
     <value>Статус</value>
+  </data>
+  <data name="Tags" xml:space="preserve">
+    <value>Теги</value>
   </data>
   <data name="There are no external authentication services configured" xml:space="preserve">
     <value>Внешние службы аутентификации не настроены</value>
@@ -350,6 +413,12 @@
   </data>
   <data name="Write a review" xml:space="preserve">
     <value>Написать рецензию</value>
+  </data>
+  <data name="Write tags separated by commas" xml:space="preserve">
+    <value>Введите теги через запятую</value>
+  </data>
+  <data name="years ago" xml:space="preserve">
+    <value>года назад</value>
   </data>
   <data name="You have successfully authenticated, but the email address was not provided by the external service" xml:space="preserve">
     <value>Вы успешно прошли аутентификацию, но адрес электронной почты не был предоставлен внешней службой</value>

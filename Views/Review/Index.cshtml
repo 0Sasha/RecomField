@@ -14,33 +14,27 @@
         <div class="col-md">
             <h1>@Model.Title</h1>
             <h2>
-                By <a asp-controller="User" asp-action="Index" asp-route-id="@Model.AuthorId">@Model.Author.UserName</a> on @Model.PublicationDate.ToString("MMM dd, yyyy")
+                @Localizer["By"] <a asp-controller="User" asp-action="Index" asp-route-id="@Model.AuthorId">@Model.Author.UserName</a> @Localizer["on"] @Model.PublicationDate.ToString("d MMM yyyy")
             </h2>
-            <h5 id="tagsLine" class="mt-3 mb-2">
+            <h4 id="tagsLine" class="mt-3 mb-2">
                 @foreach (var t in Model.Tags)
                 {
                     var s = "[" + t.Body + "]";
                     <span role="button" class='badge text-bg-primary mb-1' onclick="searchReviewsByTag('@s')">@t.Body</span>
                 }
-            </h5>
+            </h4>
             <h1 style="font-size:50px" class="mb-3">
-                @if (Model.Score.Value > 6)
-                {
-                    <span class="badge bg-success rounded-4">
-                        @Model.Score.Value/10
-                    </span>
+                @{
+                    var clSc = Model.Score.Value > 6 ? "badge bg-success rounded-4" : "badge bg-warning rounded-4";
                 }
-                else
-                {
-                    <span class="badge bg-warning rounded-4">
-                        @Model.Score.Value/10
-                    </span>
-                }
+                <span class="@clSc">
+                    @Model.Score.Value/10
+                </span>
             </h1>
         </div>
         <div class="col-md-2 align-content-end align-items-end text-center" style="min-width:210px">
             @await Html.PartialAsync("ProductCardPartial", Model.Product)
-            <h5 class="mb-0" >Your score</h5>
+            <h5 class="mb-0">@Localizer["Your score"]</h5>
             @if (appUser != null)
             {
                 for (int i = 1; i <= 5; i++)
@@ -53,7 +47,7 @@
                 if (s != null)
                 {
                     <script>
-                        setInitRateProd('@s.Value');
+                        setRateProd('@s.Value');
                     </script>
                 }
             }
@@ -67,7 +61,7 @@
     </div>
     <hr />
     <div class="row">
-        @Html.Raw(@Model.Body)
+        @Html.Raw(Model.Body)
     </div>
     <div class="row mb-2">
         <div class="col text-end">
@@ -75,16 +69,15 @@
             {
                 <a class="btn btn-secondary rounded-3" onclick="changeLike('@Model.Id')">
                     @{
-                        var id = User.Claims.First().Value;
-                        if (Model.Likes.Count > 0 && Model.Likes.Any(l => l.SenderId == id))
+                        var src = "/icons/thumb white.svg";
+                        var aria = "";
+                        if (Model.Likes.SingleOrDefault(l => l.SenderId == appUser.Id) != null)
                         {
-                            <img id="likeIcon" src="~/icons/thumb white full.svg" aria-label="Liked" style="max-width:22px; max-height:22px;">
-                        }
-                        else
-                        {
-                            <img id="likeIcon" src="~/icons/thumb white.svg" aria-label="" style="max-width:22px; max-height:22px;">
+                            src = "/icons/thumb white full.svg";
+                            aria = "Liked";
                         }
                     }
+                    <img id="likeIcon" src="@src" aria-label="@aria" style="max-width:22px; max-height:22px;">
                     <small style="font-size:large; font-weight:700" id="likeCount">@Model.LikeCounter</small>
                 </a>
             }
@@ -102,8 +95,9 @@
             <div class="row">
                 <div class="col-auto">
                     <h3>
-                        <a asp-controller="User" asp-route-id="@Model.AuthorId">@Model.Author.UserName</a>
-                        <small class="text-muted">on @Model.PublicationDate.ToString("MMM dd, yyyy")</small>
+                        @Localizer["By"]
+                        <a asp-controller="User" asp-action="Index" asp-route-id="@Model.AuthorId">@Model.Author.UserName</a>
+                        <small class="text-muted">@Localizer["on"] @Model.PublicationDate.ToString("d MMM yyyy")</small>
                     </h3>
                 </div>
             </div>
@@ -125,7 +119,7 @@
     </div>
     <hr />
     <div id="similarDiv" class="row" hidden>
-        <h4>Other reviews of @Model.Product.Title</h4>
+        <h4>@Localizer["Other reviews of"] @Model.Product.Title</h4>
         <table class="table table-striped table-hover">
             <tbody id="tbodyReviews"></tbody>
         </table>
@@ -135,9 +129,8 @@
         <div id="reviewComments">
         </div>
     </div>
+    <script>
+        loadSimilarReviews('@Model.Id');
+        showMoreComments('@Model.Id', 10);
+    </script>
 </div>
-
-<script async>
-    loadSimilarReviews('@Model.Id');
-    showMoreComments('@Model.Id', 10);
-</script>

@@ -1,11 +1,12 @@
-﻿@model int
+﻿@model (int, bool)
 @{
     string count;
-    if (Model < 1000) count = Model.ToString();
-    else count = Math.Round(Model / 1000D, 1).ToString() + "K";
+    if (Model.Item1 < 1000) count = Model.Item1.ToString();
+    else count = Math.Round(Model.Item1 / 1000D, 1).ToString() + "K";
+    var st = Model.Item2 ? "min-width:65px" : "font-size:large; font-weight:700; min-width:75px";
 }
 
-<span class="badge text-bg-secondary align-middle" style="font-size:large; font-weight:700; min-width:75px">
+<span class="badge text-bg-secondary align-middle" style="@st">
     <img src="~/icons/thumb white full.svg" aria-label="Likes" style="max-width:15px; max-height:15px;">
     @count
 </span>

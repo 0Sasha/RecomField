@@ -18,6 +18,7 @@ using RecomField.Hubs;
 using RecomField.Models;
 using System.Diagnostics.Metrics;
 using System.Web;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace RecomField.Controllers;
 
@@ -171,19 +172,27 @@ public class ReviewController : Controller
         if (string.IsNullOrEmpty(comment)) throw new ArgumentNullException(nameof(comment));
         var user = await GetUser();
         var review = await FindReview(id);
-        await context.ReviewComments.Where(k => k.Entity == review).Include(k => k.Sender).LoadAsync();
+        await context.Entry(review).Collection(r => r.Comments).LoadAsync();
         review.Comments.Add(new(user, review, comment));
         await context.SaveChangesAsync();
         await hubContext.Clients.All.SendAsync("NewReviewComment", id);
-        return PartialView("ReviewComments", (review.Comments.Take(visibleCount + 1), review.Id, review.Comments.Count));
+        return await GetReviewComments(review, visibleCount + 1);
     }
 
     [HttpPost]
     public async Task<IActionResult> ShowComments(int id, int count)
     {
         var review = await FindReview(id);
-        await context.ReviewComments.Where(k => k.Entity == review).Include(k => k.Sender).LoadAsync();
-        return PartialView("ReviewComments", (review.Comments.Take(count), review.Id, review.Comments.Count));
+        await context.Entry(review).Collection(r => r.Comments).LoadAsync();
+        return await GetReviewComments(review, count);
+    }
+
+    private async Task<IActionResult> GetReviewComments(Review review, int count)
+    {
+        ViewData["id"] = review.Id;
+        ViewData["count"] = review.Comments.Count;
+        return PartialView("ReviewComments", await context.ReviewComments
+            .Where(k => k.Entity == review).Take(count).Include(k => k.Sender).ToArrayAsync());
     }
 
     [HttpPost]

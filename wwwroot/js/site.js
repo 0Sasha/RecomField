@@ -47,7 +47,6 @@ function sendSearchRequest(text, isProds) {
     curSearchRequest = $.ajax({
         url: "/Home/Search?text=" + text + "&products=" + isProds,
         type: "POST",
-        async: true,
         success: function (res) {
             $('#tbodySearch').html(res);
             if ($('#dropdownMenu').is(":hidden")) $('#searchLine').dropdown('toggle');
