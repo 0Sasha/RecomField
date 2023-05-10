@@ -16,37 +16,69 @@
                     @await Html.PartialAsync("ProductCardPartial", review.Product)
                 </a>
             </td>
-        }
-        @if (addMenu)
-        {
-            <td class="dropdown">
-                <a class="h-100 w-100" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    @await Html.PartialAsync("ReviewCardPartial", review)
-                </a>
-                <ul class="dropdown-menu">
-                    <li>
-                        <a class="dropdown-item text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
-                            @Localizer["Open"]
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item text-start btn" asp-controller="Review" asp-action="EditReview" asp-route-id="@review.Id">
-                            @Localizer["Edit"]
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item text-start btn" onclick="removeReview('@review.Id')">
-                            @Localizer["Remove"]
-                        </a>
-                    </li>
-                </ul>
-            </td>
+            @if (addMenu)
+            {
+                <td class="dropdown">
+                    <a class="h-100 w-100" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        @await Html.PartialAsync("ReviewCardPartial", review)
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item text-start btn" asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
+                                @Localizer["Open"]
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-start btn" asp-controller="Review" asp-action="EditReview" asp-route-id="@review.Id">
+                                @Localizer["Edit"]
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item text-start btn" onclick="removeReview('@review.Id')">
+                                @Localizer["Remove"]
+                            </a>
+                        </li>
+                    </ul>
+                </td>
+            }
+            else
+            {
+                <td>
+                    <a asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
+                        @await Html.PartialAsync("ReviewCardPartial", review)
+                    </a>
+                </td>
+            }
         }
         else
         {
-            <td>
+            var clSc = review.Score.Value >= 7 ? "badge text-bg-success rounded-3" : "badge text-bg-warning rounded-3";
+            <td class="align-middle">
                 <a asp-controller="Review" asp-action="Index" asp-route-id="@review.Id">
-                    @await Html.PartialAsync("ReviewCardPartial", review)
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col">
+                            <div class="row" style="font-size:120%; font-weight:500; line-height:110%">
+                                <div class="col">
+                                    @review.Title
+                                </div>
+                            </div>
+                            <div class="row" style="font-size:100%; font-weight:500; line-height:110%">
+                                <div class="col">
+                                    @Localizer["By"] @review.Author.UserName
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="row g-2 justify-content-end align-items-center" style="font-size:110%">
+                                <div class="col-auto">
+                                    <span class="@clSc" style="min-width:75px; font-size:100%">@review.Score.Value/10</span>
+                                </div>
+                                <div class="col-auto">
+                                    @await Html.PartialAsync("LikesPartial", (review.LikeCounter, true))
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </a>
             </td>
         }
