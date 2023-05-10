@@ -292,7 +292,7 @@
     <value>Пожалуйста, используйте форматы: jpg, jpeg, png</value>
   </data>
   <data name="Please write at least one tag and add a comma." xml:space="preserve">
-    <value>Пожалуйста, напишите хотя бы один тег и добавьте запятую.</value>
+    <value>Пожалуйста, введите хотя бы один тег и добавьте запятую.</value>
   </data>
   <data name="Privacy" xml:space="preserve">
     <value>Политика конфиденциальности</value>

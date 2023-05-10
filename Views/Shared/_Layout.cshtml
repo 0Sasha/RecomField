@@ -19,7 +19,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/hub.js"></script>
 </head>
 <body>
     <header>
@@ -41,7 +40,7 @@
                     <ul class="navbar-nav w-100">
                         <form class="w-100 dropdown" role="search" autocomplete="off" style="max-width:1205px">
                             <div class="input-group">
-                                <select class="form-select" type="button" id="typeSearch" style="min-width:160px;max-width:160px;">
+                                <select class="form-select" type="button" id="typeSearch" style="max-width:max-content;">
                                     <option value="true" selected>@Localizer["Products"]</option>
                                     <option value="false">@Localizer["Reviews"]</option>
                                 </select>

@@ -83,7 +83,7 @@
             }
             else
             {
-                <a asp-area="Identity" asp-page="/Account/Login" class="badge text-bg-secondary">
+                <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-secondary rounded-3">
                     <img src="~/icons/thumb white.svg" aria-label="" style="max-width:22px; max-height:22px;">
                     <small style="font-size:large; font-weight:700" id="likeCount">@Model.LikeCounter</small>
                 </a>
@@ -129,8 +129,10 @@
         <div id="reviewComments">
         </div>
     </div>
-    <script>
-        loadSimilarReviews('@Model.Id');
-        showMoreComments('@Model.Id', 10);
-    </script>
 </div>
+
+<script>
+    loadSimilarReviews('@Model.Id');
+    showMoreComments('@Model.Id', 20);
+</script>
+<script src="~/js/hub.js"></script>

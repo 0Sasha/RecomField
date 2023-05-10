@@ -1,12 +1,15 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using CloudinaryDotNet.Actions;
+using CloudinaryDotNet;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
 using RecomField.Services;
 using System.Diagnostics;
-using System.Linq;
+using NuGet.Protocol;
 namespace RecomField.Controllers;
 
 public class HomeController : Controller
@@ -14,13 +17,15 @@ public class HomeController : Controller
     private readonly ApplicationDbContext context;
     private readonly ILogger<HomeController> logger;
     private readonly UserManager<ApplicationUser> userManager;
+    private readonly Cloudinary cloud;
 
     public HomeController(ILogger<HomeController> logger, UserManager<ApplicationUser> userManager,
-        ApplicationDbContext context)
+        ApplicationDbContext context, Cloudinary cloud)
     {
         this.logger = logger;
         this.userManager = userManager;
         this.context = context;
+        this.cloud = cloud;
     }
 
     public async Task<IActionResult> Index()
@@ -137,9 +142,29 @@ public class HomeController : Controller
         await context.Reviews.OrderByDescending(r => r.LikeCounter).Take(5)
         .Include(r => r.Product).Include(r => r.Author).Include(r => r.Score).ToArrayAsync());
 
+    [Authorize]
+    [HttpPost]
+    public async Task UploadImage(IFormFile file)
+    {
+        if (file == null) throw new ArgumentNullException(nameof(file));
+        if (file.Length > 5000000) await Response.WriteAsync("Error: The size of file is more than 5MB");
+        else if (!file.ContentType.StartsWith("image")) await Response.WriteAsync("Error: The file is not an image");
+        else if (file.ContentType[6..] != "jpeg" && file.ContentType[6..] != "jpg" && file.ContentType[6..] != "png")
+            await Response.WriteAsync("Error: Incorrect format of image");
+        else
+        {
+            var uploadParams = new ImageUploadParams() { File = new FileDescription("file", file.OpenReadStream()) };
+            var uploadResult = await cloud.UploadAsync(uploadParams);
+            await Response.WriteAsync(new { location = uploadResult.Url }.ToJson());
+        }
+    }
+
     public IActionResult Privacy() => View();
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error() =>
-        View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    public async Task Error()
+    {
+        Response.StatusCode = 404;
+        await Response.CompleteAsync();
+    }
 }

@@ -2,7 +2,7 @@
 const image_upload_handler = (blobInfo, progress) => new Promise((resolve, reject) => {
     const request = new XMLHttpRequest();
     request.withCredentials = false;
-    request.open('POST', '/Review/UploadImage', true);
+    request.open('POST', '/Home/UploadImage', true);
 
     request.upload.onprogress = (e) => {
         progress(e.loaded / e.total * 100);
@@ -94,7 +94,8 @@ function addNewTag(tag) {
     if (tag.includes(",") || allTags.includes(tag)) return;
     let id = "unIdTag" + idTag;
     idTag++;
-    $("#tagsLine").html($("#tagsLine").html() + "<span role='button' class='badge text-bg-primary mb-1' id='" + id + "' onclick=deleteTag('" + id + "')>" + tag + "</span > ");
+    $("#tagsLine").html($("#tagsLine").html() + "<span role='button' class='badge text-bg-primary mb-1' id='" +
+        id + "' onclick=deleteTag('" + id + "')>" + tag + "</span > ");
     allTags.push(tag);
     validateTags();
 }

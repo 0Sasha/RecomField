@@ -80,7 +80,7 @@ async function uploadCover(file) {
     let formData = new FormData();
     formData.append("file", file);
     startSpinner();
-    let response = await fetch('/Review/UploadImage', { method: "POST", body: formData });
+    let response = await fetch('/Home/UploadImage', { method: "POST", body: formData });
     if (response.ok) {
         const jsonValue = await response.json();
         return jsonValue.location;
