@@ -147,15 +147,18 @@ public class HomeController : Controller
     public async Task UploadImage(IFormFile file)
     {
         if (file == null) throw new ArgumentNullException(nameof(file));
-        if (file.Length > 5000000) await Response.WriteAsync(new { error = "The size of file is more than 5MB" }.ToJson());
-        else if (!file.ContentType.StartsWith("image")) await Response.WriteAsync(new { error = "The file is not an image" }.ToJson());
-        else if (file.ContentType[6..] != "jpeg" && file.ContentType[6..] != "jpg" && file.ContentType[6..] != "png")
-            await Response.WriteAsync(new { error = "Incorrect format of image" }.ToJson());
+        if (file.Length > 5000000)
+            await Response.WriteAsync(new { error = "The size of file is more than 5MB" }.ToJson());
+        else if (!file.ContentType.StartsWith("image") ||
+            file.ContentType[6..] != "jpeg" && file.ContentType[6..] != "jpg" && file.ContentType[6..] != "png")
+            await Response.WriteAsync(new { error = "Incorrect format of file" }.ToJson());
         else
         {
             var uploadParams = new ImageUploadParams() { File = new FileDescription("file", file.OpenReadStream()) };
             var uploadResult = await cloud.UploadAsync(uploadParams);
-            await Response.WriteAsync(new { location = uploadResult.Url }.ToJson());
+            if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
+                await Response.WriteAsync(new { location = uploadResult.Url }.ToJson());
+            else await Response.WriteAsync(new { error = "Error during upload" }.ToJson());
         }
     }
 

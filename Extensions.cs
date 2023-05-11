@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Localization;
+﻿using iText.Layout;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Localization;
 using RecomField.Models;
 namespace RecomField;
@@ -21,15 +22,14 @@ public static class Extensions
     public static string CustomizeYouTubeLink(this string link)
     {
         if (string.IsNullOrEmpty(link)) throw new ArgumentNullException(nameof(link));
-        var startId = link.IndexOf("v=") + 2;
-        if (startId == 1)
+        if (link.Contains("v="))
         {
-            startId = link.LastIndexOf("/") + 1;
-            if (startId != 0) return "https://www.youtube.com/embed/" + link[startId..];
-            throw new ArgumentException("Id of video is not found");
+            var startId = link.IndexOf("v=") + 2;
+            var endId = link.IndexOf("&", startId);
+            return "https://www.youtube.com/embed/" + (endId != -1 ? link[startId..endId] : link[startId..]);
         }
-        var endId = link.IndexOf("&", startId);
-        return "https://www.youtube.com/embed/" + (endId != -1 ? link[startId..endId] : link[startId..]);
+        else if (link.Contains('/')) return "https://www.youtube.com/embed/" + link[(link.LastIndexOf("/") + 1)..];
+        throw new ArgumentException("Id of video is not found");
     }
 
     public static string CustomizeHtmlForPDF(this string body) => RemoveGaps(RemoveVideos(CustomizeImages(body)));
@@ -114,22 +114,13 @@ public static class Extensions
         while (i >= 0)
         {
             var boxEl = body[..i].LastIndexOf("<");
-            if (body[boxEl + 1] != 'p')
-            {
-                i = body[..i].LastIndexOf("<iframe");
-                continue;
-            }
+            if (body[boxEl + 1] != 'p') { i = body[..i].LastIndexOf("<iframe"); continue; }
             var j = body.IndexOf("</iframe>", i);
             body = body.Insert(j + 9, "</div>");
             var startStyle = body[..j].IndexOf("style=", i);
-            if (startStyle >= 0)
-            {
-                var endStyle = body.IndexOf("\"", startStyle + 7) + 1;
-                var style = body[startStyle..endStyle];
-                body = body.Remove(startStyle, style.Length);
-                body = body.Insert(i, "<div class=\"ratio ratio-16x9\" " + style + ">");
-            }
-            else body = body.Insert(i, " <div class=\"ratio ratio-16x9\"> ");
+            var style = startStyle != -1 ? body[startStyle..(body.IndexOf("\"", startStyle + 7) + 1)] : "";
+            if (style != "") body = body.Remove(startStyle, style.Length);
+            body = body.Insert(i, " <div class=\"ratio ratio-16x9\" " + style + "> ");
             i = body[..i].LastIndexOf("<iframe");
         }
         return body;
@@ -141,13 +132,9 @@ public static class Extensions
         while (i >= 0)
         {
             var startBoxEl = body[..i].LastIndexOf("<div");
-            var startStyleBox = body.IndexOf("style=", startBoxEl, i - startBoxEl);
-            if (startStyleBox >= 0)
-            {
-                var endStyleBox = body.IndexOf("\"", startStyleBox + 7) + 1;
-                var styleBox = body[startStyleBox..endStyleBox];
-                body = body.Insert(i + 7, " " + styleBox + " ");
-            }
+            var startStyle = body.IndexOf("style=", startBoxEl, i - startBoxEl);
+            var style = startStyle != -1 ? body[startStyle..(body.IndexOf("\"", startStyle + 7) + 1)] : "";
+            if (style != "") body = body.Insert(i + 7, " " + style + " ");
             body = body.Remove(startBoxEl, body.IndexOf(">", startBoxEl) - startBoxEl + 1);
             body = body.Insert(startBoxEl, "<p>");
             var endBoxEl = body.IndexOf("</div>", startBoxEl);

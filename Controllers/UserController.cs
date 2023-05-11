@@ -104,9 +104,8 @@ public class UserController : Controller
     {
         var user = await GetUserAsync(id);
         user.LockoutEnd = days == null ? DateTimeOffset.MaxValue : DateTimeOffset.UtcNow.AddDays(days.Value);
-        await context.SaveChangesAsync();
         await userManager.UpdateSecurityStampAsync(user);
-        if (user == await userManager.GetUserAsync(User)) await signInManager.SignOutAsync();
+        await context.SaveChangesAsync();
     }
 
     [Authorize(Roles = "Admin")]
@@ -127,8 +126,8 @@ public class UserController : Controller
         var revs = await context.ReviewLikes.Where(l => l.Sender == user).Select(l => l.Entity).ToListAsync();
         foreach (var r in revs) r.LikeCounter--;
         context.Users.Remove(user);
-        await context.SaveChangesAsync();
         if (user == await userManager.GetUserAsync(User)) await signInManager.SignOutAsync();
+        await context.SaveChangesAsync();
     }
 
     [Authorize(Roles = "Admin")]
@@ -148,6 +147,7 @@ public class UserController : Controller
         var user = await GetUserAsync(id);
         if (!await userManager.IsInRoleAsync(user, "Admin")) throw new Exception("User is not an admin");
         await userManager.RemoveFromRoleAsync(user, "Admin");
+        await userManager.UpdateSecurityStampAsync(user);
         await context.SaveChangesAsync();
     }
 

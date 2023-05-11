@@ -161,6 +161,7 @@ public class ReviewController : Controller
         if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
         await review.LoadAsync(context, null, true);
         context.Reviews.Remove(review);
+        await context.SaveChangesAsync();
         await review.Product.UpdateAverageScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction("Index", "User", new { id = review.AuthorId });
