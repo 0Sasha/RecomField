@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Localization;
 using RecomField.Models;
-namespace RecomField.Services;
+namespace RecomField;
 
 public static class Extensions
 {
@@ -21,11 +21,15 @@ public static class Extensions
     public static string CustomizeYouTubeLink(this string link)
     {
         if (string.IsNullOrEmpty(link)) throw new ArgumentNullException(nameof(link));
-        var startId = link.IndexOf("v=");
-        if (startId == -1) throw new ArgumentException("Id of video is not found");
-        startId += 2;
+        var startId = link.IndexOf("v=") + 2;
+        if (startId == 1)
+        {
+            startId = link.LastIndexOf("/") + 1;
+            if (startId != 0) return "https://www.youtube.com/embed/" + link[startId..];
+            throw new ArgumentException("Id of video is not found");
+        }
         var endId = link.IndexOf("&", startId);
-        return "https://www.youtube.com/embed/" + (endId >= 0 ? link[startId..endId] : link[startId..]);
+        return "https://www.youtube.com/embed/" + (endId != -1 ? link[startId..endId] : link[startId..]);
     }
 
     public static string CustomizeHtmlForPDF(this string body) => RemoveGaps(RemoveVideos(CustomizeImages(body)));

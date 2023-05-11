@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
-using RecomField.Services;
 using System.Diagnostics;
 using NuGet.Protocol;
+using Microsoft.AspNetCore.Http;
 namespace RecomField.Controllers;
 
 public class HomeController : Controller
@@ -147,10 +147,10 @@ public class HomeController : Controller
     public async Task UploadImage(IFormFile file)
     {
         if (file == null) throw new ArgumentNullException(nameof(file));
-        if (file.Length > 5000000) await Response.WriteAsync("Error: The size of file is more than 5MB");
-        else if (!file.ContentType.StartsWith("image")) await Response.WriteAsync("Error: The file is not an image");
+        if (file.Length > 5000000) await Response.WriteAsync(new { error = "The size of file is more than 5MB" }.ToJson());
+        else if (!file.ContentType.StartsWith("image")) await Response.WriteAsync(new { error = "The file is not an image" }.ToJson());
         else if (file.ContentType[6..] != "jpeg" && file.ContentType[6..] != "jpg" && file.ContentType[6..] != "png")
-            await Response.WriteAsync("Error: Incorrect format of image");
+            await Response.WriteAsync(new { error = "Incorrect format of image" }.ToJson());
         else
         {
             var uploadParams = new ImageUploadParams() { File = new FileDescription("file", file.OpenReadStream()) };

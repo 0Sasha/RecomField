@@ -9,28 +9,21 @@ const image_upload_handler = (blobInfo, progress) => new Promise((resolve, rejec
     };
 
     request.onload = () => {
-        if (request.status === 403) {
-            reject({ message: 'HTTP Error: ' + request.status, remove: true });
-            return;
-        }
-
         if (request.status < 200 || request.status >= 300) {
             reject('HTTP Error: ' + request.status);
             return;
         }
-
-        if (request.responseText.startsWith("Error")) {
-            reject(request.responseText);
+        const json = JSON.parse(request.responseText);
+        if (!json || (typeof json.location != 'string' && typeof json.error != 'string')) {
+            reject('Invalid JSON: ' + request.responseText);
             tinymce.execCommand('Undo');
             return;
         }
-        const json = JSON.parse(request.responseText);
-
-        if (!json || typeof json.location != 'string') {
-            reject('Invalid JSON: ' + request.responseText);
+        if (typeof json.error == 'string') {
+            reject('Error: ' + json.error);
+            tinymce.execCommand('Undo');
             return;
         }
-
         resolve(json.location);
     };
 
@@ -40,7 +33,6 @@ const image_upload_handler = (blobInfo, progress) => new Promise((resolve, rejec
 
     const formData = new FormData();
     formData.append('file', blobInfo.blob(), blobInfo.filename());
-
     request.send(formData);
 });
 

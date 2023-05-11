@@ -288,8 +288,8 @@
   <data name="Please rate the product." xml:space="preserve">
     <value>Пожалуйста, оцените продукт.</value>
   </data>
-  <data name="Please use formats: jpg, jpeg, png" xml:space="preserve">
-    <value>Пожалуйста, используйте форматы: jpg, jpeg, png</value>
+  <data name="Please use formats: jpg, jpeg, png. The maximum size is 5 MB." xml:space="preserve">
+    <value>Пожалуйста, используйте форматы: jpg, jpeg, png. Максимальный размер 5 МБ.</value>
   </data>
   <data name="Please write at least one tag and add a comma." xml:space="preserve">
     <value>Пожалуйста, введите хотя бы один тег и добавьте запятую.</value>

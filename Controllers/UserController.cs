@@ -124,8 +124,9 @@ public class UserController : Controller
     {
         var user = await GetUserAsync(id);
         await user.LoadAllDependent(context);
+        var revs = await context.ReviewLikes.Where(l => l.Sender == user).Select(l => l.Entity).ToListAsync();
+        foreach (var r in revs) r.LikeCounter--;
         context.Users.Remove(user);
-        // Can update product AverageScores
         await context.SaveChangesAsync();
         if (user == await userManager.GetUserAsync(User)) await signInManager.SignOutAsync();
     }

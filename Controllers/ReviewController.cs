@@ -8,7 +8,6 @@ using Microsoft.Extensions.Localization;
 using RecomField.Data;
 using RecomField.Hubs;
 using RecomField.Models;
-using static RecomField.Services.Extensions;
 namespace RecomField.Controllers;
 
 [Authorize]

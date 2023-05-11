@@ -46,34 +46,30 @@ function dragOverHandler(ev) {
     ev.preventDefault();
 }
 
-async function dropCoverInput(ev) {
+function dropCoverInput(ev) {
     ev.preventDefault();
     if (ev.dataTransfer.items) {
         let item = ev.dataTransfer.items[0];
-        if (item.kind === "file") {
-            let file = item.getAsFile();
-            if (validFileType(file)) {
-                let url = await uploadCover(file);
-                document.getElementById("coverAspInput").value = url;
-                showCover(url);
-                return;
-            }
-        }
-        document.getElementById("coverFeedback").hidden = false;
+        if (item.kind === "file") tryUploadCover(item.getAsFile());
     }
 }
 
-async function setCover() {
+function setCover() {
     const coverInput = document.getElementById("coverInput");
-    if (coverInput.files.length != 0) {
-        const file = coverInput.files[0];
-        if (validFileType(file)) {
-            let url = await uploadCover(file);
+    if (coverInput.files.length != 0) tryUploadCover(coverInput.files[0]);
+}
+
+async function tryUploadCover(file) {
+    if (validFileType(file)) {
+        if (document.getElementById("coverAspInput").value != "") removeCover();
+        let url = await uploadCover(file);
+        if (url != undefined) {
             document.getElementById("coverAspInput").value = url;
             showCover(url);
+            return;
         }
-        else document.getElementById("coverFeedback").hidden = false;
     }
+    document.getElementById("coverFeedback").hidden = false;
 }
 
 async function uploadCover(file) {
@@ -81,10 +77,8 @@ async function uploadCover(file) {
     formData.append("file", file);
     startSpinner();
     let response = await fetch('/Home/UploadImage', { method: "POST", body: formData });
-    if (response.ok) {
-        const jsonValue = await response.json();
-        return jsonValue.location;
-    }
+    let res = await response.json();
+    if (res.location != undefined) return res.location;
     else cancelSpinner();
 }
 
@@ -108,6 +102,15 @@ function showCover(url) {
     img.hidden = false;
 }
 
+function removeCover() {
+    let img = document.getElementById("coverImg");
+    img.hidden = true;
+    document.getElementById("coverAspInput").value = "";
+    const coverInput = document.getElementById("coverInput");
+    coverInput.hidden = false;
+    if (!coverInput.hasAttribute("required")) coverInput.setAttribute("required", "");
+}
+
 function hideCoverElements() {
     const coverInput = document.getElementById("coverInput");
     coverInput.hidden = true;
@@ -127,12 +130,12 @@ function showTrailer() {
 }
 
 function getIdVideo(link) {
-    let l = String(link);
-    let startId = l.indexOf("v=") + 2;
-    l = l.slice(startId);
-    let endId = l.indexOf("&");
-    if (endId >= 0) return l.slice(0, endId);
-    return l;
+    if (link.includes("v=")) link = link.slice(link.indexOf("v=") + 2);
+    else if (link.includes("/")) return link.slice(link.lastIndexOf("/") + 1);
+    else return "";
+    let endId = link.indexOf("&");
+    if (endId != -1) return link.slice(0, endId);
+    return link;
 }
 
 function validFileType(file) {
