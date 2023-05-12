@@ -50,37 +50,32 @@ public class ReviewController : Controller
     public async Task<IActionResult> GetSimilarReviews(int id)
     {
         var review = await FindReview(id);
-        var similar = await context.Reviews.Where(r => r.ProductId == review.ProductId && r.Id != id)
-            .OrderByDescending(r => r.LikeCounter).Take(10)
-            .Include(r => r.Author).Include(r => r.Score).ToArrayAsync();
+        var similar = context.Reviews.Where(r => r.ProductId == review.ProductId && r.Id != id)
+            .OrderByDescending(r => r.LikeCounter).Take(10).Include(r => r.Author).Include(r => r.Score);
         ViewData["withProd"] = false;
-        return PartialView("ReviewsTableBody", similar);
+        return PartialView("ReviewsTableBody", await similar.ToArrayAsync());
     }
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> ShowComments(int id, int count)
-    {
-        var review = await FindReview(id);
-        await context.Entry(review).Collection(r => r.Comments).LoadAsync();
-        return await GetReviewComments(review, count);
-    }
+    public async Task<IActionResult> ShowComments(int id, int count) =>
+        await GetReviewComments(await FindReview(id), count);
 
     [HttpPost]
-    public async Task<IActionResult> AddComment(int id, string comment, int visibleCount)
+    public async Task<IActionResult> AddComment(int id, string comment, int count)
     {
         if (string.IsNullOrEmpty(comment)) throw new ArgumentNullException(nameof(comment));
         var user = await GetUser();
         var review = await FindReview(id);
-        await context.Entry(review).Collection(r => r.Comments).LoadAsync();
         review.Comments.Add(new(user, review, comment));
         await context.SaveChangesAsync();
         await hubContext.Clients.All.SendAsync("NewReviewComment", id);
-        return await GetReviewComments(review, visibleCount + 1);
+        return await GetReviewComments(review, count);
     }
 
     private async Task<IActionResult> GetReviewComments(Review review, int count)
     {
+        await context.Entry(review).Collection(r => r.Comments).LoadAsync();
         ViewData["id"] = review.Id;
         ViewData["count"] = review.Comments.Count;
         return PartialView("ReviewComments", await context.ReviewComments
@@ -135,6 +130,7 @@ public class ReviewController : Controller
         review.Body = review.Body.CustomizeHtmlForView();
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         await context.AddAsync(review);
+        await context.SaveChangesAsync();
         await review.Product.UpdateAverageScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id = review.Id });
@@ -149,6 +145,7 @@ public class ReviewController : Controller
         review.Tags.Clear();
         foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
         review.Score = new(review.Author, review, score);
+        await context.SaveChangesAsync();
         await review.Product.UpdateAverageScoresAsync(context);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id });

@@ -10,7 +10,6 @@ namespace RecomField
 {
     public class Program
     {
-        public static string Environment { get; set; } = "Development";
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
@@ -66,7 +65,6 @@ namespace RecomField
             }
             else
             {
-                Environment = app.Environment.EnvironmentName;
                 app.UseExceptionHandler("/Home/Error");
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();

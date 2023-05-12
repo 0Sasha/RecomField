@@ -19,6 +19,7 @@ public class ApplicationUser : IdentityUser
                 .Include(r => r.Product).Include(r => r.Score).LoadAsync();
         else await context.Entry(this).Collection(r => r.Reviews).LoadAsync();
         if (Reviews.Count > 0) ReviewLikes = Reviews.Select(r => r.LikeCounter).Sum();
+        else ReviewLikes = 0;
     }
 
     public async Task LoadAllDependent(ApplicationDbContext context)

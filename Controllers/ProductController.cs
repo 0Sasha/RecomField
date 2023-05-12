@@ -87,7 +87,7 @@ public class ProductController : Controller
             return PartialView("ProductsTableBody", await context.Products.Except(reviewed).Take(7).ToArrayAsync());
         var request = "\"" + partTitle + "*\" OR \"" + partTitle + "\"";
         var byTitle = await context.Products.Where(p => EF.Functions.Contains(p.Title, request)).ToArrayAsync();
-        var byAuthor = await context.Books.Where(p => EF.Functions.Contains(p.Author, request)).Select(b => (Product)b).ToArrayAsync();
+        var byAuthor = await context.Books.Where(p => EF.Functions.Contains(p.Author, request)).ToArrayAsync();
         return PartialView("ProductsTableBody", byTitle.Union(byAuthor).Except(reviewed).Take(7));
     }
 

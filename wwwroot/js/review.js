@@ -163,23 +163,24 @@ function changeLike(id) {
     });
 }
 
-function addComment(id, visibleCount) {
+function addComment(id) {
     let el = document.getElementById("comment");
     if (el.value.length == 0) return;
-    let c = el.value;
-    el.value = "";
+    let count = document.getElementById("visibleCount").value;
+    if (document.getElementById("allVisible").value.toLowerCase() === "true") count = Number(count) + 1;
     $.ajax({
-        url: "/Review/AddComment?id=" + id + "&comment=" + c + "&visibleCount=" + visibleCount,
+        url: "/Review/AddComment?id=" + id + "&comment=" + el.value + "&count=" + count,
         type: "POST",
         success: function (res) {
             $("#reviewComments").html(res);
         }
     });
+    el.value = "";
 }
 
 function showMoreComments(id, count) {
     let el = document.getElementById("visibleCount");
-    if (el != undefined) count += Number(el.value)
+    if (el != undefined) count += Number(el.value);
     $.ajax({
         url: "/Review/ShowComments?id=" + id + "&count=" + count,
         type: "POST",
@@ -190,9 +191,8 @@ function showMoreComments(id, count) {
 }
 
 function updateReviewComments(id) {
-    if (window.location.href.includes("Review/Index/" + id) || window.location.href.includes("Review/Index?id=" + id)) {
-        showMoreComments(id, 1);
-    }
+    if ((window.location.href.includes("Review/Index/" + id) || window.location.href.includes("Review/Index?id=" + id)) &&
+        document.getElementById("allVisible").value.toLowerCase() === "true") showMoreComments(id, 1);
 }
 
 function removeReview(id) {

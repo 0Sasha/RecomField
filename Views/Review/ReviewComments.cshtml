@@ -9,6 +9,7 @@
     var id = ViewData["id"] as int? ?? throw new ArgumentNullException("ViewData[id]");
     var count = ViewData["count"] as int? ?? throw new ArgumentNullException("ViewData[count]");
     var visibleCount = Model.Count();
+    var allVisible = (visibleCount == count).ToString();
     var appUser = await userManager.GetUserAsync(User);
 }
 
@@ -23,7 +24,7 @@
         </div>
         <div class="col">
             <textarea type="text" id="comment" rows="1" class="form-control" placeholder="@Localizer["Add a comment"]"></textarea>
-            <button class="d-flex float-end btn btn-primary mt-2" onclick="addComment('@id', '@visibleCount')">@Localizer["Comment"]</button>
+            <button class="d-flex float-end btn btn-primary mt-2" onclick="addComment('@id')">@Localizer["Comment"]</button>
         </div>
     </div>
 }
@@ -42,6 +43,7 @@
     </div>
 }
 <input id="visibleCount" hidden value="@visibleCount" />
+<input id="allVisible" hidden value="@allVisible" />
 
 <script>
     window.onscroll = function () {
