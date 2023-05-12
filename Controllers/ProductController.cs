@@ -41,7 +41,7 @@ public class ProductController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddMovie([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Movie product)
     {
-        product.Trailer?.CustomizeYouTubeLink();
+        product.Trailer = product.Trailer?.CustomizeYouTubeLink();
         return await AddProduct(product);
     }
 
@@ -49,7 +49,7 @@ public class ProductController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddSeries([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Series product)
     {
-        product.Trailer?.CustomizeYouTubeLink();
+        product.Trailer = product.Trailer?.CustomizeYouTubeLink();
         return await AddProduct(product);
     }
 
@@ -57,7 +57,7 @@ public class ProductController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddGame([Bind("Title,ReleaseYear,Description,Cover,Trailer")] Game product)
     {
-        product.Trailer?.CustomizeYouTubeLink();
+        product.Trailer = product.Trailer?.CustomizeYouTubeLink();
         return await AddProduct(product);
     }
 

@@ -45,8 +45,9 @@ namespace RecomField
                 options.AccessDeniedPath = "/Identity/Account/Login";
             });
 
-            var cloudinary = new Cloudinary(new Account("dvsc8smkg",
-                builder.Configuration["Cloudinary:ApiKey"], builder.Configuration["Cloudinary:APISecret"]));
+            var cloudinary = new Cloudinary(new Account("dvsc8smkg", builder.Configuration["Cloudinary:ApiKey"] ??
+                throw new Exception("Cloudinary:ApiKey is not found"), builder.Configuration["Cloudinary:APISecret"] ??
+                throw new Exception("Cloudinary:APISecret is not found")));
             builder.Services.AddSingleton(typeof(Cloudinary), cloudinary);
 
             builder.Services.AddSignalR();

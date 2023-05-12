@@ -21,7 +21,7 @@ public abstract class Product
     }
 
     [Required]
-    [MinLength(10)]
+    [MinLength(1)]
     public virtual string Description { get; set; } = "";
 
     [Required]

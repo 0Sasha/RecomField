@@ -69,6 +69,7 @@ async function tryUploadCover(file) {
             return;
         }
     }
+    else console.log("invalidFileType");
     document.getElementById("coverFeedback").hidden = false;
 }
 
@@ -79,7 +80,8 @@ async function uploadCover(file) {
     let response = await fetch('/Home/UploadImage', { method: "POST", body: formData });
     let res = await response.json();
     if (res.location != undefined) return res.location;
-    else cancelSpinner();
+    cancelSpinner();
+    if (res.error != undefined) console.log(res.error);
 }
 
 function startSpinner() {

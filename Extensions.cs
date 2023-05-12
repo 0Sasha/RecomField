@@ -29,7 +29,7 @@ public static class Extensions
             return "https://www.youtube.com/embed/" + (endId != -1 ? link[startId..endId] : link[startId..]);
         }
         else if (link.Contains('/')) return "https://www.youtube.com/embed/" + link[(link.LastIndexOf("/") + 1)..];
-        throw new ArgumentException("Id of video is not found");
+        throw new ArgumentException("Id of the video is not found");
     }
 
     public static string CustomizeHtmlForPDF(this string body) => RemoveGaps(RemoveVideos(CustomizeImages(body)));
