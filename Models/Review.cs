@@ -31,7 +31,7 @@ public class Review
     public string Title { get; set; }
 
     [Required]
-    [MinLength(10)]
+    [MinLength(1)]
     public string Body { get; set; }
 
     [Required]
