@@ -15,17 +15,18 @@
     {
         var s = p.AverageUserScore > 0.1 ? p.AverageUserScore.ToString("F2") + "/5" : "n/5";
         var c = p.AverageUserScore >= 3.5 ? "badge text-bg-success" : "badge text-bg-warning";
-        <div class="col-4">
-            <span class='@c' style="font-weight:600; font-size:15px">@s</span>
-        </div>
-    }
-</div>
-<div class="row">
-    @foreach (var p in Model)
-    {
         var title = p.Title?.Length > 24 ? p.Title[..22] + "..." : p.Title;
         <div class="col-4">
-            <a asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">@title</a>
+            <div class="row">
+                <div class="col">
+                    <span class='@c' style="font-weight:600; font-size:15px">@s</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <a asp-action="Index" asp-controller="Product" asp-route-id="@p.Id">@title</a>
+                </div>
+            </div>
         </div>
     }
 </div>
