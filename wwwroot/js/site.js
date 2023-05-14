@@ -1,6 +1,12 @@
 ﻿
-if (getCookie("IsDarkTheme").toLowerCase() == "false")
+let darkTheme = getCookie("IsDarkTheme");
+if (darkTheme != undefined && darkTheme.toLowerCase() == "false")
     document.documentElement.setAttribute("data-bs-theme", "light");
+
+let siteLanguage = getCookie(".AspNetCore.Culture");
+if (siteLanguage == undefined) siteLanguage = navigator.language == "ru" ? "ru" : "en-US";
+else if (siteLanguage.endsWith("ru")) siteLanguage = "ru";
+else siteLanguage = "en-US";
 
 function getCookie(name) {
     return document.cookie.split('; ').find((row) => row.startsWith(name + "="))?.split("=")[1];
@@ -57,7 +63,3 @@ function sendSearchRequest(text, isProds) {
     if ($('#navbarCollapse').is(":hidden")) $('#navbarCollapse').collapse('toggle');
     if ($('#dropdownMenu').is(":hidden")) $('#searchLine').dropdown('toggle');
 }
-
-let siteLanguage = getCookie(".AspNetCore.Culture");
-if (siteLanguage != undefined && siteLanguage.endsWith("ru")) siteLanguage = "ru";
-else siteLanguage = "en-US";
