@@ -60,4 +60,6 @@ public abstract class Product
         AverageUserScore = UserScores.Count > 0 ? Math.Round(UserScores.Select(s => s.Value).Average(), 2) : 0;
         AverageReviewScore = Reviews.Count > 0 ? Math.Round(Reviews.Select(s => s.Score.Value).Average(), 2) : 0;
     }
+
+    public override string ToString() => Title;
 }

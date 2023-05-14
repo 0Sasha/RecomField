@@ -147,7 +147,7 @@ public class HomeController : Controller
     public async Task UploadImage(IFormFile file)
     {
         if (file == null) throw new ArgumentNullException(nameof(file));
-        if (file.Length > 5000000) await Response.WriteAsync(new { error = "The file size is over 5MB" }.ToJson());
+        if (file.Length > 500000) await Response.WriteAsync(new { error = "The file size is over 0.5MB" }.ToJson());
         else if (!file.ContentType.StartsWith("image") ||
             file.ContentType[6..] != "jpeg" && file.ContentType[6..] != "jpg" && file.ContentType[6..] != "png")
             await Response.WriteAsync(new { error = "Incorrect format of the file" }.ToJson());
