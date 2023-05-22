@@ -11,7 +11,7 @@ public abstract class Product
     public int Id { get; set; }
 
     [Required]
-    [MinLength(1)]
+    [StringLength(200, MinimumLength = 1)]
     public virtual string Title { get; set; } = "";
 
     public virtual int ReleaseYear
@@ -21,11 +21,11 @@ public abstract class Product
     }
 
     [Required]
-    [MinLength(1)]
+    [StringLength(1500, MinimumLength = 1)]
     public virtual string Description { get; set; } = "";
 
     [Required]
-    [MinLength(1)]
+    [StringLength(500, MinimumLength = 1)]
     public virtual string Cover { get; set; } = "";
 
     public virtual double AverageUserScore { get; set; }
