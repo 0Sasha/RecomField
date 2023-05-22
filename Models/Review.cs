@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
-
 namespace RecomField.Models;
 
 [Index("Id", IsUnique = true)]
@@ -20,6 +19,7 @@ public class Review
     [ForeignKey("AuthorId")]
     public ApplicationUser Author { get; set; }
 
+    [Required]
     public int ProductId { get; set; }
 
     [Required]
@@ -27,11 +27,11 @@ public class Review
     public Product Product { get; set; }
 
     [Required]
-    [MinLength(1)]
+    [StringLength(200, MinimumLength = 1)]
     public string Title { get; set; }
 
     [Required]
-    [MinLength(1)]
+    [StringLength(15000, MinimumLength = 1)]
     public string Body { get; set; }
 
     [Required]

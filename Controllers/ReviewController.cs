@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -111,6 +112,13 @@ public class ReviewController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditReview([Bind("Id,AuthorId,ProductId,Title,Body")] Review review)
     {
+        if (ModelState.Any(s => s.Key != "Score" && s.Key != "Author" &&
+        s.Key != "Product" && s.Value?.ValidationState != ModelValidationState.Valid))
+        {
+            review.Product = await context.Products.FindAsync(review.ProductId) ?? throw new Exception();
+            return View(review);
+        }
+
         var user = await GetUser();
         if (review.AuthorId == null) throw new Exception("AuthorId is null");
         if (review.AuthorId != user.Id && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
