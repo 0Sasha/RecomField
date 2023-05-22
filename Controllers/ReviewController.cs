@@ -69,7 +69,7 @@ public class ReviewController : Controller
         var review = await FindReview(id);
         review.Comments.Add(new(user, review, comment));
         await context.SaveChangesAsync();
-        await hubContext.Clients.All.SendAsync("NewReviewComment", id);
+        await hubContext.Clients.Group("review" + id).SendAsync("NewReviewComment", id);
         return await GetReviewComments(review, count);
     }
 

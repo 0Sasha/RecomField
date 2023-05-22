@@ -191,8 +191,7 @@ function showMoreComments(id, count) {
 }
 
 function updateReviewComments(id) {
-    if ((window.location.href.includes("Review/Index/" + id) || window.location.href.includes("Review/Index?id=" + id)) &&
-        document.getElementById("allVisible").value.toLowerCase() === "true") showMoreComments(id, 1);
+    if (document.getElementById("allVisible").value.toLowerCase() === "true") showMoreComments(id, 1);
 }
 
 function removeReview(id) {
@@ -215,5 +214,22 @@ function loadSimilarReviews(id) {
                 document.getElementById("similarDiv").hidden = false;
             }
         }
+    });
+}
+
+var connection = undefined;
+
+function startHub(reviewId) {
+    connection = new signalR.HubConnectionBuilder().withUrl("/mainHub").withAutomaticReconnect().build();
+
+    connection.on("NewReviewComment", function (id) {
+        updateReviewComments(id);
+    });
+
+    connection.start().then(function () {
+        connection.invoke("JoinGroup", "review" + reviewId);
+        console.log('Hub is connected to group: review' + reviewId);
+    }).catch(function (err) {
+        return console.error(err.toString());
     });
 }
