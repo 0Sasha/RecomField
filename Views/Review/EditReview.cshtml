@@ -15,7 +15,7 @@
     <h2>@head</h2>
     <hr />
     <form asp-action="EditReview">
-        <div class="validation" asp-validation-summary="ModelOnly"></div>
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
         <div hidden>
             <input asp-for=Id />
             <input asp-for=AuthorId />

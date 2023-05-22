@@ -68,10 +68,14 @@ public class ProductController : Controller
 
     private async Task<IActionResult> AddProduct(Product product)
     {
+        if (!ModelState.IsValid) return View("AddProduct", product);
         var prods = await context.Products
             .Where(p => p.Title == product.Title && p.ReleaseYear == product.ReleaseYear).ToArrayAsync();
         if (prods.Any(p => p.GetType() == product.GetType()))
-            throw new ArgumentException("This product already exists in the database", nameof(product));
+        {
+            ModelState.AddModelError("", "This product already exists in the database");
+            return View("AddProduct", product);
+        }
         await context.AddAsync(product);
         await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id = product.Id });
