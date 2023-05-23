@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc.Localization;
 using Microsoft.Extensions.Localization;
 using RecomField.Controllers;
+using RecomField.Services;
 
 namespace RecomField.Areas.Identity.Pages.Account
 {
@@ -33,6 +34,7 @@ namespace RecomField.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
         private readonly IStringLocalizer<SharedResource> _localizer;
+        private readonly IUserService<ApplicationUser, IResponseCookies, Language> _userService;
 
         public ExternalLoginModel(
             SignInManager<ApplicationUser> signInManager,
@@ -40,7 +42,8 @@ namespace RecomField.Areas.Identity.Pages.Account
             IUserStore<ApplicationUser> userStore,
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender,
-            IStringLocalizer<SharedResource> localizer)
+            IStringLocalizer<SharedResource> localizer,
+            IUserService<ApplicationUser, IResponseCookies, Language> userService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -49,6 +52,7 @@ namespace RecomField.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
             _localizer = localizer;
+            _userService = userService;
         }
 
         /// <summary>
@@ -124,7 +128,7 @@ namespace RecomField.Areas.Identity.Pages.Account
             if (result.Succeeded)
             {
                 _logger.LogInformation("{Name} logged in with {LoginProvider} provider.", info.Principal.Identity.Name, info.LoginProvider);
-                Response.Cookies.AddUserCookies(await _userManager.FindByNameAsync(info.Principal.Identity.Name));
+                await _userService.AddUserCookiesAsync((await _userManager.FindByNameAsync(info.Principal.Identity.Name)).Id, Response.Cookies);
                 return LocalRedirect(returnUrl);
             }
             if (result.IsLockedOut)

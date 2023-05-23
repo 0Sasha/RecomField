@@ -7,30 +7,30 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
-using System.Diagnostics;
+using RecomField.Services;
 using NuGet.Protocol;
-using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 namespace RecomField.Controllers;
 
 public class HomeController : Controller
 {
     private readonly ApplicationDbContext context;
     private readonly ILogger<HomeController> logger;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly IUserService<ApplicationUser, IResponseCookies, Language> userService;
     private readonly Cloudinary cloud;
 
-    public HomeController(ILogger<HomeController> logger, UserManager<ApplicationUser> userManager,
-        ApplicationDbContext context, Cloudinary cloud)
+    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, Cloudinary cloud,
+        IUserService<ApplicationUser, IResponseCookies, Language> userService)
     {
         this.logger = logger;
-        this.userManager = userManager;
         this.context = context;
         this.cloud = cloud;
+        this.userService = userService;
     }
 
     public async Task<IActionResult> Index()
     {
-        Response.Cookies.AddUserCookies(await userManager.GetUserAsync(User));
+        await userService.AddUserCookiesAsync(GetUserId(), Response.Cookies);
         ViewData["Tags"] = await GetTagsForCloud();
         return View(await context.Movies.OrderByDescending(p => p.AverageUserScore).Take(6).ToArrayAsync());
     }
@@ -90,30 +90,12 @@ public class HomeController : Controller
         Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
             CookieRequestCultureProvider.MakeCookieValue(lang),
             new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) });
-        await SaveLanguage(current == "en" ? Language.Russian : Language.English);
+        await userService.SaveLanguageAsync(GetUserId(), current == "en" ? Language.Russian : Language.English);
         return Redirect(returnUrl);
     }
 
-    private async Task SaveLanguage(Language language)
-    {
-        var u = await userManager.GetUserAsync(User);
-        if (u != null)
-        {
-            u.InterfaceLanguage = language;
-            await userManager.UpdateAsync(u);
-        }
-    }
-
     [HttpPost]
-    public async Task SaveTheme(bool isDark)
-    {
-        var u = await userManager.GetUserAsync(User);
-        if (u != null)
-        {
-            u.DarkTheme = isDark;
-            await userManager.UpdateAsync(u);
-        }
-    }
+    public async Task SaveTheme(bool isDark) => await userService.SaveThemeAsync(GetUserId(), isDark);
 
     [HttpPost]
     public async Task<IActionResult> GetBestSeries() => PartialView("BestProductsPartial",
@@ -162,6 +144,8 @@ public class HomeController : Controller
     }
 
     public IActionResult Privacy() => View();
+
+    private string? GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task Error()

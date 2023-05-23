@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
+using RecomField.Services;
+using System.Security.Claims;
 namespace RecomField.Controllers;
 
 [Authorize]
@@ -12,22 +14,19 @@ public class UserController : Controller
     private readonly UserManager<ApplicationUser> userManager;
     private readonly SignInManager<ApplicationUser> signInManager;
     private readonly ApplicationDbContext context;
+    private readonly IUserService<ApplicationUser, IResponseCookies, Language> userService;
 
     public UserController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, 
-        ApplicationDbContext context)
+        ApplicationDbContext context, IUserService<ApplicationUser, IResponseCookies, Language> userService)
     {
         this.userManager = userManager;
         this.signInManager = signInManager;
         this.context = context;
+        this.userService = userService;
     }
 
-    public async Task<IActionResult> Index(string? id = null)
-    {
-        var user = (string.IsNullOrEmpty(id) ? await userManager.GetUserAsync(User) :
-            await userManager.FindByIdAsync(id)) ?? throw new Exception("User is not found");
-        await user.LoadAsync(context, true);
-        return View(user);
-    }
+    public async Task<IActionResult> Index(string? id = null) =>
+        View(await userService.LoadAsync(string.IsNullOrEmpty(id) ? GetUserId() : id));
 
     [HttpPost]
     public async Task<IActionResult> GetUsersView(string? search, string type, int count)
@@ -154,4 +153,7 @@ public class UserController : Controller
 
     private async Task<ApplicationUser> GetUserAsync(string id) =>
         await context.Users.FindAsync(id) ?? throw new Exception("User is not found");
+
+    private string GetUserId() =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("UserId is not found");
 }

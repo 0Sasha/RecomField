@@ -1,10 +1,12 @@
 using CloudinaryDotNet;
+using iTextSharp.text.log;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using RecomField.Data;
 using RecomField.Hubs;
 using RecomField.Models;
+using RecomField.Services;
 
 namespace RecomField
 {
@@ -49,6 +51,8 @@ namespace RecomField
                 throw new Exception("Cloudinary:ApiKey is not found"), builder.Configuration["Cloudinary:APISecret"] ??
                 throw new Exception("Cloudinary:APISecret is not found")));
             builder.Services.AddSingleton(typeof(Cloudinary), cloudinary);
+
+            builder.Services.AddScoped<IUserService<ApplicationUser, IResponseCookies, Language>, UserService>();
 
             builder.Services.AddSignalR();
 
