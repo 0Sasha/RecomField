@@ -46,6 +46,7 @@ public abstract class Product
 
     public virtual async Task ChangeUserScoreAsync(ApplicationDbContext context, ApplicationUser user, int score)
     {
+        if (score < 1 || score > 5) throw new Exception("Score is not between 1 and 5");
         await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
         var s = UserScores.SingleOrDefault(s => s.Sender == user);
         if (s != null) s.Value = score;
