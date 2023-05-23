@@ -125,6 +125,7 @@ public class ReviewController : Controller
         if (review.ProductId == 0) throw new Exception("ProductId is 0");
         string tags = Request.Form["TagsForServer"].Single() ?? throw new Exception("Tags is not filled");
         int score = int.Parse(Request.Form["RateForServer"].Single() ?? throw new Exception("Score is not defined"));
+        if (score < 1 || score > 10) throw new Exception("Score is not between 1 and 10");
         return review.Id == 0 ? await AddReview(review, tags, score) :
             await EditReview(review.Id, review.Title, tags, review.Body, score);
     }
