@@ -53,6 +53,7 @@ namespace RecomField
             builder.Services.AddSingleton(typeof(Cloudinary), cloudinary);
 
             builder.Services.AddScoped<IUserService<ApplicationUser, IResponseCookies, Language>, UserService>();
+            builder.Services.AddScoped<ICloudService<IFormFile>, CloudService>();
 
             builder.Services.AddSignalR();
 

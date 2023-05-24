@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-namespace RecomField.Services;
+﻿namespace RecomField.Services;
 
 public interface IUserService<TUser, TCookies, TLanguage>
 {

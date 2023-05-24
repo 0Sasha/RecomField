@@ -1,6 +1,4 @@
-﻿using CloudinaryDotNet.Actions;
-using CloudinaryDotNet;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
 using RecomField.Services;
-using NuGet.Protocol;
 using System.Security.Claims;
 namespace RecomField.Controllers;
 
@@ -17,15 +14,15 @@ public class HomeController : Controller
     private readonly ApplicationDbContext context;
     private readonly ILogger<HomeController> logger;
     private readonly IUserService<ApplicationUser, IResponseCookies, Language> userService;
-    private readonly Cloudinary cloud;
+    private readonly ICloudService<IFormFile> cloudService;
 
-    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, Cloudinary cloud,
-        IUserService<ApplicationUser, IResponseCookies, Language> userService)
+    public HomeController(ILogger<HomeController> logger, ApplicationDbContext context,
+        IUserService<ApplicationUser, IResponseCookies, Language> userService, ICloudService<IFormFile> cloudService)
     {
         this.logger = logger;
         this.context = context;
-        this.cloud = cloud;
         this.userService = userService;
+        this.cloudService = cloudService;
     }
 
     public async Task<IActionResult> Index()
@@ -84,7 +81,6 @@ public class HomeController : Controller
 
     public async Task<IActionResult> ChangeLanguage(string current, string returnUrl)
     {
-        if (string.IsNullOrEmpty(current)) throw new ArgumentNullException(nameof(current));
         if (string.IsNullOrEmpty(returnUrl)) throw new ArgumentNullException(nameof(returnUrl));
         var lang = new RequestCulture(current == "en" ? "ru" : "en-US");
         Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
@@ -126,22 +122,8 @@ public class HomeController : Controller
 
     [Authorize]
     [HttpPost]
-    public async Task UploadImage(IFormFile file)
-    {
-        if (file == null) throw new ArgumentNullException(nameof(file));
-        if (file.Length > 500000) await Response.WriteAsync(new { error = "The file size is over 0.5MB" }.ToJson());
-        else if (!file.ContentType.StartsWith("image") ||
-            file.ContentType[6..] != "jpeg" && file.ContentType[6..] != "jpg" && file.ContentType[6..] != "png")
-            await Response.WriteAsync(new { error = "Incorrect format of the file" }.ToJson());
-        else
-        {
-            var uploadParams = new ImageUploadParams() { File = new FileDescription("file", file.OpenReadStream()) };
-            var uploadResult = await cloud.UploadAsync(uploadParams);
-            if (uploadResult.StatusCode == System.Net.HttpStatusCode.OK)
-                await Response.WriteAsync(new { location = uploadResult.Url }.ToJson());
-            else await Response.WriteAsync(new { error = "Error during upload" }.ToJson());
-        }
-    }
+    public async Task UploadImage(IFormFile file) =>
+        await Response.WriteAsync(await cloudService.UploadImageAsync(file));
 
     public IActionResult Privacy() => View();
 
