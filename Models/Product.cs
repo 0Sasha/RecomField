@@ -44,16 +44,6 @@ public abstract class Product
         if (deep) await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).Include(r => r.Author).LoadAsync();
     }
 
-    public virtual async Task ChangeUserScoreAsync(ApplicationDbContext context, ApplicationUser user, int score)
-    {
-        if (score < 1 || score > 5) throw new Exception("Score is not between 1 and 5");
-        await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
-        var s = UserScores.SingleOrDefault(s => s.Sender == user);
-        if (s != null) s.Value = score;
-        else UserScores.Add(new(user, this, score));
-        AverageUserScore = Math.Round(UserScores.Select(s => s.Value).Average(), 2);
-    }
-
     public virtual async Task UpdateAverageScoresAsync(ApplicationDbContext context)
     {
         await context.Entry(this).Collection(p => p.UserScores).LoadAsync();

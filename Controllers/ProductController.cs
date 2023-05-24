@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
+using RecomField.Services;
+using System.Security.Claims;
+
 namespace RecomField.Controllers;
 
 [Authorize]
@@ -11,21 +14,19 @@ public class ProductController : Controller
 {
     private readonly UserManager<ApplicationUser> userManager;
     private readonly ApplicationDbContext context;
+    private readonly IProductService<Product> productService;
 
-    public ProductController(UserManager<ApplicationUser> userManager, ApplicationDbContext context)
+    public ProductController(UserManager<ApplicationUser> userManager, ApplicationDbContext context,
+        IProductService<Product> productService)
     {
         this.userManager = userManager;
         this.context = context;
+        this.productService = productService;
     }
 
     [AllowAnonymous]
-    public async Task<IActionResult> Index(int id)
-    {
-        var prod = await FindProduct(id);
-        var user = await userManager.GetUserAsync(User);
-        await prod.LoadAsync(context, user?.Id, true);
-        return View(prod);
-    }
+    public async Task<IActionResult> Index(int id) =>
+        View(await productService.LoadProductAsync(id, true, GetUserId()));
 
     public IActionResult AddProduct(string type)
     {
@@ -69,41 +70,27 @@ public class ProductController : Controller
     private async Task<IActionResult> AddProduct(Product product)
     {
         if (!ModelState.IsValid) return View("AddProduct", product);
-        var prods = await context.Products
-            .Where(p => p.Title == product.Title && p.ReleaseYear == product.ReleaseYear).ToArrayAsync();
-        if (prods.Any(p => p.GetType() == product.GetType()))
+        if (!await productService.AddProductAsync(product))
         {
             ModelState.AddModelError("", "This product already exists in the database");
             return View("AddProduct", product);
         }
-        await context.AddAsync(product);
-        await context.SaveChangesAsync();
         return RedirectToAction(nameof(Index), new { id = product.Id });
     }
 
     [HttpPost]
     public async Task<IActionResult> GetProductsForReview(string authorId, string? partTitle = null)
     {
-        var user = await userManager.FindByIdAsync(authorId) ?? throw new Exception("User is not found");
-        var reviewed = context.Reviews.Where(r => r.Author == user).Include(r => r.Product).Select(r => r.Product);
+        var reviewed =
+            context.Reviews.Where(r => r.AuthorId == authorId).Include(r => r.Product).Select(r => r.Product);
         ViewData["authorIdForNewReview"] = authorId;
-        if (string.IsNullOrEmpty(partTitle))
-            return PartialView("ProductsTableBody", await context.Products.Except(reviewed).Take(7).ToArrayAsync());
-        var request = "\"" + partTitle + "*\" OR \"" + partTitle + "\"";
-        var byTitle = await context.Products.Where(p => EF.Functions.Contains(p.Title, request)).ToArrayAsync();
-        var byAuthor = await context.Books.Where(p => EF.Functions.Contains(p.Author, request)).ToArrayAsync();
-        return PartialView("ProductsTableBody", byTitle.Union(byAuthor).Except(reviewed).Take(7));
+        return PartialView("ProductsTableBody", await productService.GetProductsAsync(7, partTitle, reviewed));
     }
 
     [HttpPost]
-    public async Task ChangeScoreProduct(int id, int score)
-    {
-        var user = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
-        var prod = await FindProduct(id);
-        await prod.ChangeUserScoreAsync(context, user, score);
-        await context.SaveChangesAsync();
-    }
+    public async Task ChangeScoreProduct(int id, int score) =>
+        await productService.ChangeUserScoreAsync(id, GetUserId(), score);
 
-    private async Task<Product> FindProduct(int id) =>
-        await context.Products.FindAsync(id) ?? throw new Exception("Product is not found");
+    private string GetUserId() =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("UserId is not found");
 }
