@@ -3,7 +3,9 @@ namespace RecomField.Services;
 
 public interface IUserService<TUser, TCookies, TLanguage>
 {
-    public Task<TUser> LoadAsync(string userId);
+    public Task<TUser> LoadUserAsync(string userId);
+
+    public Task<TUser[]> GetUsersAsync(string type, int count, string? search);
 
     public Task AddUserCookiesAsync(string? userId, TCookies cookies);
 
@@ -15,9 +17,9 @@ public interface IUserService<TUser, TCookies, TLanguage>
 
     public Task RevokeAdminRoleAsync(string userId);
 
-    public Task BlockAsync(string userId, int? days);
+    public Task BlockUserAsync(string userId, int? days);
 
-    public Task UnblockAsync(string userId);
+    public Task UnblockUserAsync(string userId);
 
-    public Task RemoveAsync(string userId);
+    public Task RemoveUserAsync(string userId);
 }

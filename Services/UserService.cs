@@ -16,13 +16,29 @@ public class UserService : IUserService<ApplicationUser, IResponseCookies, Langu
         this.userManager = userManager;
     }
 
-    public async Task<ApplicationUser> LoadAsync(string userId)
+    public async Task<ApplicationUser> LoadUserAsync(string userId)
     {
         var user = await GetUserAsync(userId);
         await context.Reviews.Where(r => r.Author == user).Include(r => r.Product).Include(r => r.Score).LoadAsync();
         if (user.Reviews.Count > 0) user.ReviewLikes = user.Reviews.Select(r => r.LikeCounter).Sum();
         else user.ReviewLikes = 0;
         return user;
+    }
+
+    public async Task<ApplicationUser[]> GetUsersAsync(string type, int count, string? search)
+    {
+        if (count < 1) count = int.MaxValue;
+        var users = string.IsNullOrEmpty(search) ? context.Users :
+            context.Users.Where(u => u.UserName != null && u.UserName.Contains(search));
+        if (type == "Admins")
+        {
+            var adminsId = await context.UserRoles.Select(r => r.UserId).ToArrayAsync();
+            return await users.Where(u => adminsId.Contains(u.Id)).Take(count).ToArrayAsync();
+        }
+        if (type == "All") return await users.Take(count).ToArrayAsync();
+        if (type == "Blocked")
+            return await users.Where(u => u.LockoutEnd > DateTimeOffset.UtcNow).Take(count).ToArrayAsync();
+        throw new ArgumentException("Unexpected value", nameof(type));
     }
 
     public async Task AddUserCookiesAsync(string? userId, IResponseCookies cookies)
@@ -78,7 +94,7 @@ public class UserService : IUserService<ApplicationUser, IResponseCookies, Langu
         await context.SaveChangesAsync();
     }
 
-    public async Task BlockAsync(string userId, int? days)
+    public async Task BlockUserAsync(string userId, int? days)
     {
         var user = await GetUserAsync(userId);
         user.LockoutEnd = days == null ? DateTimeOffset.MaxValue : DateTimeOffset.UtcNow.AddDays(days.Value);
@@ -86,14 +102,14 @@ public class UserService : IUserService<ApplicationUser, IResponseCookies, Langu
         await context.SaveChangesAsync();
     }
 
-    public async Task UnblockAsync(string userId)
+    public async Task UnblockUserAsync(string userId)
     {
         var user = await GetUserAsync(userId);
         user.LockoutEnd = DateTimeOffset.MinValue;
         await context.SaveChangesAsync();
     }
 
-    public async Task RemoveAsync(string userId)
+    public async Task RemoveUserAsync(string userId)
     {
         var user = await GetUserAsync(userId);
         await context.Reviews.Where(r => r.Author == user).Include(r => r.Score).Include(r => r.Tags)
