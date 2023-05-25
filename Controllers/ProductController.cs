@@ -1,25 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
 using RecomField.Services;
 using System.Security.Claims;
-
 namespace RecomField.Controllers;
 
 [Authorize]
 public class ProductController : Controller
 {
-    private readonly UserManager<ApplicationUser> userManager;
     private readonly ApplicationDbContext context;
     private readonly IProductService<Product> productService;
 
-    public ProductController(UserManager<ApplicationUser> userManager, ApplicationDbContext context,
-        IProductService<Product> productService)
+    public ProductController(ApplicationDbContext context, IProductService<Product> productService)
     {
-        this.userManager = userManager;
         this.context = context;
         this.productService = productService;
     }

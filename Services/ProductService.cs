@@ -29,10 +29,16 @@ public class ProductService : IProductService<Product>
     public async Task<Product[]> GetProductsAsync(int count, string? search, IEnumerable<Product> except)
     {
         if (string.IsNullOrEmpty(search)) return await context.Products.Except(except).Take(count).ToArrayAsync();
+        
         var request = "\"" + search + "*\" OR \"" + search + "\"";
-        var byTitle = await context.Products.Where(p => EF.Functions.Contains(p.Title, request)).ToArrayAsync();
+        var prods = (await context.Products.Where(x => EF.Functions.Contains(x.Title, request) ||
+        EF.Functions.Contains(x.Description, request)).ToArrayAsync()).Except(except).Take(count).ToArray();
+        if (prods.Length == count) return prods;
+
         var byAuthor = await context.Books.Where(p => EF.Functions.Contains(p.Author, request)).ToArrayAsync();
-        return byTitle.Union(byAuthor).Except(except).Take(count).ToArray();
+        var byYear = int.TryParse(search, out var number) ? await context.Products
+            .Where(p => p.ReleaseYear == number).ToArrayAsync() : Array.Empty<Product>();
+        return prods.Union(byAuthor).Union(byYear).Except(except).Take(count).ToArray();
     }
 
     public async Task ChangeUserScoreAsync(int productId, string userId, int score)
@@ -53,8 +59,10 @@ public class ProductService : IProductService<Product>
         var prod = await GetProductAsync(productId);
         await context.Entry(prod).Collection(p => p.UserScores).LoadAsync();
         await context.Reviews.Where(r => r.ProductId == productId).Include(r => r.Score).LoadAsync();
-        prod.AverageUserScore = prod.UserScores.Count > 0 ? Math.Round(prod.UserScores.Select(s => s.Value).Average(), 2) : 0;
-        prod.AverageReviewScore = prod.Reviews.Count > 0 ? Math.Round(prod.Reviews.Select(s => s.Score.Value).Average(), 2) : 0;
+        prod.AverageUserScore =
+            prod.UserScores.Count > 0 ? Math.Round(prod.UserScores.Select(s => s.Value).Average(), 2) : 0;
+        prod.AverageReviewScore =
+            prod.Reviews.Count > 0 ? Math.Round(prod.Reviews.Select(s => s.Score.Value).Average(), 2) : 0;
         await context.SaveChangesAsync();
     }
 

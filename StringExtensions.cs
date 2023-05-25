@@ -1,10 +1,6 @@
-﻿using iText.Layout;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.Extensions.Localization;
-using RecomField.Models;
-namespace RecomField;
+﻿namespace RecomField;
 
-public static class Extensions
+public static class StringExtensions
 {
     public static string CustomizeYouTubeLink(this string link)
     {

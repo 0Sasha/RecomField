@@ -14,15 +14,18 @@ public class HomeController : Controller
     private readonly ApplicationDbContext context;
     private readonly ILogger<HomeController> logger;
     private readonly IUserService<ApplicationUser, IResponseCookies, Language> userService;
+    private readonly IProductService<Product> productService;
     private readonly ICloudService<IFormFile> cloudService;
 
     public HomeController(ILogger<HomeController> logger, ApplicationDbContext context,
-        IUserService<ApplicationUser, IResponseCookies, Language> userService, ICloudService<IFormFile> cloudService)
+        IUserService<ApplicationUser, IResponseCookies, Language> userService, IProductService<Product> productService,
+        ICloudService<IFormFile> cloudService)
     {
         this.logger = logger;
         this.context = context;
         this.userService = userService;
         this.cloudService = cloudService;
+        this.productService = productService;
     }
 
     public async Task<IActionResult> Index()
@@ -48,16 +51,8 @@ public class HomeController : Controller
     public async Task<IActionResult> Search(string text, bool products) => products ? await SearchProducts(text) :
         text.StartsWith('[') && text.EndsWith("]") ? await SearchReviewsByTag(text) : await SearchReviews(text);
 
-    private async Task<IActionResult> SearchProducts(string text)
-    {
-        var request = "\"" + text + "*\" OR \"" + text + "\"";
-        var prods = await context.Products.Where(x =>
-        EF.Functions.Contains(x.Title, request) || EF.Functions.Contains(x.Description, request)).ToArrayAsync();
-        var byAuthor = await context.Books.Where(x => EF.Functions.Contains(x.Author, request)).ToArrayAsync();
-        var byYear = int.TryParse(text, out var number) ?
-            await context.Products.Where(p => p.ReleaseYear == number).ToArrayAsync() : Array.Empty<Product>();
-        return PartialView("ProductsTableBody", prods.Union(byAuthor).Union(byYear));
-    }
+    private async Task<IActionResult> SearchProducts(string text) =>
+        PartialView("ProductsTableBody", await productService.GetProductsAsync(30, text, Array.Empty<Product>()));
 
     private async Task<IActionResult> SearchReviews(string text)
     {
