@@ -1,5 +1,4 @@
-﻿using iText.Html2pdf;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -9,6 +8,9 @@ using Microsoft.Extensions.Localization;
 using RecomField.Data;
 using RecomField.Hubs;
 using RecomField.Models;
+using RecomField.Services;
+using System.Security.Claims;
+
 namespace RecomField.Controllers;
 
 [Authorize]
@@ -18,33 +20,25 @@ public class ReviewController : Controller
     private readonly ApplicationDbContext context;
     private readonly IHubContext<MainHub> hubContext;
     private readonly IStringLocalizer<SharedResource> localizer;
+    private readonly IReviewService<Review> reviewService;
 
     public ReviewController(UserManager<ApplicationUser> userManager, ApplicationDbContext context,
-        IHubContext<MainHub> hubContext, IStringLocalizer<SharedResource> localizer)
+        IHubContext<MainHub> hubContext, IStringLocalizer<SharedResource> localizer, IReviewService<Review> reviewService)
     {
         this.userManager = userManager;
         this.context = context;
         this.hubContext = hubContext;
         this.localizer = localizer;
+        this.reviewService = reviewService;
     }
 
     [AllowAnonymous]
-    public async Task<IActionResult> Index(int id)
-    {
-        var review = await FindReview(id);
-        var user = await userManager.GetUserAsync(User);
-        await review.LoadAsync(context, user?.Id);
-        return View(review);
-    }
+    public async Task<IActionResult> Index(int id) =>
+        View(await reviewService.LoadReviewAsync(id, false, User.FindFirstValue(ClaimTypes.NameIdentifier)));
 
     [AllowAnonymous]
-    public async Task<IActionResult> ConvertToPDF(int id)
-    {
-        var review = await FindReview(id);
-        using MemoryStream pdfDest = new();
-        HtmlConverter.ConvertToPdf(await review.ToHtmlAsync(context, localizer), pdfDest);
-        return File(new MemoryStream(pdfDest.ToArray()), "application/pdf");
-    }
+    public async Task<IActionResult> ConvertToPDF(int id) =>
+        File(new MemoryStream(await reviewService.GetPdfVersionAsync(id)), "application/pdf");
 
     [AllowAnonymous]
     [HttpPost]
@@ -147,8 +141,7 @@ public class ReviewController : Controller
     
     private async Task<IActionResult> EditReview(int id, string title, string tags, string body, int score)
     {
-        var review = await FindReview(id);
-        await review.LoadAsync(context, null);
+        var review = await reviewService.LoadReviewAsync(id, false, null);
         review.Title = title;
         review.Body = body.CustomizeHtmlForView();
         review.Tags.Clear();
@@ -163,9 +156,8 @@ public class ReviewController : Controller
     public async Task<IActionResult> RemoveReview(int id)
     {
         var user = await GetUser();
-        var review = await FindReview(id);
+        var review = await reviewService.LoadReviewAsync(id, true, null);
         if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
-        await review.LoadAsync(context, null, true);
         context.Reviews.Remove(review);
         await context.SaveChangesAsync();
         await review.Product.UpdateAverageScoresAsync(context);
@@ -183,13 +175,10 @@ public class ReviewController : Controller
     }
 
     [HttpPost]
-    public async Task ChangeLike(int id)
-    {
-        var user = await GetUser();
-        var review = await FindReview(id);
-        await review.ChangeLikeAsync(context, user);
-        await context.SaveChangesAsync();
-    }
+    public async Task ChangeLike(int id) => await reviewService.ChangeLikeAsync(id, GetUserId());
+
+    private string GetUserId() =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("UserId is not found");
 
     private async Task<ApplicationUser> GetUser() =>
         await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");

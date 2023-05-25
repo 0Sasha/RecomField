@@ -54,6 +54,7 @@ namespace RecomField
 
             builder.Services.AddScoped<IUserService<ApplicationUser, IResponseCookies, Language>, UserService>();
             builder.Services.AddScoped<IProductService<Product>, ProductService>();
+            builder.Services.AddScoped<IReviewService<Review>, ReviewService>();
             builder.Services.AddScoped<ICloudService<IFormFile>, CloudService>();
 
             builder.Services.AddSignalR();

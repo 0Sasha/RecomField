@@ -15,17 +15,19 @@ public class HomeController : Controller
     private readonly ILogger<HomeController> logger;
     private readonly IUserService<ApplicationUser, IResponseCookies, Language> userService;
     private readonly IProductService<Product> productService;
+    private readonly IReviewService<Review> reviewService;
     private readonly ICloudService<IFormFile> cloudService;
 
     public HomeController(ILogger<HomeController> logger, ApplicationDbContext context,
         IUserService<ApplicationUser, IResponseCookies, Language> userService, IProductService<Product> productService,
-        ICloudService<IFormFile> cloudService)
+        ICloudService<IFormFile> cloudService, IReviewService<Review> reviewService)
     {
         this.logger = logger;
         this.context = context;
         this.userService = userService;
         this.cloudService = cloudService;
         this.productService = productService;
+        this.reviewService = reviewService;
     }
 
     public async Task<IActionResult> Index()
@@ -49,30 +51,13 @@ public class HomeController : Controller
 
     [HttpPost]
     public async Task<IActionResult> Search(string text, bool products) => products ? await SearchProducts(text) :
-        text.StartsWith('[') && text.EndsWith("]") ? await SearchReviewsByTag(text) : await SearchReviews(text);
+        await SearchReviews(text, text.StartsWith('[') && text.EndsWith("]"));
 
     private async Task<IActionResult> SearchProducts(string text) =>
         PartialView("ProductsTableBody", await productService.GetProductsAsync(30, text, Array.Empty<Product>()));
 
-    private async Task<IActionResult> SearchReviews(string text)
-    {
-        var request = "\"" + text + "*\" OR \"" + text + "\"";
-        var revs = context.Reviews.Where(x => EF.Functions.Contains(x.Title, request) ||
-        EF.Functions.Contains(x.Body, request) || EF.Functions.Contains(x.Product.Title, request));
-        var byTags = context.ReviewTags.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
-        var byComments = context.ReviewComments.Where(x => EF.Functions.Contains(x.Body, request)).Select(t => t.Entity);
-        var founded = revs.Union(byTags).Union(byComments).Include(r => r.Product).Include(r => r.Author).Include(r => r.Score);
-        return PartialView("ReviewsTableBody", await founded.ToArrayAsync());
-    }
-
-    private async Task<IActionResult> SearchReviewsByTag(string text)
-    {
-        text = text[1..(text.Length - 1)];
-        var request = "\"" + text + "*\" OR \"" + text + "\"";
-        return PartialView("ReviewsTableBody", await context.ReviewTags.Where(x =>
-        EF.Functions.Contains(x.Body, request)).Include(r => r.Entity.Product)
-        .Include(r => r.Entity.Author).Include(r => r.Entity.Score).Select(t => t.Entity).ToArrayAsync());
-    }
+    private async Task<IActionResult> SearchReviews(string text, bool byTag) =>
+        PartialView("ReviewsTableBody", await reviewService.GetReviewsAsync(text, byTag));
 
     public async Task<IActionResult> ChangeLanguage(string current, string returnUrl)
     {
