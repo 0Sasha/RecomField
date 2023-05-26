@@ -26,6 +26,33 @@ public class ReviewService : IReviewService<Review>
         return byTag ? await SearchByTagAsync(request) : await SearchAsync(request);
     }
 
+    public async Task<Review[]> GetReviewsAsync(string userId, string? search)
+    {
+        if (string.IsNullOrEmpty(userId)) throw new ArgumentNullException(nameof(userId));
+        var reviews = context.Reviews.Where(r => r.AuthorId == userId);
+        if (!string.IsNullOrEmpty(search))
+        {
+            var request = "\"" + search + "*\" OR \"" + search + "\"";
+            reviews = context.Reviews.Where(r => r.AuthorId == userId &&
+            (EF.Functions.Contains(r.Title, request) || EF.Functions.Contains(r.Body, request) ||
+            EF.Functions.Contains(r.Product.Title, request)));
+        }
+        return await reviews.Include(r => r.Author).Include(r => r.Product).Include(r => r.Score).ToArrayAsync();
+    }
+
+    public Review[] SortReviews(IEnumerable<Review> reviews, string sortBy, bool ascOrder)
+    {
+        if (sortBy == "date") return ascOrder ? reviews.OrderBy(r => r.PublicationDate).ToArray() :
+                reviews.OrderByDescending(r => r.PublicationDate).ToArray();
+        if (sortBy == "title") return ascOrder ? reviews.OrderBy(r => r.Title).ToArray() :
+                reviews.OrderByDescending(r => r.Title).ToArray();
+        if (sortBy == "likes") return ascOrder ? reviews.OrderBy(r => r.LikeCounter).ToArray() :
+                reviews.OrderByDescending(r => r.LikeCounter).ToArray();
+        if (sortBy == "score") return ascOrder ? reviews.OrderBy(r => r.Score.Value).ToArray() :
+                reviews.OrderByDescending(r => r.Score.Value).ToArray();
+        throw new ArgumentException("Unexpected value", nameof(sortBy));
+    }
+
     public async Task<Review[]> GetSimilarReviewsAsync(int reviewId, int count)
     {
         var review = await GetReviewAsync(reviewId);
@@ -134,6 +161,14 @@ public class ReviewService : IReviewService<Review>
         var review = await GetReviewAsync(reviewId);
         review.Comments.Add(new(user, review, comment));
         await context.SaveChangesAsync();
+    }
+
+    public async Task<string[]> GetReviewTagsAsync(string search, int count)
+    {
+        var request = "\"" + search + "*\" OR \"" + search + "\"";
+        var tags = await context.ReviewTags
+            .Where(t => EF.Functions.Contains(t.Body, request)).Select(t => t.Body).ToArrayAsync();
+        return tags.Distinct().Take(count).ToArray();
     }
 
     private async Task<Review> GetReviewAsync(int reviewId) =>

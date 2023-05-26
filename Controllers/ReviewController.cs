@@ -122,13 +122,8 @@ public class ReviewController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> GetTagList(string partTag)
-    {
-        var request = "\"" + partTag + "*\" OR \"" + partTag + "\"";
-        var tags = await context.ReviewTags
-            .Where(t => EF.Functions.Contains(t.Body, request)).Select(t => t.Body).ToArrayAsync();
-        return PartialView("OptionsList", tags.Distinct().Take(7));
-    }
+    public async Task<IActionResult> GetTagList(string partTag) =>
+        PartialView("OptionsList", await reviewService.GetReviewTagsAsync(partTag, 7));
 
     [HttpPost]
     public async Task ChangeLike(int id) => await reviewService.ChangeLikeAsync(id, GetUserId());

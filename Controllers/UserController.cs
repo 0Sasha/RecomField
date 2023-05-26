@@ -11,16 +11,16 @@ namespace RecomField.Controllers;
 [Authorize]
 public class UserController : Controller
 {
-    private readonly UserManager<ApplicationUser> userManager;
     private readonly ApplicationDbContext context;
     private readonly IUserService<ApplicationUser, IResponseCookies, Language> userService;
+    private readonly IReviewService<Review> reviewService;
 
-    public UserController(UserManager<ApplicationUser> userManager, ApplicationDbContext context,
-        IUserService<ApplicationUser, IResponseCookies, Language> userService)
+    public UserController(ApplicationDbContext context,
+        IUserService<ApplicationUser, IResponseCookies, Language> userService, IReviewService<Review> reviewService)
     {
-        this.userManager = userManager;
         this.context = context;
         this.userService = userService;
+        this.reviewService = reviewService;
     }
 
     public async Task<IActionResult> Index(string? id = null) =>
@@ -29,39 +29,9 @@ public class UserController : Controller
     [HttpPost]
     public async Task<IActionResult> GetReviewsView(string userId, string? search, string sort, bool ascOrder)
     {
-        if (string.IsNullOrEmpty(userId)) throw new ArgumentNullException(nameof(userId));
-        if (string.IsNullOrEmpty(sort)) throw new ArgumentNullException(nameof(sort));
-        var curUser = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
-        var user = await userService.LoadUserAsync(userId);
-        ViewData["addMenu"] = user == curUser || await userManager.IsInRoleAsync(curUser, "Admin");
-        return PartialView("ReviewsTableBody", await FilterReviews(user, search, sort, ascOrder));
-    }
-
-    private async Task<Review[]> FilterReviews(ApplicationUser user, string? search, string sort, bool ascOrder)
-    {
-        Review[] filtered;
-        if (!string.IsNullOrEmpty(search))
-        {
-            var request = "\"" + search + "*\" OR \"" + search + "\"";
-            filtered = await context.Reviews.Where(r => r.AuthorId == user.Id &&
-            (EF.Functions.Contains(r.Title, request) || EF.Functions.Contains(r.Body, request) ||
-            EF.Functions.Contains(r.Product.Title, request))).ToArrayAsync();
-        }
-        else filtered = user.Reviews.ToArray();
-        return SortReviews(filtered, sort, ascOrder);
-    }
-
-    private static Review[] SortReviews(IEnumerable<Review> reviews, string sort, bool ascOrder)
-    {
-        if (sort == "date") return ascOrder ? reviews.OrderBy(r => r.PublicationDate).ToArray() :
-                reviews.OrderByDescending(r => r.PublicationDate).ToArray();
-        if (sort == "title") return ascOrder ? reviews.OrderBy(r => r.Title).ToArray() :
-                reviews.OrderByDescending(r => r.Title).ToArray();
-        if (sort == "likes") return ascOrder ? reviews.OrderBy(r => r.LikeCounter).ToArray() :
-                reviews.OrderByDescending(r => r.LikeCounter).ToArray();
-        if (sort == "score") return ascOrder ? reviews.OrderBy(r => r.Score.Value).ToArray() :
-                reviews.OrderByDescending(r => r.Score.Value).ToArray();
-        throw new ArgumentException("Unexpected value", nameof(sort));
+        ViewData["addMenu"] = userId == GetUserId() || User.IsInRole("Admin");
+        return PartialView("ReviewsTableBody",
+            reviewService.SortReviews(await reviewService.GetReviewsAsync(userId, search), sort, ascOrder));
     }
 
     [Authorize(Roles = "Admin")]
