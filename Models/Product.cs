@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using RecomField.Data;
 using System.ComponentModel.DataAnnotations;
 namespace RecomField.Models;
 
@@ -37,20 +36,6 @@ public abstract class Product
     public virtual List<Review> Reviews { get; set; } = new();
 
     public Product() { }
-
-    public virtual async Task LoadAsync(ApplicationDbContext context, string? userId, bool deep = false)
-    {
-        if (userId != null) await context.ProductScores.SingleOrDefaultAsync(s => s.SenderId == userId && s.EntityId == Id);
-        if (deep) await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).Include(r => r.Author).LoadAsync();
-    }
-
-    public virtual async Task UpdateAverageScoresAsync(ApplicationDbContext context)
-    {
-        await context.Entry(this).Collection(p => p.UserScores).LoadAsync();
-        await context.Reviews.Where(r => r.ProductId == Id).Include(r => r.Score).LoadAsync();
-        AverageUserScore = UserScores.Count > 0 ? Math.Round(UserScores.Select(s => s.Value).Average(), 2) : 0;
-        AverageReviewScore = Reviews.Count > 0 ? Math.Round(Reviews.Select(s => s.Score.Value).Average(), 2) : 0;
-    }
 
     public override string ToString() => Title;
 }

@@ -32,7 +32,7 @@ public class UserController : Controller
         if (string.IsNullOrEmpty(userId)) throw new ArgumentNullException(nameof(userId));
         if (string.IsNullOrEmpty(sort)) throw new ArgumentNullException(nameof(sort));
         var curUser = await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
-        var user = await userService.LoadUserAsync(GetUserId());
+        var user = await userService.LoadUserAsync(userId);
         ViewData["addMenu"] = user == curUser || await userManager.IsInRoleAsync(curUser, "Admin");
         return PartialView("ReviewsTableBody", await FilterReviews(user, search, sort, ascOrder));
     }

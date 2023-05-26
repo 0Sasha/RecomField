@@ -1,35 +1,30 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
 using RecomField.Data;
 using RecomField.Hubs;
 using RecomField.Models;
 using RecomField.Services;
 using System.Security.Claims;
-
 namespace RecomField.Controllers;
 
 [Authorize]
 public class ReviewController : Controller
 {
-    private readonly UserManager<ApplicationUser> userManager;
     private readonly ApplicationDbContext context;
     private readonly IHubContext<MainHub> hubContext;
-    private readonly IStringLocalizer<SharedResource> localizer;
     private readonly IReviewService<Review> reviewService;
+    private readonly IProductService<Product> productService;
 
-    public ReviewController(UserManager<ApplicationUser> userManager, ApplicationDbContext context,
-        IHubContext<MainHub> hubContext, IStringLocalizer<SharedResource> localizer, IReviewService<Review> reviewService)
+    public ReviewController(ApplicationDbContext context, IHubContext<MainHub> hubContext,
+        IReviewService<Review> reviewService, IProductService<Product> productService)
     {
-        this.userManager = userManager;
         this.context = context;
         this.hubContext = hubContext;
-        this.localizer = localizer;
         this.reviewService = reviewService;
+        this.productService = productService;
     }
 
     [AllowAnonymous]
@@ -44,32 +39,25 @@ public class ReviewController : Controller
     [HttpPost]
     public async Task<IActionResult> GetSimilarReviews(int id)
     {
-        var review = await FindReview(id);
-        var similar = context.Reviews.Where(r => r.ProductId == review.ProductId && r.Id != id)
-            .OrderByDescending(r => r.LikeCounter).Take(10).Include(r => r.Author).Include(r => r.Score);
         ViewData["withProd"] = false;
-        return PartialView("ReviewsTableBody", await similar.ToArrayAsync());
+        return PartialView("ReviewsTableBody", await reviewService.GetSimilarReviewsAsync(id, 10));
     }
 
     [AllowAnonymous]
     [HttpPost]
-    public async Task<IActionResult> ShowComments(int id, int count) =>
-        await GetReviewComments(await FindReview(id), count);
+    public async Task<IActionResult> ShowComments(int id, int count) => await GetReviewComments(id, count);
 
     [HttpPost]
     public async Task<IActionResult> AddComment(int id, string comment, int count)
     {
-        if (string.IsNullOrEmpty(comment)) throw new ArgumentNullException(nameof(comment));
-        var user = await GetUser();
-        var review = await FindReview(id);
-        review.Comments.Add(new(user, review, comment));
-        await context.SaveChangesAsync();
+        await reviewService.AddCommentAsync(id, GetUserId(), comment);
         await hubContext.Clients.Group("review" + id).SendAsync("NewReviewComment", id);
-        return await GetReviewComments(review, count);
+        return await GetReviewComments(id, count);
     }
 
-    private async Task<IActionResult> GetReviewComments(Review review, int count)
+    private async Task<IActionResult> GetReviewComments(int id, int count)
     {
+        var review = await context.Reviews.FindAsync(id) ?? throw new Exception("Review is not found");
         await context.Entry(review).Collection(r => r.Comments).LoadAsync();
         ViewData["id"] = review.Id;
         ViewData["count"] = review.Comments.Count;
@@ -79,25 +67,22 @@ public class ReviewController : Controller
 
     public async Task<IActionResult> AddReview(int prodId, string? authorId = null)
     {
-        var user = await GetUser();
-        authorId ??= user.Id;
+        var userId = GetUserId();
+        authorId ??= userId;
         var review = await context.Reviews.SingleOrDefaultAsync(r => r.AuthorId == authorId && r.ProductId == prodId);
         if (review != null) return RedirectToAction(nameof(EditReview), new { id = review.Id });
-        var prod = await context.Products.FindAsync(prodId) ?? throw new ArgumentException("Product is not found", nameof(prodId));
-        if (authorId == user.Id) return View("EditReview", new Review() { Product = prod, AuthorId = user.Id });
-        else if (!User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
-        var author = await userManager.FindByIdAsync(authorId) ?? throw new Exception("Author is not found");
-        return View("EditReview", new Review() { Product = prod, AuthorId = author.Id });
+
+        CheckAccess(authorId);
+        var prod = await context.Products.FindAsync(prodId) ??
+            throw new ArgumentException("Product is not found", nameof(prodId));
+        var author = await context.Users.FindAsync(authorId) ?? throw new Exception("Author is not found");
+        return View("EditReview", new Review() { Product = prod, AuthorId = authorId });
     }
 
     public async Task<IActionResult> EditReview(int id)
     {
-        var user = await GetUser();
-        var review = await FindReview(id);
-        if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
-        await context.Entry(review).Reference(r => r.Product).LoadAsync();
-        await context.Entry(review).Reference(r => r.Score).LoadAsync();
-        await context.Entry(review).Collection(r => r.Tags).LoadAsync();
+        var review = await reviewService.LoadReviewAsync(id, false, null);
+        CheckAccess(review.AuthorId);
         review.Body = review.Body.ReverseCustomizedHtml();
         return View(review);
     }
@@ -106,62 +91,33 @@ public class ReviewController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditReview([Bind("Id,AuthorId,ProductId,Title,Body")] Review review)
     {
+        CheckAccess(review.AuthorId);
         if (ModelState.Any(s => s.Key != "Score" && s.Key != "Author" &&
         s.Key != "Product" && s.Value?.ValidationState != ModelValidationState.Valid))
         {
             review.Product = await context.Products.FindAsync(review.ProductId) ?? throw new Exception();
             return View(review);
         }
-
-        var user = await GetUser();
-        if (review.AuthorId == null) throw new Exception("AuthorId is null");
-        if (review.AuthorId != user.Id && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
-        if (review.ProductId == 0) throw new Exception("ProductId is 0");
-        string tags = Request.Form["TagsForServer"].Single() ?? throw new Exception("Tags is not filled");
-        int score = int.Parse(Request.Form["RateForServer"].Single() ?? throw new Exception("Score is not defined"));
-        if (score < 1 || score > 10) throw new Exception("Score is not between 1 and 10");
-        return review.Id == 0 ? await AddReview(review, tags, score) :
-            await EditReview(review.Id, review.Title, tags, review.Body, score);
+        var tags = Request.Form["TagsForServer"].Single()?.Split(",") ?? throw new Exception("Tags is not filled");
+        var score = int.Parse(Request.Form["RateForServer"].Single() ?? throw new Exception("Score is not defined"));
+        return await EditReview(review, score, tags);
     }
 
-    private async Task<IActionResult> AddReview(Review review, string tags, int score)
+    private async Task<IActionResult> EditReview(Review review, int score, string[] tags)
     {
-        review.PublicationDate = DateTime.UtcNow;
-        review.Author = await userManager.FindByIdAsync(review.AuthorId) ?? throw new Exception("Author is not found"); ;
-        review.Product = await context.Products.FindAsync(review.ProductId) ?? throw new Exception("Product is not found");
-        review.Score = new(review.Author, review, score);
-        review.Body = review.Body.CustomizeHtmlForView();
-        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
-        await context.AddAsync(review);
-        await context.SaveChangesAsync();
-        await review.Product.UpdateAverageScoresAsync(context);
-        await context.SaveChangesAsync();
+        if (review.Id == 0) await reviewService.AddReviewAsync(review, score, tags);
+        else await reviewService.EditReviewAsync(review.Id, review.Title, review.Body, score, tags);
+        await productService.UpdateAverageScoresAsync(review.ProductId);
         return RedirectToAction(nameof(Index), new { id = review.Id });
-    }
-    
-    private async Task<IActionResult> EditReview(int id, string title, string tags, string body, int score)
-    {
-        var review = await reviewService.LoadReviewAsync(id, false, null);
-        review.Title = title;
-        review.Body = body.CustomizeHtmlForView();
-        review.Tags.Clear();
-        foreach (var tag in tags.Split(",")) review.Tags.Add(new(tag, review));
-        review.Score = new(review.Author, review, score);
-        await context.SaveChangesAsync();
-        await review.Product.UpdateAverageScoresAsync(context);
-        await context.SaveChangesAsync();
-        return RedirectToAction(nameof(Index), new { id });
     }
 
     public async Task<IActionResult> RemoveReview(int id)
     {
-        var user = await GetUser();
         var review = await reviewService.LoadReviewAsync(id, true, null);
-        if (review.Author != user && !User.IsInRole("Admin")) throw new Exception("User is not an author or admin");
+        CheckAccess(review.AuthorId);
         context.Reviews.Remove(review);
         await context.SaveChangesAsync();
-        await review.Product.UpdateAverageScoresAsync(context);
-        await context.SaveChangesAsync();
+        await productService.UpdateAverageScoresAsync(review.ProductId);
         return RedirectToAction("Index", "User", new { id = review.AuthorId });
     }
 
@@ -177,12 +133,12 @@ public class ReviewController : Controller
     [HttpPost]
     public async Task ChangeLike(int id) => await reviewService.ChangeLikeAsync(id, GetUserId());
 
+    private void CheckAccess(string authorId)
+    {
+        if (authorId != GetUserId() && !User.IsInRole("Admin"))
+            throw new Exception("User is not an author or admin");
+    }
+
     private string GetUserId() =>
         User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("UserId is not found");
-
-    private async Task<ApplicationUser> GetUser() =>
-        await userManager.GetUserAsync(User) ?? throw new Exception("User is not found");
-
-    private async Task<Review> FindReview(int id) =>
-        await context.Reviews.FindAsync(id) ?? throw new Exception("Review is not found");
 }

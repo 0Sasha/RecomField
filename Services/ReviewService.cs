@@ -20,9 +20,17 @@ public class ReviewService : IReviewService<Review>
 
     public async Task<Review[]> GetReviewsAsync(string search, bool byTag = false)
     {
+        if (string.IsNullOrEmpty(search)) return Array.Empty<Review>();
         if (byTag) search = search[1..(search.Length - 1)];
         var request = "\"" + search + "*\" OR \"" + search + "\"";
         return byTag ? await SearchByTagAsync(request) : await SearchAsync(request);
+    }
+
+    public async Task<Review[]> GetSimilarReviewsAsync(int reviewId, int count)
+    {
+        var review = await GetReviewAsync(reviewId);
+        return await context.Reviews.Where(r => r.ProductId == review.ProductId && r.Id != reviewId)
+            .OrderByDescending(r => r.LikeCounter).Take(count).Include(r => r.Author).Include(r => r.Score).ToArrayAsync();
     }
 
     private async Task<Review[]> SearchAsync(string request)
@@ -59,6 +67,33 @@ public class ReviewService : IReviewService<Review>
         return review;
     }
 
+    public async Task AddReviewAsync(Review review, int score, string[] tags)
+    {
+        if (score < 1 || score > 10) throw new Exception("Score must be between 1 and 10");
+        if (tags.Length == 0) throw new Exception("Must have tags");
+        review.PublicationDate = DateTime.UtcNow;
+        review.Author = await context.Users.FindAsync(review.AuthorId) ?? throw new Exception("Author is not found"); ;
+        review.Product = await context.Products.FindAsync(review.ProductId) ?? throw new Exception("Product is not found");
+        review.Score = new(review.Author, review, score);
+        review.Body = review.Body.CustomizeHtmlForView();
+        foreach (var tag in tags) review.Tags.Add(new(tag, review));
+        await context.AddAsync(review);
+        await context.SaveChangesAsync();
+    }
+
+    public async Task EditReviewAsync(int reviewId, string title, string body, int score, string[] tags)
+    {
+        if (score < 1 || score > 10) throw new Exception("Score must be between 1 and 10");
+        if (tags.Length == 0) throw new Exception("Must have tags");
+        var review = await LoadReviewAsync(reviewId, false, null);
+        review.Title = title;
+        review.Body = body.CustomizeHtmlForView();
+        review.Tags.Clear();
+        foreach (var tag in tags) review.Tags.Add(new(tag, review));
+        review.Score = new(review.Author, review, score);
+        await context.SaveChangesAsync();
+    }
+
     public async Task<byte[]> GetPdfVersionAsync(int reviewId)
     {
         var review = await LoadReviewAsync(reviewId, false, null);
@@ -89,6 +124,15 @@ public class ReviewService : IReviewService<Review>
             new(await context.Users.FindAsync(userId) ?? throw new Exception("User is not found"), review));
         review.LikeCounter = review.Likes.Count;
         review.Version = Guid.NewGuid();
+        await context.SaveChangesAsync();
+    }
+
+    public async Task AddCommentAsync(int reviewId, string userId, string comment)
+    {
+        if (string.IsNullOrEmpty(comment)) throw new ArgumentNullException(nameof(comment));
+        var user = await context.Users.FindAsync(userId) ?? throw new Exception("User is not found");
+        var review = await GetReviewAsync(reviewId);
+        review.Comments.Add(new(user, review, comment));
         await context.SaveChangesAsync();
     }
 
