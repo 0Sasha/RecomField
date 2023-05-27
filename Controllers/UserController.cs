@@ -48,7 +48,7 @@ public class UserController : Controller
     public async Task<IActionResult> GetUsersView(string? search, string type, int count)
     {
         ViewData["Admins"] = await context.UserRoles.Select(r => r.UserId).ToArrayAsync();
-        return PartialView("UsersTableBody", await userService.GetUsersAsync(type, count, search));
+        return PartialView("UsersTableBody", await userService.GetUsersAsync(count, search, type));
     }
 
     [Authorize(Roles = "Admin")]

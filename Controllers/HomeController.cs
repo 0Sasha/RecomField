@@ -32,7 +32,8 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        await userService.AddUserCookiesAsync(GetUserId(), Response.Cookies);
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+            await userService.AddUserCookiesAsync(GetUserId(), Response.Cookies);
         ViewData["Tags"] = await GetTagsForCloud();
         return View(await context.Movies.OrderByDescending(p => p.AverageUserScore).Take(6).ToArrayAsync());
     }
@@ -66,12 +67,17 @@ public class HomeController : Controller
         Response.Cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
             CookieRequestCultureProvider.MakeCookieValue(lang),
             new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) });
-        await userService.SaveLanguageAsync(GetUserId(), current == "en" ? Language.Russian : Language.English);
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+            await userService.SaveLanguageAsync(GetUserId(), current == "en" ? Language.Russian : Language.English);
         return Redirect(returnUrl);
     }
 
     [HttpPost]
-    public async Task SaveTheme(bool isDark) => await userService.SaveThemeAsync(GetUserId(), isDark);
+    public async Task SaveTheme(bool isDark)
+    {
+        if (User.Identity != null && User.Identity.IsAuthenticated)
+            await userService.SaveThemeAsync(GetUserId(), isDark);
+    }
 
     [HttpPost]
     public async Task<IActionResult> GetBestSeries() => PartialView("BestProductsPartial",
@@ -107,7 +113,8 @@ public class HomeController : Controller
 
     public IActionResult Privacy() => View();
 
-    private string? GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
+    private string GetUserId() =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("UserId is not found");
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public async Task Error()

@@ -25,56 +25,44 @@ public class UserService : IUserService<ApplicationUser, IResponseCookies, Langu
         return user;
     }
 
-    public async Task<ApplicationUser[]> GetUsersAsync(string type, int count, string? search)
+    public async Task<ApplicationUser[]> GetUsersAsync(int count, string? search, string? type)
     {
         if (count < 1) count = int.MaxValue;
         var users = string.IsNullOrEmpty(search) ? context.Users :
             context.Users.Where(u => u.UserName != null && u.UserName.Contains(search));
+        if (type == null || type == "All") return await users.Take(count).ToArrayAsync();
         if (type == "Admins")
         {
             var adminsId = await context.UserRoles.Select(r => r.UserId).ToArrayAsync();
             return await users.Where(u => adminsId.Contains(u.Id)).Take(count).ToArrayAsync();
         }
-        if (type == "All") return await users.Take(count).ToArrayAsync();
         if (type == "Blocked")
             return await users.Where(u => u.LockoutEnd > DateTimeOffset.UtcNow).Take(count).ToArrayAsync();
         throw new ArgumentException("Unexpected value", nameof(type));
     }
 
-    public async Task AddUserCookiesAsync(string? userId, IResponseCookies cookies)
+    public async Task AddUserCookiesAsync(string userId, IResponseCookies cookies)
     {
-        if (userId == null) return;
-        var user = await context.Users.FindAsync(userId);
-        if (user != null)
-        {
-            var opt = new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) };
-            var lang = new RequestCulture(user.InterfaceLanguage == Language.Russian ? "ru" : "en-US");
-            cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
-                CookieRequestCultureProvider.MakeCookieValue(lang), opt);
-            cookies.Append("IsDarkTheme", user.DarkTheme.ToString(), opt);
-        }
+        var user = await GetUserAsync(userId);
+        var opt = new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) };
+        var lang = new RequestCulture(user.InterfaceLanguage == Language.Russian ? "ru" : "en-US");
+        cookies.Append(CookieRequestCultureProvider.DefaultCookieName,
+            CookieRequestCultureProvider.MakeCookieValue(lang), opt);
+        cookies.Append("IsDarkTheme", user.DarkTheme.ToString(), opt);
     }
 
-    public async Task SaveLanguageAsync(string? userId, Language language)
+    public async Task SaveLanguageAsync(string userId, Language language)
     {
-        if (userId == null) return;
-        var user = await userManager.FindByIdAsync(userId);
-        if (user != null)
-        {
-            user.InterfaceLanguage = language;
-            await userManager.UpdateAsync(user);
-        }
+        var user = await GetUserAsync(userId);
+        user.InterfaceLanguage = language;
+        await userManager.UpdateAsync(user);
     }
 
-    public async Task SaveThemeAsync(string? userId, bool isDark)
+    public async Task SaveThemeAsync(string userId, bool isDark)
     {
-        if (userId == null) return;
-        var user = await userManager.FindByIdAsync(userId);
-        if (user != null)
-        {
-            user.DarkTheme = isDark;
-            await userManager.UpdateAsync(user);
-        }
+        var user = await GetUserAsync(userId);
+        user.DarkTheme = isDark;
+        await userManager.UpdateAsync(user);
     }
 
     public async Task AddAdminRoleAsync(string userId)
