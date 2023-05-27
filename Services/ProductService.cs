@@ -9,11 +9,12 @@ public class ProductService : IProductService<Product>
 
     public ProductService(ApplicationDbContext context) => this.context = context;
 
-    public async Task<bool> AddProductAsync(Product product)
+    public async Task AddProductAsync(Product product)
     {
-        if (await CheckExistenceAsync(product)) return false;
+        if (await CheckExistenceAsync(product))
+            throw new ArgumentException("This product already exists in the database", nameof(product));
         await context.AddAsync(product);
-        return await context.SaveChangesAsync() > 0;
+        await context.SaveChangesAsync();
     }
 
     public async Task<Product> LoadProductAsync(int productId, bool deep, string? userId)
@@ -26,8 +27,9 @@ public class ProductService : IProductService<Product>
         return prod;
     }
 
-    public async Task<Product[]> GetProductsAsync(int count, string? search, IEnumerable<Product> except)
+    public async Task<Product[]> GetProductsAsync(int count, string? search, IEnumerable<Product>? except)
     {
+        except ??= Array.Empty<Product>();
         if (string.IsNullOrEmpty(search)) return await context.Products.Except(except).Take(count).ToArrayAsync();
         
         var request = "\"" + search + "*\" OR \"" + search + "\"";
@@ -41,15 +43,15 @@ public class ProductService : IProductService<Product>
         return prods.Union(byAuthor).Union(byYear).Except(except).Take(count).ToArray();
     }
 
-    public async Task ChangeUserScoreAsync(int productId, string userId, int score)
+    public async Task ChangeUserScoreAsync(int productId, string userId, int newScore)
     {
-        if (score < 1 || score > 5) throw new Exception("Score must be between 1 and 5");
+        if (newScore < 1 || newScore > 5) throw new Exception("Score must be between 1 and 5");
         var prod = await GetProductAsync(productId);
         await context.Entry(prod).Collection(p => p.UserScores).LoadAsync();
         var s = prod.UserScores.SingleOrDefault(s => s.SenderId == userId);
-        if (s != null) s.Value = score;
+        if (s != null) s.Value = newScore;
         else prod.UserScores.Add(new(await context.Users.FindAsync(userId) ??
-            throw new Exception("User is not found"), prod, score));
+            throw new Exception("User is not found"), prod, newScore));
         prod.AverageUserScore = Math.Round(prod.UserScores.Select(s => s.Value).Average(), 2);
         await context.SaveChangesAsync();
     }

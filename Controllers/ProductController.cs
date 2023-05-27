@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using RecomField.Data;
 using RecomField.Models;
@@ -21,7 +22,7 @@ public class ProductController : Controller
 
     [AllowAnonymous]
     public async Task<IActionResult> Index(int id) =>
-        View(await productService.LoadProductAsync(id, true, GetUserId()));
+        View(await productService.LoadProductAsync(id, true, User.FindFirstValue(ClaimTypes.NameIdentifier)));
 
     public IActionResult AddProduct(string type)
     {
@@ -65,9 +66,10 @@ public class ProductController : Controller
     private async Task<IActionResult> AddProduct(Product product)
     {
         if (!ModelState.IsValid) return View("AddProduct", product);
-        if (!await productService.AddProductAsync(product))
+        try { await productService.AddProductAsync(product); }
+        catch (ArgumentException ex)
         {
-            ModelState.AddModelError("", "This product already exists in the database");
+            ModelState.AddModelError("", ex.Message);
             return View("AddProduct", product);
         }
         return RedirectToAction(nameof(Index), new { id = product.Id });
@@ -84,8 +86,6 @@ public class ProductController : Controller
 
     [HttpPost]
     public async Task ChangeScoreProduct(int id, int score) =>
-        await productService.ChangeUserScoreAsync(id, GetUserId(), score);
-
-    private string GetUserId() =>
-        User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("UserId is not found");
+        await productService.ChangeUserScoreAsync(id,
+            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new Exception("UserId is not found"), score);
 }

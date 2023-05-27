@@ -55,7 +55,7 @@ public class HomeController : Controller
         await SearchReviews(text, text.StartsWith('[') && text.EndsWith("]"));
 
     private async Task<IActionResult> SearchProducts(string text) =>
-        PartialView("ProductsTableBody", await productService.GetProductsAsync(30, text, Array.Empty<Product>()));
+        PartialView("ProductsTableBody", await productService.GetProductsAsync(30, text, null));
 
     private async Task<IActionResult> SearchReviews(string text, bool byTag) =>
         PartialView("ReviewsTableBody", await reviewService.GetReviewsAsync(text, byTag));
