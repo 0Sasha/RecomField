@@ -34,7 +34,7 @@ namespace RecomField.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
         private readonly IStringLocalizer<SharedResource> _localizer;
-        private readonly IUserService<ApplicationUser, IResponseCookies, Language> _userService;
+        private readonly IUserService<ApplicationUser, IResponseCookies> _userService;
 
         public ExternalLoginModel(
             SignInManager<ApplicationUser> signInManager,
@@ -43,7 +43,7 @@ namespace RecomField.Areas.Identity.Pages.Account
             ILogger<ExternalLoginModel> logger,
             IEmailSender emailSender,
             IStringLocalizer<SharedResource> localizer,
-            IUserService<ApplicationUser, IResponseCookies, Language> userService)
+            IUserService<ApplicationUser, IResponseCookies> userService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
