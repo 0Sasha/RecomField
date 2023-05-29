@@ -3,6 +3,6 @@ namespace RecomField.Models;
 
 public class Movie : Product
 {
-    [MinLength(10)]
+    [StringLength(500, MinimumLength = 10)]
     public string? Trailer { get; set; }
 }

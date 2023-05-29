@@ -6,7 +6,7 @@
 @{
     if (Model.AuthorId == null) throw new ArgumentNullException(nameof(Model.AuthorId));
     if (Model.Product == null) throw new ArgumentNullException(nameof(Model.Product));
-    Model.ProductId = Model.Product.Id;
+    if (Model.ProductId == 0) throw new ArgumentException("Must not be 0", nameof(Model.ProductId));
     string head = SLocalizer["Review of"] + " " + Model.Product.Title;
     ViewData["Title"] = head;
 }

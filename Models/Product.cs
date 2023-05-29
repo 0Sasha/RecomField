@@ -11,7 +11,7 @@ public abstract class Product
 
     [Required]
     [StringLength(200, MinimumLength = 1)]
-    public virtual string Title { get; set; } = "";
+    public virtual string Title { get; set; } = default!;
 
     public virtual int ReleaseYear
     {
@@ -20,12 +20,12 @@ public abstract class Product
     }
 
     [Required]
-    [StringLength(1500, MinimumLength = 1)]
-    public virtual string Description { get; set; } = "";
+    [StringLength(2500, MinimumLength = 1)]
+    public virtual string Description { get; set; } = default!;
 
     [Required]
     [StringLength(500, MinimumLength = 1)]
-    public virtual string Cover { get; set; } = "";
+    public virtual string Cover { get; set; } = default!;
 
     public virtual double AverageUserScore { get; set; }
 
@@ -34,8 +34,6 @@ public abstract class Product
     public virtual List<Score<Product>> UserScores { get; set; } = new();
 
     public virtual List<Review> Reviews { get; set; } = new();
-
-    public Product() { }
 
     public override string ToString() => Title;
 }

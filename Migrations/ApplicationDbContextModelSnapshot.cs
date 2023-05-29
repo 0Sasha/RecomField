@@ -264,7 +264,7 @@ namespace RecomField.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("ReviewComments");
+                    b.ToTable("ReviewComments", (string)null);
                 });
 
             modelBuilder.Entity("RecomField.Models.Like<RecomField.Models.Review>", b =>
@@ -288,7 +288,7 @@ namespace RecomField.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("ReviewLikes");
+                    b.ToTable("ReviewLikes", (string)null);
                 });
 
             modelBuilder.Entity("RecomField.Models.Product", b =>
@@ -328,7 +328,7 @@ namespace RecomField.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
 
                     b.HasDiscriminator<string>("Discriminator").HasValue("Product");
 
@@ -377,7 +377,7 @@ namespace RecomField.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Reviews");
+                    b.ToTable("Reviews", (string)null);
                 });
 
             modelBuilder.Entity("RecomField.Models.Score<RecomField.Models.Product>", b =>
@@ -404,7 +404,7 @@ namespace RecomField.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("ProductScores");
+                    b.ToTable("ProductScores", (string)null);
                 });
 
             modelBuilder.Entity("RecomField.Models.Score<RecomField.Models.Review>", b =>
@@ -432,7 +432,7 @@ namespace RecomField.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("ReviewScores");
+                    b.ToTable("ReviewScores", (string)null);
                 });
 
             modelBuilder.Entity("RecomField.Models.Tag<RecomField.Models.Review>", b =>
@@ -457,7 +457,7 @@ namespace RecomField.Migrations
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("ReviewTags");
+                    b.ToTable("ReviewTags", (string)null);
                 });
 
             modelBuilder.Entity("RecomField.Models.Book", b =>
@@ -478,7 +478,7 @@ namespace RecomField.Migrations
                     b.Property<string>("Trailer")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("Products", t =>
+                    b.ToTable("Products", null, t =>
                         {
                             t.Property("Trailer")
                                 .HasColumnName("Game_Trailer");
@@ -504,7 +504,7 @@ namespace RecomField.Migrations
                     b.Property<string>("Trailer")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("Products", t =>
+                    b.ToTable("Products", null, t =>
                         {
                             t.Property("Trailer")
                                 .HasColumnName("Series_Trailer");

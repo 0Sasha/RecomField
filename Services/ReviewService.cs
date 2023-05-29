@@ -40,8 +40,8 @@ public class ReviewService : IReviewService<Review>
 
     public async Task AddReviewAsync(Review review, int score, string[] tags)
     {
-        if (score < 1 || score > 10) throw new Exception("Score must be between 1 and 10");
-        if (tags.Length == 0) throw new Exception("Must have tags");
+        if (score < 1 || score > 10) throw new ArgumentException("Score must be between 1 and 10", nameof(score));
+        if (tags.Length == 0) throw new ArgumentException("Must have tags", nameof(tags));
         review.PublicationDate = DateTime.UtcNow;
         review.Author = await context.Users.FindAsync(review.AuthorId) ?? throw new Exception("Author is not found"); ;
         review.Product = await context.Products.FindAsync(review.ProductId) ?? throw new Exception("Product is not found");
@@ -54,8 +54,8 @@ public class ReviewService : IReviewService<Review>
 
     public async Task EditReviewAsync(int reviewId, string title, string body, int score, string[] tags)
     {
-        if (score < 1 || score > 10) throw new Exception("Score must be between 1 and 10");
-        if (tags.Length == 0) throw new Exception("Must have tags");
+        if (score < 1 || score > 10) throw new ArgumentException("Score must be between 1 and 10", nameof(score));
+        if (tags.Length == 0) throw new ArgumentException("Must have tags", nameof(tags));
         var review = await LoadReviewAsync(reviewId, false, null);
         review.Title = title;
         review.Body = body.CustomizeHtmlForView();

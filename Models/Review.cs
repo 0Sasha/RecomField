@@ -9,30 +9,29 @@ public class Review
     public int Id { get; set; }
 
     [Required]
-    [MinLength(1)]
-    public string AuthorId { get; set; }
+    [StringLength(100, MinimumLength = 1)]
+    public string AuthorId { get; set; } = default!;
 
     [Required]
     [ForeignKey("AuthorId")]
-    public ApplicationUser Author { get; set; }
+    public ApplicationUser Author { get; set; } = default!;
 
-    [Required]
     public int ProductId { get; set; }
 
     [Required]
     [ForeignKey("ProductId")]
-    public Product Product { get; set; }
+    public Product Product { get; set; } = default!;
 
     [Required]
-    [StringLength(200, MinimumLength = 1)]
-    public string Title { get; set; }
+    [StringLength(100, MinimumLength = 1)]
+    public string Title { get; set; } = default!;
 
     [Required]
-    [StringLength(15000, MinimumLength = 1)]
-    public string Body { get; set; }
+    [StringLength(50000, MinimumLength = 1)]
+    public string Body { get; set; } = default!;
 
     [Required]
-    public Score<Review> Score { get; set; }
+    public Score<Review> Score { get; set; } = default!;
 
     [DataType(DataType.Date)]
     public DateTime PublicationDate { get; set; }
@@ -47,6 +46,4 @@ public class Review
 
     [ConcurrencyCheck]
     public Guid Version { get; set; }
-
-    public Review() { }
 }

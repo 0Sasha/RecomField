@@ -7,18 +7,18 @@ public class Like<T>
     public int Id { get; set; }
 
     [Required]
-    [MinLength(1)]
-    public string SenderId { get; set; }
+    [StringLength(100, MinimumLength = 1)]
+    public string SenderId { get; set; } = default!;
 
     [Required]
     [ForeignKey("SenderId")]
-    public ApplicationUser Sender { get; set; }
+    public ApplicationUser Sender { get; set; } = default!;
 
     public int EntityId { get; set; }
 
     [Required]
     [ForeignKey("EntityId")]
-    public T Entity { get; set; }
+    public T Entity { get; set; } = default!;
 
     public Like() { }
 

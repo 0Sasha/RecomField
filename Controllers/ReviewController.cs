@@ -76,7 +76,7 @@ public class ReviewController : Controller
         var prod = await context.Products.FindAsync(prodId) ??
             throw new ArgumentException("Product is not found", nameof(prodId));
         var author = await context.Users.FindAsync(authorId) ?? throw new Exception("Author is not found");
-        return View("EditReview", new Review() { Product = prod, AuthorId = authorId });
+        return View("EditReview", new Review() { Product = prod, ProductId = prod.Id, AuthorId = authorId });
     }
 
     public async Task<IActionResult> EditReview(int id)

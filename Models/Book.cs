@@ -4,6 +4,6 @@ namespace RecomField.Models;
 public class Book : Product
 {
     [Required]
-    [MinLength(1)]
-    public string Author { get; set; } = "";
+    [StringLength(200, MinimumLength = 1)]
+    public string Author { get; set; } = default!;
 }
