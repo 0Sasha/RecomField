@@ -13,13 +13,13 @@ public class HomeController : Controller
 {
     private readonly ApplicationDbContext context;
     private readonly ILogger<HomeController> logger;
-    private readonly IUserService<ApplicationUser, IResponseCookies, Language> userService;
+    private readonly IUserService<ApplicationUser, IResponseCookies> userService;
     private readonly IProductService<Product> productService;
     private readonly IReviewService<Review> reviewService;
     private readonly ICloudService<IFormFile> cloudService;
 
     public HomeController(ILogger<HomeController> logger, ApplicationDbContext context,
-        IUserService<ApplicationUser, IResponseCookies, Language> userService, IProductService<Product> productService,
+        IUserService<ApplicationUser, IResponseCookies> userService, IProductService<Product> productService,
         ICloudService<IFormFile> cloudService, IReviewService<Review> reviewService)
     {
         this.logger = logger;
@@ -68,7 +68,7 @@ public class HomeController : Controller
             CookieRequestCultureProvider.MakeCookieValue(lang),
             new CookieOptions() { Expires = DateTime.UtcNow.AddDays(30) });
         if (User.Identity != null && User.Identity.IsAuthenticated)
-            await userService.SaveLanguageAsync(GetUserId(), current == "en" ? Language.Russian : Language.English);
+            await userService.SaveLanguageAsync(GetUserId(), current == "en" ? "ru" : "en-US");
         return Redirect(returnUrl);
     }
 

@@ -1,6 +1,6 @@
 ﻿namespace RecomField.Services;
 
-public interface IUserService<TUser, TCookies, TLanguage>
+public interface IUserService<TUser, TCookies>
 {
     public Task<TUser> LoadUserAsync(string userId);
 
@@ -10,7 +10,7 @@ public interface IUserService<TUser, TCookies, TLanguage>
 
     public Task SaveThemeAsync(string userId, bool isDark);
 
-    public Task SaveLanguageAsync(string userId, TLanguage language);
+    public Task SaveLanguageAsync(string userId, string language);
 
     public Task AddAdminRoleAsync(string userId);
 

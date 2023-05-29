@@ -5,7 +5,7 @@ using RecomField.Data;
 using RecomField.Models;
 namespace RecomField.Services;
 
-public class UserService : IUserService<ApplicationUser, IResponseCookies, Language>
+public class UserService : IUserService<ApplicationUser, IResponseCookies>
 {
     private readonly ApplicationDbContext context;
     private readonly UserManager<ApplicationUser> userManager;
@@ -51,10 +51,12 @@ public class UserService : IUserService<ApplicationUser, IResponseCookies, Langu
         cookies.Append("IsDarkTheme", user.DarkTheme.ToString(), opt);
     }
 
-    public async Task SaveLanguageAsync(string userId, Language language)
+    public async Task SaveLanguageAsync(string userId, string language)
     {
         var user = await GetUserAsync(userId);
-        user.InterfaceLanguage = language;
+        if (language == "en-US") user.InterfaceLanguage = Language.English;
+        else if (language == "ru") user.InterfaceLanguage = Language.Russian;
+        else throw new ArgumentException("Unexpected value", nameof(language));
         await userManager.UpdateAsync(user);
     }
 

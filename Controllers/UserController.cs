@@ -12,11 +12,11 @@ namespace RecomField.Controllers;
 public class UserController : Controller
 {
     private readonly ApplicationDbContext context;
-    private readonly IUserService<ApplicationUser, IResponseCookies, Language> userService;
+    private readonly IUserService<ApplicationUser, IResponseCookies> userService;
     private readonly IReviewService<Review> reviewService;
 
     public UserController(ApplicationDbContext context,
-        IUserService<ApplicationUser, IResponseCookies, Language> userService, IReviewService<Review> reviewService)
+        IUserService<ApplicationUser, IResponseCookies> userService, IReviewService<Review> reviewService)
     {
         this.context = context;
         this.userService = userService;
